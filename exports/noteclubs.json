@@ -1,0 +1,1608 @@
+[
+  {
+    "_id": "603a5a6aee61271e2e5392a1",
+    "member": "Matthew Young",
+    "artist": "The Eagles",
+    "album": "On the Border",
+    "__v": 0
+  },
+  {
+    "_id": "603a5ab0ee61271e2e5392a2",
+    "member": "Ken Hertzog",
+    "artist": "Karen O, Danger Mouse",
+    "album": "Lux Prima",
+    "__v": 0
+  },
+  {
+    "_id": "603a5b4eee61271e2e5392a3",
+    "member": "Johnny Young",
+    "artist": "Soho Ghetto",
+    "album": "Thou or I or Both",
+    "__v": 0
+  },
+  {
+    "_id": "603a5b71ee61271e2e5392a4",
+    "member": "John Keith",
+    "artist": "Moving Pictures",
+    "album": "Rush",
+    "__v": 0
+  },
+  {
+    "_id": "603a5bc2ee61271e2e5392a5",
+    "member": "John Keith",
+    "artist": "Pink Floyd",
+    "album": "Momentary Lapse of Reason",
+    "__v": 0
+  },
+  {
+    "_id": "603a5c0aee61271e2e5392a6",
+    "member": "Joe Panzarella",
+    "artist": "Phish",
+    "album": "LivePhish, Vol.3",
+    "__v": 0
+  },
+  {
+    "_id": "603a5c48ee61271e2e5392a7",
+    "member": "Jake Roa",
+    "artist": "Metallica",
+    "album": "Master of Puppets",
+    "__v": 0
+  },
+  {
+    "_id": "603a5c84ee61271e2e5392a8",
+    "member": "Cameron Mahood",
+    "artist": "Triumph",
+    "album": "Allied Forces",
+    "__v": 0
+  },
+  {
+    "_id": "603a5cecee61271e2e5392a9",
+    "member": "Tim Mahood",
+    "artist": "Trombone Shorty",
+    "album": "Backatown",
+    "__v": 0
+  },
+  {
+    "_id": "603a5d82ee61271e2e5392aa",
+    "member": "Matthew Young",
+    "artist": "Cheap Trick",
+    "album": "Dream Police",
+    "__v": 0
+  },
+  {
+    "_id": "603a5dbcee61271e2e5392ab",
+    "member": "John Keith",
+    "artist": "Y&T",
+    "album": "Facemelter",
+    "__v": 0
+  },
+  {
+    "_id": "603a5f4cee61271e2e5392ac",
+    "member": "Johnny Young",
+    "artist": "Gojira",
+    "album": "Magma",
+    "__v": 0
+  },
+  {
+    "_id": "603a5f73ee61271e2e5392ad",
+    "member": "Ken Hertzog",
+    "artist": "Weezer",
+    "album": "Green Album",
+    "__v": 0
+  },
+  {
+    "_id": "603a5fc5ee61271e2e5392ae",
+    "member": "Jake Roa",
+    "artist": "Powerman5000",
+    "album": "Tonight the Stars Revolt",
+    "__v": 0
+  },
+  {
+    "_id": "603a6009ee61271e2e5392af",
+    "member": "Joe Panzarella",
+    "artist": "Pink Floyd",
+    "album": "Animals",
+    "__v": 0
+  },
+  {
+    "_id": "603a604dee61271e2e5392b0",
+    "member": "Cameron Mahood",
+    "artist": "Kinks",
+    "album": "Lola Versus Powerman and the Moneyground",
+    "__v": 0
+  },
+  {
+    "_id": "603a67caee61271e2e5392b2",
+    "member": "Tim Mahood",
+    "artist": "Spinal Tap",
+    "album": "This is Spinal Tap",
+    "__v": 0
+  },
+  {
+    "_id": "603a6825ee61271e2e5392b3",
+    "member": "Taylor Roa",
+    "artist": "AC/DC",
+    "album": "Power Up",
+    "__v": 0
+  },
+  {
+    "_id": "603a6861ee61271e2e5392b4",
+    "member": "Matthew Young",
+    "artist": "Coheed and Cambria",
+    "album": "Year of the Black Rainbow",
+    "__v": 0
+  },
+  {
+    "_id": "603a6895ee61271e2e5392b5",
+    "member": "Ken Hertzog",
+    "artist": "Nine Inch Nails",
+    "album": "The Fragile",
+    "__v": 0
+  },
+  {
+    "_id": "603a6a08ee61271e2e5392b6",
+    "member": "Johnny Young",
+    "artist": "Gorillaz",
+    "album": "Demon Dayz",
+    "__v": 0
+  },
+  {
+    "_id": "603a6a3dee61271e2e5392b7",
+    "member": "Joe Panzarella",
+    "artist": "Foo Fighters",
+    "album": "Foo Fighters",
+    "__v": 0
+  },
+  {
+    "_id": "603a6a8bee61271e2e5392b8",
+    "member": "Jake Roa",
+    "artist": "Dolly Parton",
+    "album": "White Limozeen",
+    "__v": 0
+  },
+  {
+    "_id": "603a6ac1ee61271e2e5392b9",
+    "member": "Cameron Mahood",
+    "artist": "James Taylor",
+    "album": "James Taylor",
+    "__v": 0
+  },
+  {
+    "_id": "603a6afcee61271e2e5392ba",
+    "member": "Tim Mahood",
+    "artist": "Red Hot Chili Peppers",
+    "album": "Mother's Milk",
+    "__v": 0
+  },
+  {
+    "_id": "603a6b46ee61271e2e5392bb",
+    "member": "Taylor Roa",
+    "artist": "Van Halen",
+    "album": "Unlawful Carnal Knowledge",
+    "__v": 0
+  },
+  {
+    "_id": "603a6b62ee61271e2e5392bc",
+    "member": "Matthew Young",
+    "artist": "Garbage",
+    "album": "Version 2.0",
+    "__v": 0
+  },
+  {
+    "_id": "603a6bbcee61271e2e5392bd",
+    "member": "Ken Hertzog",
+    "artist": "Death",
+    "album": "Scream Bloody Gore",
+    "__v": 0
+  },
+  {
+    "_id": "603a6c08ee61271e2e5392be",
+    "member": "Johnny Young",
+    "artist": "The Cure",
+    "album": "Disintegration",
+    "__v": 0
+  },
+  {
+    "_id": "603a6c49ee61271e2e5392bf",
+    "member": "Joe Panzarella",
+    "artist": "Funkadelic",
+    "album": "The Electric Spanking of War Babies",
+    "__v": 0
+  },
+  {
+    "_id": "603a6c8fee61271e2e5392c0",
+    "member": "Jake Roa",
+    "artist": "Protest the Hero",
+    "album": "Palimpsest",
+    "__v": 0
+  },
+  {
+    "_id": "603a6cbfee61271e2e5392c1",
+    "member": "Cameron Mahood",
+    "artist": "Deep Purple",
+    "album": "In Rock",
+    "__v": 0
+  },
+  {
+    "_id": "603a6e3dee61271e2e5392c2",
+    "member": "Tim Mahood",
+    "artist": "Mitch Hedberg",
+    "album": "All Together",
+    "__v": 0
+  },
+  {
+    "_id": "603a6e82ee61271e2e5392c4",
+    "member": "Joe Panzarella",
+    "artist": "White Stripes",
+    "album": "Elephant",
+    "__v": 0
+  },
+  {
+    "_id": "603a6ec5ee61271e2e5392c5",
+    "member": "Taylor Roa",
+    "artist": "Dan Mills",
+    "album": "Stockbridge",
+    "__v": 0
+  },
+  {
+    "_id": "603a6f76ee61271e2e5392c6",
+    "member": "Ken Hertzog",
+    "artist": "Brittany Howard",
+    "album": "Jaime",
+    "__v": 0
+  },
+  {
+    "_id": "603a6f9aee61271e2e5392c7",
+    "member": "Matthew Young",
+    "artist": "The Growlers",
+    "album": "City Club",
+    "__v": 0
+  },
+  {
+    "_id": "603a6ff3ee61271e2e5392c8",
+    "member": "Johnny Young",
+    "artist": "Megadeth",
+    "album": "Rust in Peace",
+    "__v": 0
+  },
+  {
+    "_id": "603a7029ee61271e2e5392c9",
+    "member": "Ken Hertzog",
+    "artist": "Broken Bells",
+    "album": "After the Disco",
+    "__v": 0
+  },
+  {
+    "_id": "603a70b1ee61271e2e5392ca",
+    "member": "Tim Mahood",
+    "artist": "Primus",
+    "album": "Sailing the Seas of Cheese",
+    "__v": 0
+  },
+  {
+    "_id": "60561d4036fe382f5c302d88",
+    "member": "Tim Mahood",
+    "artist": "J. Cole",
+    "album": "Cole World: The Sideline Story"
+  },
+  {
+    "_id": "60561d4036fe382f5c302d98",
+    "member": "Ken Hertzog",
+    "artist": "My Chemical Romance",
+    "album": "The Black Parade"
+  },
+  {
+    "_id": "60561d4036fe382f5c302d91",
+    "member": "Ken Hertzog",
+    "artist": "Black Keys",
+    "album": "Thickfreakness"
+  },
+  {
+    "_id": "60561d4036fe382f5c302d89",
+    "member": "Cameron Mahood",
+    "artist": "John 5 & The Creatures",
+    "album": "Season of the Witch"
+  },
+  {
+    "_id": "60561d4036fe382f5c302da6",
+    "member": "Jake Roa",
+    "artist": "Tom Waits",
+    "album": "Bad As Me"
+  },
+  {
+    "_id": "60561d4036fe382f5c302d97",
+    "member": "Johnny Young",
+    "artist": "Electric Guest",
+    "album": "Plural"
+  },
+  {
+    "_id": "60561d4036fe382f5c302d8b",
+    "member": "Johnny Young",
+    "artist": "Rush",
+    "album": "Moving Pictures"
+  },
+  {
+    "_id": "60561d4036fe382f5c302d87",
+    "member": "Johnny Young",
+    "artist": "Stone Temple Pilots",
+    "album": "No. 4"
+  },
+  {
+    "_id": "60561d4036fe382f5c302d8a",
+    "member": "Emily Young",
+    "artist": "Kesha",
+    "album": "Animal"
+  },
+  {
+    "_id": "60561d4036fe382f5c302d93",
+    "member": "Johnny Young",
+    "artist": "George Benson",
+    "album": "Give Me the Night"
+  },
+  {
+    "_id": "60561d4036fe382f5c302d92",
+    "member": "Cameron Mahood",
+    "artist": "Frank Zappa",
+    "album": "Over-nite Sensation"
+  },
+  {
+    "_id": "60561d4036fe382f5c302d9e",
+    "member": "Tim Mahood",
+    "artist": "SR71",
+    "album": "Now You See Inside"
+  },
+  {
+    "_id": "60561d4036fe382f5c302d8f",
+    "member": "Jake Roa",
+    "artist": "Pink Floyd",
+    "album": "Dark Side of the Moon"
+  },
+  {
+    "_id": "60561d4036fe382f5c302d9c",
+    "member": "Ken Hertzog",
+    "artist": "Arctic Monkeys",
+    "album": "Favourite Worst Nightmare"
+  },
+  {
+    "_id": "60561d4036fe382f5c302d8c",
+    "member": "Cameron Mahood",
+    "artist": "Herbie Hancock",
+    "album": "Head Hunters"
+  },
+  {
+    "_id": "60561d4036fe382f5c302d9d",
+    "member": "Jake Roa",
+    "artist": "Motorhead",
+    "album": "Overkill"
+  },
+  {
+    "_id": "60561d4036fe382f5c302da8",
+    "member": "Ken Hertzog",
+    "artist": "Metric",
+    "album": "Old World Underground"
+  },
+  {
+    "_id": "60561d4036fe382f5c302db4",
+    "member": "Jake Roa",
+    "artist": "Cake",
+    "album": "Fashion Nugget"
+  },
+  {
+    "_id": "60561d4036fe382f5c302da0",
+    "member": "Jake Roa",
+    "artist": "Flying Lotus",
+    "album": "Until the Quite Comes"
+  },
+  {
+    "_id": "60561d4036fe382f5c302da4",
+    "member": "Tim Mahood",
+    "artist": "Zero7",
+    "album": "When it Falls"
+  },
+  {
+    "_id": "60561d4036fe382f5c302dad",
+    "member": "Ken Hertzog",
+    "artist": "Maroon 5",
+    "album": "Songs about Jane"
+  },
+  {
+    "_id": "60561d4036fe382f5c302db5",
+    "member": "Johnny Young",
+    "artist": "Muse",
+    "album": "Origin of Symmetry"
+  },
+  {
+    "_id": "60561d4036fe382f5c302da9",
+    "member": "Tim Mahood",
+    "artist": "Blink-182",
+    "album": "Cheshire Cat"
+  },
+  {
+    "_id": "60561d4036fe382f5c302db0",
+    "member": "Johnny Young",
+    "artist": "Dire Straits",
+    "album": "Brothers in Arms"
+  },
+  {
+    "_id": "60561d4036fe382f5c302d8e",
+    "member": "Cameron Mahood",
+    "artist": "Body Count",
+    "album": "Body Count"
+  },
+  {
+    "_id": "60561d4036fe382f5c302d95",
+    "member": "Cameron Mahood",
+    "artist": "The Hollies",
+    "album": "Distant Light"
+  },
+  {
+    "_id": "60561d4036fe382f5c302daa",
+    "member": "Cameron Mahood",
+    "artist": "Traveling Wilburys",
+    "album": "Volume 1"
+  },
+  {
+    "_id": "60561d4036fe382f5c302db2",
+    "member": "Tim Mahood",
+    "artist": "Delhi 2 Dublin",
+    "album": "Delhi 2 Dubland EP"
+  },
+  {
+    "_id": "60561d4036fe382f5c302d9b",
+    "member": "Johnny Young",
+    "artist": "Iron Maiden",
+    "album": "Somewhere in Time"
+  },
+  {
+    "_id": "60561d4036fe382f5c302d9f",
+    "member": "Cameron Mahood",
+    "artist": "The Struts",
+    "album": "Young & Dangerous"
+  },
+  {
+    "_id": "60561d4036fe382f5c302da3",
+    "member": "Ken Hertzog",
+    "artist": "Death From Above 1979",
+    "album": "You’re a Woman, I’m a Machine"
+  },
+  {
+    "_id": "60561d4036fe382f5c302d9a",
+    "member": "Cameron Mahood",
+    "artist": "Alice Cooper",
+    "album": "Muscle of Love"
+  },
+  {
+    "_id": "60561d4036fe382f5c302daf",
+    "member": "Jake Roa",
+    "artist": "Bill Callahan",
+    "album": "Shepherd in a Sheepskin Vest"
+  },
+  {
+    "_id": "60561d4036fe382f5c302db7",
+    "member": "Ken Hertzog",
+    "artist": "Postal Service",
+    "album": "Give Up"
+  },
+  {
+    "_id": "60561d4036fe382f5c302da1",
+    "member": "Johnny Young",
+    "artist": "Ghost B.C.",
+    "album": "Infestissumam"
+  },
+  {
+    "_id": "60561d4036fe382f5c302dac",
+    "member": "Johnny Young",
+    "artist": "Scorpians",
+    "album": "Animal Magnetism"
+  },
+  {
+    "_id": "60561d4036fe382f5c302db8",
+    "member": "Tim Mahood",
+    "artist": "Primus",
+    "album": "Sailing the Sea of Cheese"
+  },
+  {
+    "_id": "60561d4036fe382f5c302d99",
+    "member": "Tim Mahood",
+    "artist": "Lizzo",
+    "album": "Cuz I Love You"
+  },
+  {
+    "_id": "60561d4036fe382f5c302db1",
+    "member": "Ken Hertzog",
+    "artist": "Kenna",
+    "album": "New Sacred Cow"
+  },
+  {
+    "_id": "60561d4036fe382f5c302da7",
+    "member": "Johnny Young",
+    "artist": "Foster the People",
+    "album": "Sacred Hearts Club"
+  },
+  {
+    "_id": "60561d4036fe382f5c302dae",
+    "member": "Cameron Mahood",
+    "artist": "Black Sabbath",
+    "album": "Heaven and Hell"
+  },
+  {
+    "_id": "60561d4036fe382f5c302da2",
+    "member": "Cameron Mahood",
+    "artist": "Jimi Hendrix",
+    "album": "Electric Ladyland"
+  },
+  {
+    "_id": "60561d4036fe382f5c302da5",
+    "member": "Cameron Mahood",
+    "artist": "Chris de Burgh",
+    "album": "The Getaway"
+  },
+  {
+    "_id": "60561d4036fe382f5c302d8d",
+    "member": "Tim Mahood",
+    "artist": "Sublime",
+    "album": "Sublime"
+  },
+  {
+    "_id": "60561d4036fe382f5c302d94",
+    "member": "Tim Mahood",
+    "artist": "The Doors",
+    "album": "The Doors"
+  },
+  {
+    "_id": "60561d4036fe382f5c302d96",
+    "member": "Jake Roa",
+    "artist": "Mars Volta",
+    "album": "Frances the Mute"
+  },
+  {
+    "_id": "60561d4036fe382f5c302db3",
+    "member": "Cameron Mahood",
+    "artist": "Crosby, Stills, Nash & Young",
+    "album": "Deja Vu"
+  },
+  {
+    "_id": "60561d4036fe382f5c302db6",
+    "member": "Tim Mahood",
+    "artist": "Racconteurs",
+    "album": "Consolers of the Lonely",
+    "createdAt": "2000-01-01T05:00:00.000Z",
+    "updatedAt": "2000-01-01T05:00:00.000Z"
+  },
+  {
+    "_id": "60561d4036fe382f5c302d90",
+    "member": "Johnny Young",
+    "artist": "Wintersun",
+    "album": "Time I"
+  },
+  {
+    "_id": "60561d4036fe382f5c302dab",
+    "member": "Jake Roa",
+    "artist": "Ben Seretan",
+    "album": "Bowl of Plums"
+  },
+  {
+    "_id": "610699cf3f8ab849682faa75",
+    "album": "Rage Against The Machine",
+    "artist": "Rage Against The Machine",
+    "member": "Darshan Patel",
+    "createdAt": "2021-08-01T12:55:43.600Z",
+    "updatedAt": "2021-08-01T12:55:43.600Z",
+    "__v": 0
+  },
+  {
+    "_id": "6108970bdb9c1a00225668b8",
+    "album": "Dire straits",
+    "artist": "Dire straits",
+    "member": "Joe Panzarella",
+    "createdAt": "2021-08-03T01:08:27.290Z",
+    "updatedAt": "2021-08-03T01:08:27.290Z",
+    "__v": 0
+  },
+  {
+    "_id": "610c101400979a0022710941",
+    "album": "Ramones",
+    "artist": "Ramones",
+    "member": "John Keith",
+    "createdAt": "2021-08-05T16:21:40.538Z",
+    "updatedAt": "2021-08-05T16:21:40.538Z",
+    "__v": 0
+  },
+  {
+    "_id": "611163cc7a0b830022320918",
+    "album": "Red Hot Chili Peppers",
+    "artist": "Red Hot Chili Peppers",
+    "member": "Johnny Young",
+    "createdAt": "2021-08-09T17:20:12.714Z",
+    "updatedAt": "2021-08-09T17:20:12.714Z",
+    "__v": 0
+  },
+  {
+    "_id": "6117e3e378cfa100229ad021",
+    "album": "Chicago Transit Authority",
+    "artist": "Chicago",
+    "member": "Ken Hertzog",
+    "createdAt": "2021-08-14T15:40:19.974Z",
+    "updatedAt": "2021-08-14T15:40:19.974Z",
+    "__v": 0
+  },
+  {
+    "_id": "611fabe440f64c0022af428f",
+    "album": "Future ",
+    "artist": "Future",
+    "member": "Tim Mahood",
+    "createdAt": "2021-08-20T13:19:32.785Z",
+    "updatedAt": "2021-08-20T13:19:32.785Z",
+    "__v": 0
+  },
+  {
+    "_id": "61263793008a050022764edc",
+    "album": "Bad Company",
+    "artist": "Bad Company",
+    "member": "Cameron Mahood",
+    "createdAt": "2021-08-25T12:29:07.929Z",
+    "updatedAt": "2021-08-25T12:29:07.929Z",
+    "__v": 0
+  },
+  {
+    "_id": "612d509482be8d0022e37eaa",
+    "album": "Vikings",
+    "artist": "New Politics",
+    "member": "Joe Panzarella",
+    "createdAt": "2021-08-30T21:41:40.167Z",
+    "updatedAt": "2021-08-30T21:41:40.167Z",
+    "__v": 0
+  },
+  {
+    "_id": "61323e0215ee5783a4b4f895",
+    "member": "Ken Hertzog",
+    "artist": "Blur",
+    "album": "Blur"
+  },
+  {
+    "_id": "61323e4f15ee5783a4b4f896",
+    "member": "Cameron Mahood",
+    "artist": "Butthole Surfers",
+    "album": "Psychic… Powerless… Another Man's Sac"
+  },
+  {
+    "_id": "61323e7515ee5783a4b4f897",
+    "member": "Tim Mahood",
+    "artist": "Nirvana",
+    "album": "Nevermind"
+  },
+  {
+    "_id": "61323e9c15ee5783a4b4f898",
+    "member": "Johnny Young",
+    "artist": "Queens of the Stone Age",
+    "album": "Songs for the Deaf"
+  },
+  {
+    "_id": "61323ee315ee5783a4b4f899",
+    "member": "",
+    "artist": "Pearl Jam",
+    "album": "Ten"
+  },
+  {
+    "_id": "61323efc15ee5783a4b4f89a",
+    "member": "Cameron Mahood",
+    "artist": "Rolling Stones",
+    "album": "Sticky Fingers"
+  },
+  {
+    "_id": "61323f1f15ee5783a4b4f89b",
+    "member": "Jake Roa",
+    "artist": "Howlin' Wolf",
+    "album": "Moanin in the Moonlight"
+  },
+  {
+    "_id": "61323f6d15ee5783a4b4f89c",
+    "member": "Ken Hertzog",
+    "artist": "Sufjan Stevens",
+    "album": "Illinois"
+  },
+  {
+    "_id": "6132418d15ee5783a4b4f89d",
+    "member": "Johnny Young",
+    "artist": "X-Ray Spex",
+    "album": "Conscious Consumer"
+  },
+  {
+    "_id": "613241b615ee5783a4b4f89e",
+    "member": "John Keith",
+    "artist": "Styx",
+    "album": "Grand Illusion"
+  },
+  {
+    "_id": "613241f415ee5783a4b4f89f",
+    "member": "Ken Hertzog",
+    "artist": "The XX",
+    "album": "XX"
+  },
+  {
+    "_id": "6132426715ee5783a4b4f8a0",
+    "member": "Tim Mahood",
+    "artist": "X-Raided",
+    "album": "Bloc Star Evolution"
+  },
+  {
+    "_id": "613242f615ee5783a4b4f8a1",
+    "member": "Cameron Mahood",
+    "artist": "Snoop Dogg",
+    "album": "Doggy Style"
+  },
+  {
+    "_id": "6132435e15ee5783a4b4f8a2",
+    "member": "Darshan Patel",
+    "artist": "Red Hot Chili Peppers",
+    "album": "Californication"
+  },
+  {
+    "_id": "613243c315ee5783a4b4f8a3",
+    "member": "Joe Panzarella",
+    "artist": "Dr. John",
+    "album": "Gris-Gris"
+  },
+  {
+    "_id": "6132443715ee5783a4b4f8a4",
+    "member": "John Keith",
+    "artist": "The Allman Brothers Band",
+    "album": "At Filmore East"
+  },
+  {
+    "_id": "6132449415ee5783a4b4f8a5",
+    "member": "Johnny Young",
+    "artist": "The Isley Brothers",
+    "album": "Spend the Night"
+  },
+  {
+    "_id": "613244dc15ee5783a4b4f8a6",
+    "member": "Ken Hertzog",
+    "artist": "Depeche Mode",
+    "album": "Violator"
+  },
+  {
+    "_id": "6132452915ee5783a4b4f8a7",
+    "member": "Tim Mahood",
+    "artist": "Big Joe Turner",
+    "album": "Everyday I Have the Blues"
+  },
+  {
+    "_id": "6132458215ee5783a4b4f8a8",
+    "member": "Cameron Mahood",
+    "artist": "Cat Stevens",
+    "album": "Tea for the Tillerman"
+  },
+  {
+    "_id": "613245c315ee5783a4b4f8a9",
+    "member": "Joe Panzarella",
+    "artist": "M83",
+    "album": "Oblivion Soundtrack"
+  },
+  {
+    "_id": "6132460c15ee5783a4b4f8aa",
+    "member": "John Keith",
+    "artist": "Hans Zimmer",
+    "album": "Dark Knight OST"
+  },
+  {
+    "_id": "6132465515ee5783a4b4f8ab",
+    "member": "Johnny Young",
+    "artist": "Daft Punk",
+    "album": "TRON: Legacy Reconfigured"
+  },
+  {
+    "_id": "6132471b15ee5783a4b4f8ac",
+    "member": "Ken Hertzog",
+    "artist": "Good Will Hunting OST",
+    "album": "Good Will Hunting OST"
+  },
+  {
+    "_id": "6132476115ee5783a4b4f8ad",
+    "member": "Tim Mahood",
+    "artist": "Kendrick Lamar",
+    "album": "Black Panther"
+  },
+  {
+    "_id": "613247a515ee5783a4b4f8ae",
+    "member": "Cameron Mahood",
+    "artist": "Prince",
+    "album": "Purple Rain"
+  },
+  {
+    "_id": "613247e315ee5783a4b4f8af",
+    "member": "Joe Panzarella",
+    "artist": "Beach Boys",
+    "album": "Pet Sounds"
+  },
+  {
+    "_id": "6132480c15ee5783a4b4f8b0",
+    "member": "John Keith",
+    "artist": "Doc Halibut",
+    "album": "Lucky Star"
+  },
+  {
+    "_id": "613248b615ee5783a4b4f8b1",
+    "member": "Johnny Young",
+    "artist": "Todd Rundgren",
+    "album": "Something/Anything"
+  },
+  {
+    "_id": "6132498915ee5783a4b4f8b2",
+    "member": "Ken Hertzog",
+    "artist": "AFI",
+    "album": "Bodies"
+  },
+  {
+    "_id": "613249dc15ee5783a4b4f8b3",
+    "member": "Tim Mahood",
+    "artist": "Tool",
+    "album": "Undertow"
+  },
+  {
+    "_id": "61324a1c15ee5783a4b4f8b4",
+    "member": "Cameron Mahood",
+    "artist": "Thin Lizzy",
+    "album": "Johnny the Fox"
+  },
+  {
+    "_id": "61324a5b15ee5783a4b4f8b5",
+    "member": "Darshan Patel",
+    "artist": "Weezer",
+    "album": "Weezer (White Album)"
+  },
+  {
+    "_id": "61324a9315ee5783a4b4f8b6",
+    "member": "Joe Panzarella",
+    "artist": "Jurassic 5",
+    "album": "Quality Control"
+  },
+  {
+    "_id": "61324ae415ee5783a4b4f8b7",
+    "member": "John Keith",
+    "artist": "Big Wreck",
+    "album": "Ghosts"
+  },
+  {
+    "_id": "61324b2d15ee5783a4b4f8b8",
+    "member": "Johnny Young",
+    "artist": "The Runaways",
+    "album": "The Runaways"
+  },
+  {
+    "_id": "61324bef15ee5783a4b4f8b9",
+    "member": "Tim Mahood",
+    "artist": "The Doors",
+    "album": "The Doors"
+  },
+  {
+    "_id": "61324c1415ee5783a4b4f8ba",
+    "member": "Cameron Mahood",
+    "artist": "Blind Faith",
+    "album": "Blind Faith"
+  },
+  {
+    "_id": "61324dec15ee5783a4b4f8bb",
+    "member": "Joe Panzarella",
+    "artist": "The Cars",
+    "album": "The Cars"
+  },
+  {
+    "_id": "61328b1c800caf002322fce1",
+    "album": "David Bowie",
+    "artist": "David Bowie",
+    "member": "John Keith",
+    "createdAt": "2021-09-03T20:52:44.546Z",
+    "updatedAt": "2021-09-03T20:52:44.546Z",
+    "__v": 0
+  },
+  {
+    "_id": "613a0bb3c68143002341fe37",
+    "album": "Them Crooked Vultures",
+    "artist": "Them Crooked Vultures",
+    "member": "Johnny Young",
+    "createdAt": "2021-09-09T13:27:15.094Z",
+    "updatedAt": "2021-09-09T13:27:15.094Z",
+    "__v": 0
+  },
+  {
+    "_id": "6145fc4a7bfcf40023bb3e4d",
+    "album": "The Dust of Retreat",
+    "artist": "Margot & The Nuclear So and So's",
+    "member": "Ken Hertzog",
+    "createdAt": "2021-09-18T14:48:42.969Z",
+    "updatedAt": "2021-09-18T14:48:42.969Z",
+    "__v": 0
+  },
+  {
+    "_id": "614b94a637bc5c0023ea5ad0",
+    "album": "Earth rocker",
+    "artist": "Clutch",
+    "member": "Tim Mahood",
+    "createdAt": "2021-09-22T20:40:06.730Z",
+    "updatedAt": "2021-09-22T20:40:06.730Z",
+    "__v": 0
+  },
+  {
+    "_id": "6152413475f73200231a9a2e",
+    "album": "Bob Marley",
+    "artist": "Exodus ",
+    "member": "Cameron Mahood",
+    "createdAt": "2021-09-27T22:09:56.221Z",
+    "updatedAt": "2021-09-27T22:09:56.221Z",
+    "__v": 0
+  },
+  {
+    "_id": "615c662fcd6c3a00231b8436",
+    "album": "Breach",
+    "artist": "Wallflowers",
+    "member": "Darshan Patel",
+    "createdAt": "2021-10-05T14:50:23.878Z",
+    "updatedAt": "2021-10-05T14:50:23.878Z",
+    "__v": 0
+  },
+  {
+    "_id": "615eefb9f741dc0023fb11a0",
+    "album": "Bayside",
+    "artist": "Bayside",
+    "member": "Joe Panzarella",
+    "createdAt": "2021-10-07T13:01:45.558Z",
+    "updatedAt": "2021-10-07T13:01:45.558Z",
+    "__v": 0
+  },
+  {
+    "_id": "616553ec5d2c640023400ecd",
+    "album": "Bexley",
+    "artist": "Bexley",
+    "member": "John Keith",
+    "createdAt": "2021-10-12T09:22:52.047Z",
+    "updatedAt": "2021-10-12T09:22:52.047Z",
+    "__v": 0
+  },
+  {
+    "_id": "616ebdb50ea1cc00237dad7f",
+    "album": "Sixteen Stone",
+    "artist": "Bush",
+    "member": "Johnny Young",
+    "createdAt": "2021-10-19T12:44:37.134Z",
+    "updatedAt": "2021-10-19T12:44:37.134Z",
+    "__v": 0
+  },
+  {
+    "_id": "617aef664c7220002302ba57",
+    "album": "Chutes Too Narrow",
+    "artist": "The Shins",
+    "member": "Ken Hertzog",
+    "createdAt": "2021-10-28T18:43:50.443Z",
+    "updatedAt": "2021-10-28T18:43:50.443Z",
+    "__v": 0
+  },
+  {
+    "_id": "618031ddf857750023c1a5ec",
+    "album": "Trust in the lifeforce of the deep mystery",
+    "artist": "The comet is coming ",
+    "member": "Tim Mahood",
+    "createdAt": "2021-11-01T18:28:45.599Z",
+    "updatedAt": "2021-11-01T18:28:45.599Z",
+    "__v": 0
+  },
+  {
+    "_id": "618571f0dcf1d70023c8a347",
+    "album": "All Things Must Pass",
+    "artist": "George Harrison ",
+    "member": "Cameron Mahood",
+    "createdAt": "2021-11-05T18:03:28.419Z",
+    "updatedAt": "2021-11-05T18:03:28.419Z",
+    "__v": 0
+  },
+  {
+    "_id": "618dbd789f5728b61e0a6bee",
+    "member": "Darshan Patel",
+    "artist": "Bo Burnham",
+    "album": "Inside",
+    "createdAt": "2021-11-12T01:03:52.246Z",
+    "updatedAt": "2021-11-12T01:03:52.246Z",
+    "__v": 0
+  },
+  {
+    "_id": "618e768713bc990023450745",
+    "album": "Fantastic Planet",
+    "artist": "Failure",
+    "member": "Joe Panzarella",
+    "createdAt": "2021-11-12T14:13:27.381Z",
+    "updatedAt": "2021-11-12T14:13:27.381Z",
+    "__v": 0
+  },
+  {
+    "_id": "619578b72500d300233fef10",
+    "album": "Time Clocks",
+    "artist": "Joe Bonamassa",
+    "member": "John Keith",
+    "createdAt": "2021-11-17T21:48:39.486Z",
+    "updatedAt": "2021-11-17T21:48:39.486Z",
+    "__v": 0
+  },
+  {
+    "_id": "61a0fe82d2a4320023e767e7",
+    "album": "Deceiver Of The Gods",
+    "artist": "Amon Amarth",
+    "member": "Johnny Young",
+    "createdAt": "2021-11-26T15:34:26.744Z",
+    "updatedAt": "2021-11-26T15:34:26.744Z",
+    "__v": 0
+  },
+  {
+    "_id": "61a6a809d46bce002359fe48",
+    "album": "My Dear Melancholy,",
+    "artist": "The Weeknd",
+    "member": "Ken Hertzog",
+    "createdAt": "2021-11-30T22:39:05.458Z",
+    "updatedAt": "2021-11-30T22:39:05.458Z",
+    "__v": 0
+  },
+  {
+    "_id": "61ae87228ae16800239a751e",
+    "album": "At the Roxy",
+    "artist": "Phish",
+    "member": "Tim Mahood",
+    "createdAt": "2021-12-06T21:56:50.476Z",
+    "updatedAt": "2021-12-06T21:56:50.476Z",
+    "__v": 0
+  },
+  {
+    "_id": "61b1413a2952f200234f2dff",
+    "album": "Turn! Turn! Turn!",
+    "artist": "The Byrds",
+    "member": "Cameron Mahood",
+    "createdAt": "2021-12-08T23:35:22.144Z",
+    "updatedAt": "2021-12-08T23:35:22.144Z",
+    "__v": 0
+  },
+  {
+    "_id": "61b9f95757dc8b0023556966",
+    "album": "Houses of the Holy",
+    "artist": "Led Zeppelin",
+    "member": "Joe Panzarella",
+    "createdAt": "2021-12-15T14:19:03.451Z",
+    "updatedAt": "2021-12-15T14:19:03.451Z",
+    "__v": 0
+  },
+  {
+    "_id": "61be3d7893637d002378e343",
+    "album": "Joyful Rebellion",
+    "artist": "K-OS",
+    "member": "John Keith",
+    "createdAt": "2021-12-18T19:58:48.445Z",
+    "updatedAt": "2021-12-18T19:58:48.445Z",
+    "__v": 0
+  },
+  {
+    "_id": "61c5ef4242a66c002325c777",
+    "album": "All 6s and 7s ",
+    "artist": "Tech N9ne",
+    "member": "Johnny Young",
+    "createdAt": "2021-12-24T16:03:14.455Z",
+    "updatedAt": "2021-12-24T16:03:14.455Z",
+    "__v": 0
+  },
+  {
+    "_id": "61d33b599c4ba7002377d101",
+    "album": "Bargainville",
+    "artist": "Moxy Früvous",
+    "member": "Jared No",
+    "createdAt": "2022-01-03T18:07:21.250Z",
+    "updatedAt": "2022-01-03T18:07:21.250Z",
+    "__v": 0
+  },
+  {
+    "_id": "61d7514e85764e00235f95ce",
+    "album": "One hot minute",
+    "artist": "Red hot chili peppers",
+    "member": "Tim Mahood",
+    "createdAt": "2022-01-06T20:30:06.692Z",
+    "updatedAt": "2022-01-06T20:30:06.692Z",
+    "__v": 0
+  },
+  {
+    "_id": "61dc6181fd7f720023f06688",
+    "album": "Trash",
+    "artist": "Alice Cooper",
+    "member": "Cameron Mahood",
+    "createdAt": "2022-01-10T16:40:33.858Z",
+    "updatedAt": "2022-01-10T16:40:33.858Z",
+    "__v": 0
+  },
+  {
+    "_id": "61e048e3e76e8f0023e0365e",
+    "album": "The End of Heartache",
+    "artist": "Killswitch Engage",
+    "member": "Jared No",
+    "createdAt": "2022-01-13T15:44:35.054Z",
+    "updatedAt": "2022-01-13T15:44:35.054Z",
+    "__v": 0
+  },
+  {
+    "_id": "61ea0fbfb55fc00023664c83",
+    "album": "Adore",
+    "artist": "The Smashing Pumpkins",
+    "member": "Joe Panzarella",
+    "createdAt": "2022-01-21T01:43:27.122Z",
+    "updatedAt": "2022-01-21T01:43:27.122Z",
+    "__v": 0
+  },
+  {
+    "_id": "61eede5cbe0e3c00233783c1",
+    "album": "Aja",
+    "artist": "Steely Dan ",
+    "member": "John Keith",
+    "createdAt": "2022-01-24T17:14:04.302Z",
+    "updatedAt": "2022-01-24T17:14:04.302Z",
+    "__v": 0
+  },
+  {
+    "_id": "61f2b3ff112eaa0023f8a636",
+    "album": "Shock Tactics",
+    "artist": "Samson",
+    "member": "Johnny Young",
+    "createdAt": "2022-01-27T15:02:23.113Z",
+    "updatedAt": "2022-01-27T15:02:23.113Z",
+    "__v": 0
+  },
+  {
+    "_id": "61f7e336da5494002312bfaf",
+    "album": "...Like Clockwork",
+    "artist": "Queens of the Stone Age",
+    "member": "Ken Hertzog",
+    "createdAt": "2022-01-31T13:25:10.990Z",
+    "updatedAt": "2022-01-31T13:25:10.990Z",
+    "__v": 0
+  },
+  {
+    "_id": "6204183d749c6f00239252dc",
+    "album": "Eternally even",
+    "artist": "Jim james",
+    "member": "Tim Mahood",
+    "createdAt": "2022-02-09T19:38:37.889Z",
+    "updatedAt": "2022-02-09T19:38:37.889Z",
+    "__v": 0
+  },
+  {
+    "_id": "6206af87375f5d0023eba0ce",
+    "album": "Parsley, Sage, Rosemary and Thyme ",
+    "artist": "Simon & Garfunkel ",
+    "member": "Cameron Mahood",
+    "createdAt": "2022-02-11T18:48:39.559Z",
+    "updatedAt": "2022-02-11T18:48:39.559Z",
+    "__v": 0
+  },
+  {
+    "_id": "620e918d6f723c002352957e",
+    "album": "Lifa",
+    "artist": "Heilung",
+    "member": "Jared No",
+    "createdAt": "2022-02-17T18:18:53.667Z",
+    "updatedAt": "2022-02-17T18:18:53.667Z",
+    "__v": 0
+  },
+  {
+    "_id": "6214ffb95c27f20023d6bc4f",
+    "album": "Like a Virgin",
+    "artist": "Madonna",
+    "member": "Joe Panzarella",
+    "createdAt": "2022-02-22T15:22:33.916Z",
+    "updatedAt": "2022-02-22T15:22:33.916Z",
+    "__v": 0
+  },
+  {
+    "_id": "621e1cd5d0b96d0023b6dad1",
+    "album": "Born and Raised",
+    "artist": "John Mayer",
+    "member": "John Keith",
+    "createdAt": "2022-03-01T13:17:09.332Z",
+    "updatedAt": "2022-06-14T14:28:23.983Z",
+    "__v": 0
+  },
+  {
+    "_id": "6225fc3eb7839100231ab645",
+    "album": "Bear Creek",
+    "artist": "Brandi Carlile",
+    "member": "Johnny Young",
+    "createdAt": "2022-03-07T12:36:14.290Z",
+    "updatedAt": "2022-03-07T12:36:14.290Z",
+    "__v": 0
+  },
+  {
+    "_id": "622f8e2f98b5dd002336af65",
+    "album": "Surfacing",
+    "artist": "Sarah McLachlan",
+    "member": "Ken Hertzog",
+    "createdAt": "2022-03-14T18:49:19.159Z",
+    "updatedAt": "2022-03-14T18:49:19.159Z",
+    "__v": 0
+  },
+  {
+    "_id": "623d2478d500d10023984abf",
+    "album": "Dixie Chicken",
+    "artist": "Little feat",
+    "member": "Tim Mahood",
+    "createdAt": "2022-03-25T02:10:00.774Z",
+    "updatedAt": "2022-06-14T14:27:46.293Z",
+    "__v": 0
+  },
+  {
+    "_id": "624ac6d303360e00237a4dd0",
+    "album": "The Party",
+    "artist": "Max Webster",
+    "member": "Cameron Mahood",
+    "createdAt": "2022-04-04T10:22:11.955Z",
+    "updatedAt": "2022-04-04T10:22:11.955Z",
+    "__v": 0
+  },
+  {
+    "_id": "62530c63df9e1e00230eb0a0",
+    "album": "Act II: The Meaning of, And All Things Regarding Ms. Leading",
+    "artist": "The Dear Hunter",
+    "member": "Jared No",
+    "createdAt": "2022-04-10T16:57:07.770Z",
+    "updatedAt": "2022-04-10T16:57:07.770Z",
+    "__v": 0
+  },
+  {
+    "_id": "625978662e678b00239b5565",
+    "album": "Surrender",
+    "artist": "Rüfüs Du Sol",
+    "member": "Joe Panzarella",
+    "createdAt": "2022-04-15T13:51:34.765Z",
+    "updatedAt": "2022-04-15T13:51:34.765Z",
+    "__v": 0
+  },
+  {
+    "_id": "6261874e43487e00230ff9cd",
+    "album": "Fully Completely ",
+    "artist": "The Tragically Hip",
+    "member": "John Keith",
+    "createdAt": "2022-04-21T16:33:18.341Z",
+    "updatedAt": "2022-06-14T14:27:59.130Z",
+    "__v": 0
+  },
+  {
+    "_id": "626fee0b87c6990023018d45",
+    "album": "Crash Kings",
+    "artist": "Crash Kings",
+    "member": "Johnny Young",
+    "createdAt": "2022-05-02T14:43:23.688Z",
+    "updatedAt": "2022-05-02T14:43:23.688Z",
+    "__v": 0,
+    "theme": "Ivories"
+  },
+  {
+    "_id": "62752b919e3acb0023f047f7",
+    "album": "Elton John",
+    "artist": "Elton John",
+    "member": "Ken Hertzog",
+    "createdAt": "2022-05-06T14:07:13.426Z",
+    "updatedAt": "2022-05-06T14:07:13.426Z",
+    "__v": 0,
+    "theme": "Ivories"
+  },
+  {
+    "_id": "6279008b4f16290023c81fcd",
+    "album": "Black radio",
+    "artist": "Robert Glasper experiment",
+    "member": "Tim Mahood",
+    "createdAt": "2022-05-09T11:52:43.347Z",
+    "updatedAt": "2022-05-09T11:52:43.347Z",
+    "__v": 0,
+    "theme": "Ivories"
+  },
+  {
+    "_id": "627ce4a1acb8c700239a95d6",
+    "album": "Fragile",
+    "artist": "Yes",
+    "member": "Cameron Mahood",
+    "createdAt": "2022-05-12T10:42:41.665Z",
+    "updatedAt": "2022-05-12T10:42:41.665Z",
+    "__v": 0,
+    "theme": "Ivories"
+  },
+  {
+    "_id": "6282aed17724c10023d2b1ee",
+    "album": "Introducing",
+    "artist": "Foxy Shazam",
+    "member": "Jared No",
+    "createdAt": "2022-05-16T20:06:41.214Z",
+    "updatedAt": "2022-05-16T20:06:41.214Z",
+    "__v": 0,
+    "theme": "Ivories"
+  },
+  {
+    "_id": "628bb0e9534c710023d07ad6",
+    "album": "Brothers and Sisters",
+    "artist": "The Allman Brothers Band",
+    "member": "Joe Panzarella",
+    "createdAt": "2022-05-23T16:06:01.064Z",
+    "updatedAt": "2022-05-23T16:06:01.064Z",
+    "__v": 0,
+    "theme": "Ivories"
+  },
+  {
+    "_id": "629658821770b4229061d2f4",
+    "member": "John Keith",
+    "artist": "Ray Charles",
+    "album": "The Great Ray Charles",
+    "createdAt": "2022-05-31T18:03:46.446Z",
+    "updatedAt": "2022-06-14T14:27:23.325Z",
+    "__v": 0,
+    "theme": "Ivories"
+  },
+  {
+    "_id": "629ebafefa6715db51e3a759",
+    "member": "Johnny Young",
+    "artist": "Hall and Oates",
+    "album": "H2O",
+    "createdAt": "2022-06-07T02:42:06.976Z",
+    "updatedAt": "2022-06-07T02:42:06.976Z",
+    "__v": 0,
+    "theme": "80s"
+  },
+  {
+    "_id": "62a7248d7a1905fab10a41a6",
+    "member": "Ken Hertzog",
+    "artist": "Michael Jackson",
+    "album": "Thriller",
+    "theme": "80s",
+    "createdAt": "2022-06-13T11:50:37.214Z",
+    "updatedAt": "2022-06-13T11:50:37.214Z",
+    "__v": 0
+  },
+  {
+    "_id": "62b1d84413e8bf7754f78325",
+    "member": "Tim Mahood",
+    "artist": "Talking heads",
+    "album": "Remain in light",
+    "theme": "80s",
+    "createdAt": "2022-06-21T14:40:04.791Z",
+    "updatedAt": "2022-06-21T14:40:04.791Z",
+    "__v": 0
+  },
+  {
+    "_id": "62b4c5153db13f475b4b0295",
+    "member": "Cameron Mahood",
+    "artist": "Robbie Robertson",
+    "album": "Robbie Robertson",
+    "theme": "80’s",
+    "createdAt": "2022-06-23T19:55:01.576Z",
+    "updatedAt": "2022-06-23T19:55:01.576Z",
+    "__v": 0
+  },
+  {
+    "_id": "62bb7e060ad22eae32d2504d",
+    "member": "Jared No",
+    "artist": "New Order",
+    "album": "Substance",
+    "theme": "80s",
+    "createdAt": "2022-06-28T22:17:42.839Z",
+    "updatedAt": "2022-06-28T22:17:42.839Z",
+    "__v": 0
+  },
+  {
+    "_id": "62c0b954ef40726d41c1f9af",
+    "member": "Joe Panzarella",
+    "artist": "Blondie",
+    "album": "Autoamerican",
+    "theme": "80s ",
+    "createdAt": "2022-07-02T21:32:04.341Z",
+    "updatedAt": "2022-07-02T21:32:04.341Z",
+    "__v": 0
+  },
+  {
+    "_id": "62c6e61065e1490ef2dd746c",
+    "member": "John Keith",
+    "artist": "Kiss ",
+    "album": "Creatures of the night ",
+    "theme": "80’s ",
+    "createdAt": "2022-07-07T13:56:32.884Z",
+    "updatedAt": "2022-07-07T13:56:32.884Z",
+    "__v": 0
+  },
+  {
+    "_id": "62cd9d422d46873f54299a48",
+    "member": "Johnny Young",
+    "artist": "Justice",
+    "album": "Cross",
+    "theme": "💩 that slaps",
+    "createdAt": "2022-07-12T16:11:46.333Z",
+    "updatedAt": "2022-07-12T16:11:46.333Z",
+    "__v": 0
+  },
+  {
+    "_id": "62d549e3fd50134cdcf03116",
+    "member": "Ken Hertzog",
+    "artist": "Marcus Miller",
+    "album": "Silver Rain",
+    "theme": "Slappers only",
+    "createdAt": "2022-07-18T11:54:11.504Z",
+    "updatedAt": "2022-07-18T11:54:11.504Z",
+    "__v": 0
+  },
+  {
+    "_id": "62d758e7465d107a9504345e",
+    "member": "Tim Mahood",
+    "artist": "Travie McCoy ",
+    "album": "Never slept better ",
+    "theme": "Shit that slaps",
+    "createdAt": "2022-07-20T01:22:47.361Z",
+    "updatedAt": "2022-07-20T01:22:47.361Z",
+    "__v": 0
+  },
+  {
+    "_id": "62da72743c71ce84a5ca589c",
+    "member": "Cameron Mahood",
+    "artist": "Slapp Happy",
+    "album": "Ça Va",
+    "theme": "💩that slaps ",
+    "createdAt": "2022-07-22T09:48:36.583Z",
+    "updatedAt": "2022-07-22T09:48:36.583Z",
+    "__v": 0
+  },
+  {
+    "_id": "62e1c73bfbe5e307ba0d15ee",
+    "member": "Jared No",
+    "artist": "Between the Buried and Me",
+    "album": "Automata I",
+    "theme": "Shit That Slaps",
+    "createdAt": "2022-07-27T23:16:11.580Z",
+    "updatedAt": "2022-07-27T23:16:11.580Z",
+    "__v": 0
+  },
+  {
+    "_id": "62ebdb31e0dd27553e8e1c6e",
+    "member": "Joe Panzarella",
+    "artist": "Radiohead",
+    "album": "OK Computer",
+    "theme": "Shit that slaps",
+    "createdAt": "2022-08-04T14:44:01.480Z",
+    "updatedAt": "2022-08-04T14:44:01.480Z",
+    "__v": 0
+  },
+  {
+    "_id": "62f2ce44fc2976cafe4f458a",
+    "member": "John Keith",
+    "artist": "AC/DC",
+    "album": "Highway to hell",
+    "theme": "Slappers",
+    "createdAt": "2022-08-09T21:14:44.037Z",
+    "updatedAt": "2022-08-09T21:14:44.037Z",
+    "__v": 0
+  },
+  {
+    "_id": "62ff818cc3af1ff11905e367",
+    "member": "Johnny Young",
+    "artist": "Thundercat",
+    "album": "It Is What It Is",
+    "theme": "Slap that like button",
+    "createdAt": "2022-08-19T12:26:52.163Z",
+    "updatedAt": "2022-08-19T12:26:52.163Z",
+    "__v": 0
+  },
+  {
+    "_id": "630b99bc84502cf1b69a7ec6",
+    "member": "Ken Hertzog",
+    "artist": "Sia",
+    "album": "Colour The Small One",
+    "theme": "Female singers",
+    "createdAt": "2022-08-28T16:37:16.461Z",
+    "updatedAt": "2022-08-28T16:37:16.461Z",
+    "__v": 0
+  },
+  {
+    "_id": "63165fc43e51b8c84954267a",
+    "member": "Tim Mahood",
+    "artist": "Alabama shakes",
+    "album": "Boys & Girls",
+    "theme": "Female singers",
+    "createdAt": "2022-09-05T20:44:52.704Z",
+    "updatedAt": "2022-09-05T20:44:52.704Z",
+    "__v": 0
+  },
+  {
+    "_id": "6318eb5e0d9d5d095f6b2ef2",
+    "member": "Cameron Mahood",
+    "artist": "Pat Benatar",
+    "album": "Crimes of Passion ",
+    "theme": "Female singers ",
+    "createdAt": "2022-09-07T19:05:02.430Z",
+    "updatedAt": "2022-09-07T19:05:02.430Z",
+    "__v": 0
+  },
+  {
+    "_id": "63232c2dafbbe672c5d46fb9",
+    "member": "Jared No",
+    "artist": "Poppy",
+    "album": "I Disagree",
+    "theme": "Female Singers",
+    "createdAt": "2022-09-15T13:44:13.599Z",
+    "updatedAt": "2022-09-15T13:44:13.599Z",
+    "__v": 0
+  },
+  {
+    "_id": "632c642606410dee82c201a5",
+    "member": "Joe Panzarella",
+    "artist": "PJ Harvey & John Parish",
+    "album": "A woman a man walked by",
+    "theme": "",
+    "createdAt": "2022-09-22T13:33:26.550Z",
+    "updatedAt": "2022-09-22T13:33:26.550Z",
+    "__v": 0
+  },
+  {
+    "_id": "63345592dc33cc15a192ac2d",
+    "member": "John Keith",
+    "artist": "Garbage",
+    "album": "Garbage",
+    "theme": "Chicks who sing",
+    "createdAt": "2022-09-28T14:09:22.479Z",
+    "updatedAt": "2022-09-28T14:09:22.479Z",
+    "__v": 0
+  },
+  {
+    "_id": "633f1e7a3e78dbae93cb3f5f",
+    "member": "Johnny Young",
+    "artist": "Unleash the Archers",
+    "album": "Time Stands Still",
+    "theme": "Women Lead Singers <3",
+    "createdAt": "2022-10-06T18:29:14.316Z",
+    "updatedAt": "2022-10-06T18:29:14.316Z",
+    "__v": 0
+  },
+  {
+    "_id": "6349600f9b5312822f5f3ab4",
+    "member": "Ken Hertzog",
+    "artist": "The Warning",
+    "album": "Error",
+    "theme": "More ladies",
+    "createdAt": "2022-10-14T13:11:43.735Z",
+    "updatedAt": "2022-10-14T13:11:43.735Z",
+    "__v": 0
+  },
+  {
+    "_id": "634ff916ac49707a818c94ba",
+    "member": "Tim Mahood",
+    "artist": "Red hot chili peppers",
+    "album": "Return of the dream canteen ",
+    "theme": "Favorite band’s, new music ",
+    "createdAt": "2022-10-19T13:18:14.252Z",
+    "updatedAt": "2022-10-19T13:18:14.252Z",
+    "__v": 0
+  },
+  {
+    "_id": "635b1560433e7923e9e8e3f6",
+    "member": "Cameron Mahood",
+    "artist": "Ozzy Ozbourne",
+    "album": "Patient Number 9",
+    "theme": "Old bands, new release ",
+    "createdAt": "2022-10-27T23:33:52.929Z",
+    "updatedAt": "2022-10-27T23:33:52.929Z",
+    "__v": 0
+  },
+  {
+    "_id": "636842bbaa8dcd097aa52506",
+    "member": "Jared No",
+    "artist": "Nekrogoblikon",
+    "album": "The Fundamental Slimes and Humours",
+    "theme": "Favorite, but new",
+    "createdAt": "2022-11-06T23:26:51.127Z",
+    "updatedAt": "2022-11-06T23:26:51.127Z",
+    "__v": 0
+  },
+  {
+    "_id": "636b9ecdc25ad247f6b2f807",
+    "member": "Joe Panzarella",
+    "artist": "Twenty-one pilots ",
+    "album": "Scaled and Icy",
+    "theme": "Newest album/favorite band",
+    "createdAt": "2022-11-09T12:36:29.829Z",
+    "updatedAt": "2022-11-09T12:36:29.829Z",
+    "__v": 0
+  }
+]

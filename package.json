@@ -3,8 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
-    "dev-legacy": "next dev",
+    "dev": "node scripts/clean-pwa-dev.js && next dev --turbopack",
+    "dev-legacy": "node scripts/clean-pwa-dev.js && next dev",
+    "dev-clean": "node scripts/clean-pwa-dev.js",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
@@ -35,12 +36,15 @@
     "mongoose": "^8.16.4",
     "next": "15.4.4",
     "next-auth": "^4.24.11",
+    "next-pwa": "^5.6.0",
     "node-youtube-music": "^0.10.3",
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "react-hook-form": "^7.61.1",
     "tailwind-merge": "^3.3.1",
     "tailwindcss-animate": "^1.0.7",
+    "web-push": "^3.6.7",
+    "ytmusic-api": "^5.3.0",
     "zod": "^4.0.9"
   },
   "devDependencies": {

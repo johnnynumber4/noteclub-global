@@ -1,0 +1,44 @@
+[
+  {
+    "_id": "6048f5ea9738de16a8a59949",
+    "pack": [
+      "A dusty stick"
+    ],
+    "name": "OptimisticPenguin",
+    "userID": "340146199082434560",
+    "leaderBoard": "all",
+    "money": 0,
+    "xp": 0,
+    "daily": 0,
+    "health": 1000000000,
+    "__v": 0
+  },
+  {
+    "_id": "6048f7812fae3314e4bc5f25",
+    "pack": [
+      "A dusty stick"
+    ],
+    "name": "MyNamesNotMatt",
+    "userID": "222037598573428737",
+    "leaderBoard": "all",
+    "money": 0,
+    "xp": 0,
+    "daily": 0,
+    "health": 1000000000,
+    "__v": 0
+  },
+  {
+    "_id": "6048f7b52fae3314e4bc5f26",
+    "pack": [
+      "A dusty stick"
+    ],
+    "name": "Bowser B Johnson",
+    "userID": "608102668627476490",
+    "leaderBoard": "all",
+    "money": 0,
+    "xp": 0,
+    "daily": 0,
+    "health": 1000000000,
+    "__v": 0
+  }
+]

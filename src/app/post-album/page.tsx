@@ -23,6 +23,10 @@ import {
   InputAdornment,
   Divider,
   Paper,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
 } from "@mui/material";
 import {
   Search,
@@ -35,22 +39,35 @@ import {
   Event,
   Description,
   Link as LinkIcon,
+  Apple,
 } from "@mui/icons-material";
 
-interface YouTubeAlbum {
+interface UnifiedAlbumResult {
   id: string;
   title: string;
   artist: string;
   year?: number;
+  genre?: string;
   thumbnail?: string;
-  youtubeUrl: string;
-  type: string;
+  description?: string;
+  duration?: number;
+  trackCount?: number;
+  
+  // Streaming URLs
+  youtubeMusicUrl?: string;
+  spotifyUrl?: string;
+  appleMusicUrl?: string;
+  
+  // Source information
+  primarySource: 'youtube' | 'spotify' | 'apple';
+  availableOn: string[];
 }
 
 interface Theme {
   _id: string;
   title: string;
   description: string;
+  isActive: boolean;
   isCurrentlyActive: boolean;
 }
 
@@ -75,7 +92,7 @@ export default function PostAlbumPage() {
   // UI state
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState<YouTubeAlbum[]>([]);
+  const [searchResults, setSearchResults] = useState<UnifiedAlbumResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -84,6 +101,9 @@ export default function PostAlbumPage() {
   // Theme data
   const [themes, setThemes] = useState<Theme[]>([]);
   const [activeTheme, setActiveTheme] = useState<Theme | null>(null);
+
+  // Override detection
+  const [isOverride, setIsOverride] = useState(false);
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -95,18 +115,38 @@ export default function PostAlbumPage() {
     fetchThemes();
   }, []);
 
+  useEffect(() => {
+    // Check for override parameter in URL
+    if (typeof window !== "undefined") {
+      const searchParams = new URLSearchParams(window.location.search);
+      const override = searchParams.get("override") === "true";
+      setIsOverride(override);
+    }
+  }, []);
+
   const fetchThemes = async () => {
     try {
       const response = await fetch("/api/themes");
       if (response.ok) {
         const data = await response.json();
         setThemes(data.themes || []);
+        
+        // First try to find a currently active theme
         const active = data.themes?.find(
           (theme: Theme) => theme.isCurrentlyActive
         );
+        
         if (active) {
           setActiveTheme(active);
           setFormData((prev) => ({ ...prev, themeId: active._id }));
+        } else {
+          // Fallback to "Random" theme if no active theme
+          const randomTheme = data.themes?.find(
+            (theme: Theme) => theme.title === "Random"
+          );
+          if (randomTheme) {
+            setFormData((prev) => ({ ...prev, themeId: randomTheme._id }));
+          }
         }
       }
     } catch (error) {
@@ -114,47 +154,109 @@ export default function PostAlbumPage() {
     }
   };
 
-  const searchYouTubeMusic = async () => {
+  const searchAllMusicServices = async () => {
     if (!searchQuery.trim()) return;
 
     setIsSearching(true);
     try {
       const response = await fetch(
-        `/api/youtube-music/search?q=${encodeURIComponent(searchQuery)}`
+        `/api/music/search-all?q=${encodeURIComponent(searchQuery)}&limit=10`
       );
 
       if (response.ok) {
         const data = await response.json();
         setSearchResults(data.albums || []);
+        console.log(`Found ${data.albums.length} unified results`);
       } else {
-        setError("Failed to search YouTube Music");
+        setError("Failed to search music services");
       }
     } catch (error) {
-      console.error("Search error:", error);
-      setError("Failed to search YouTube Music");
+      console.error("Unified search error:", error);
+      setError("Failed to search music services");
     } finally {
       setIsSearching(false);
     }
   };
 
-  const selectAlbum = (album: YouTubeAlbum) => {
-    setFormData((prev) => ({
-      ...prev,
-      title: album.title,
-      artist: album.artist,
-      year: album.year?.toString() || "",
-      youtubeMusicUrl: album.youtubeUrl,
-      coverImageUrl: album.thumbnail || "",
-    }));
-    setIsSearchOpen(false);
-    setSearchQuery("");
-    setSearchResults([]);
-    setSuccess(
-      `Selected "${album.title}" by ${album.artist} from YouTube Music!`
-    );
-    // Clear success message after 3 seconds
-    setTimeout(() => setSuccess(""), 3000);
+  const selectAlbum = async (album: UnifiedAlbumResult) => {
+    try {
+      // Enhanced description fetching based on primary source
+      let enhancedDescription = album.description || "";
+      
+      if (album.primarySource === 'youtube' && album.youtubeMusicUrl) {
+        try {
+          // Extract YouTube album ID from URL for detailed description
+          const ytId = album.id.replace('unified_', '');
+          const albumDetailsResponse = await fetch(
+            `/api/youtube-music/album?id=${encodeURIComponent(ytId)}`
+          );
+          
+          if (albumDetailsResponse.ok) {
+            const detailsData = await albumDetailsResponse.json();
+            enhancedDescription = detailsData.album?.description || enhancedDescription;
+          }
+        } catch (ytError) {
+          console.log("YouTube description fetch failed:", ytError);
+        }
+      }
+
+      // Update form data with all available streaming links (preserve existing themeId)
+      setFormData((prev) => ({
+        ...prev,
+        title: album.title,
+        artist: album.artist,
+        year: album.year?.toString() || "",
+        genre: album.genre || prev.genre,
+        description: enhancedDescription || prev.description,
+        youtubeMusicUrl: album.youtubeMusicUrl || "",
+        spotifyUrl: album.spotifyUrl || "",
+        appleMusicUrl: album.appleMusicUrl || "",
+        coverImageUrl: album.thumbnail || "",
+      }));
+      
+      setIsSearchOpen(false);
+      setSearchQuery("");
+      setSearchResults([]);
+      
+      // Create success message based on available platforms
+      const availablePlatforms = album.availableOn.join(', ');
+      const platformCount = album.availableOn.length;
+      
+      let successMessage;
+      if (platformCount === 1) {
+        successMessage = `Selected "${album.title}" from ${availablePlatforms}!`;
+      } else if (platformCount === 2) {
+        successMessage = `Selected "${album.title}" with links from ${availablePlatforms}!`;
+      } else {
+        successMessage = `Selected "${album.title}" with links from all platforms (${availablePlatforms})!`;
+      }
+      
+      setSuccess(successMessage);
+      
+      // Clear success message after 4 seconds
+      setTimeout(() => setSuccess(""), 4000);
+      
+    } catch (error) {
+      console.error("Error selecting album:", error);
+      // Fallback to basic selection (preserve themeId)
+      setFormData((prev) => ({
+        ...prev,
+        title: album.title,
+        artist: album.artist,
+        year: album.year?.toString() || "",
+        youtubeMusicUrl: album.youtubeMusicUrl || "",
+        spotifyUrl: album.spotifyUrl || "",
+        appleMusicUrl: album.appleMusicUrl || "",
+        coverImageUrl: album.thumbnail || "",
+      }));
+      setIsSearchOpen(false);
+      setSearchQuery("");
+      setSearchResults([]);
+      setSuccess(`Selected "${album.title}" by ${album.artist}!`);
+      setTimeout(() => setSuccess(""), 3000);
+    }
   };
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -184,6 +286,7 @@ export default function PostAlbumPage() {
           youtubeMusicUrl: formData.youtubeMusicUrl,
           appleMusicUrl: formData.appleMusicUrl,
           coverImageUrl: formData.coverImageUrl,
+          isOverride: isOverride,
         }),
       });
 
@@ -237,18 +340,90 @@ export default function PostAlbumPage() {
               </Box>
             </Typography>
 
-            {activeTheme && (
-              <Card sx={{ p: 3, bgcolor: "rgba(244, 67, 54, 0.1)" }}>
-                <Stack spacing={1}>
-                  <Typography variant="h6" color="primary.main">
-                    Current Theme: {activeTheme.title}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {activeTheme.description}
-                  </Typography>
-                </Stack>
-              </Card>
-            )}
+            {/* Theme Selection */}
+            <Card sx={{ p: 3, bgcolor: "rgba(33, 150, 243, 0.1)" }}>
+              <Stack spacing={3}>
+                <Typography variant="h6" color="primary.main">
+                  Select Theme
+                </Typography>
+                
+                <FormControl fullWidth>
+                  <InputLabel>Choose Theme</InputLabel>
+                  <Select
+                    value={formData.themeId}
+                    label="Choose Theme"
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        themeId: e.target.value,
+                      }))
+                    }
+                  >
+                    {themes.map((theme) => (
+                      <MenuItem 
+                        key={theme._id} 
+                        value={theme._id}
+                        disabled={!theme.isCurrentlyActive && theme.title !== "Random"}
+                      >
+                        <Stack>
+                          <Typography variant="body1">
+                            {theme.title}
+                            {theme.isCurrentlyActive && (
+                              <Chip 
+                                label="Currently Active" 
+                                size="small" 
+                                color="success" 
+                                sx={{ ml: 1 }}
+                              />
+                            )}
+                            {theme.title === "Random" && (
+                              <Chip 
+                                label="Always Available" 
+                                size="small" 
+                                color="default" 
+                                sx={{ ml: 1 }}
+                              />
+                            )}
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            {theme.description}
+                          </Typography>
+                        </Stack>
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+
+                {/* Display selected theme info */}
+                {formData.themeId && (
+                  <Card sx={{ p: 2, bgcolor: "rgba(244, 67, 54, 0.05)" }}>
+                    {(() => {
+                      const selectedTheme = themes.find(t => t._id === formData.themeId);
+                      return selectedTheme ? (
+                        <Stack spacing={1}>
+                          <Typography variant="subtitle1" fontWeight={600}>
+                            Selected: {selectedTheme.title}
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            {selectedTheme.description}
+                          </Typography>
+                        </Stack>
+                      ) : null;
+                    })()}
+                  </Card>
+                )}
+
+                {/* Add New Theme Button */}
+                <Button
+                  variant="outlined"
+                  size="small"
+                  disabled
+                  sx={{ alignSelf: "flex-start", opacity: 0.6 }}
+                >
+                  + Add New Theme (Coming Soon)
+                </Button>
+              </Stack>
+            </Card>
           </Stack>
 
           {/* Success/Error Messages */}
@@ -264,33 +439,59 @@ export default function PostAlbumPage() {
             </Alert>
           )}
 
+          {/* Override Mode Indicator */}
+          {isOverride && (
+            <Alert
+              severity="warning"
+              sx={{
+                borderRadius: 2,
+                background:
+                  "linear-gradient(135deg, rgba(255, 152, 0, 0.1), rgba(255, 193, 7, 0.1))",
+                border: "1px solid rgba(255, 152, 0, 0.3)",
+              }}
+            >
+              <Stack direction="row" alignItems="center" spacing={1}>
+                <Typography variant="body1" fontWeight={600}>
+                  🎯 Override Mode Active
+                </Typography>
+                <Typography variant="body2">
+                  - You're posting outside of turn order (turn order will remain
+                  unchanged)
+                </Typography>
+              </Stack>
+            </Alert>
+          )}
+
           {/* Main Form */}
           <Card>
             <CardContent sx={{ p: 4 }}>
               <form onSubmit={handleSubmit}>
                 <Stack spacing={4}>
-                  {/* YouTube Music Search */}
+                  {/* Unified Music Search */}
                   <Box>
                     <Typography variant="h6" gutterBottom>
-                      Search YouTube Music
+                      Search Music Services
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" gutterBottom>
+                      Search across YouTube Music, Spotify, and Apple Music at once
                     </Typography>
                     <Button
                       variant="outlined"
                       fullWidth
-                      startIcon={<YouTube />}
+                      startIcon={<Search />}
                       onClick={() => setIsSearchOpen(true)}
                       sx={{
                         py: 2,
                         borderStyle: "dashed",
-                        borderColor: "#FF0000",
-                        color: "#FF0000",
+                        borderColor: "primary.main",
+                        color: "primary.main",
                         "&:hover": {
-                          borderColor: "#FF0000",
-                          bgcolor: "rgba(255, 0, 0, 0.1)",
+                          borderColor: "primary.main",
+                          bgcolor: "rgba(33, 150, 243, 0.1)",
                         },
                       }}
                     >
-                      Search for Album on YouTube Music
+                      Search All Music Services
                     </Button>
                   </Box>
 
@@ -578,7 +779,7 @@ export default function PostAlbumPage() {
         </Stack>
       </Container>
 
-      {/* YouTube Music Search Dialog */}
+      {/* Unified Music Search Dialog */}
       <Dialog
         open={isSearchOpen}
         onClose={() => setIsSearchOpen(false)}
@@ -591,7 +792,7 @@ export default function PostAlbumPage() {
             justifyContent="space-between"
             alignItems="center"
           >
-            <Typography variant="h6">Search YouTube Music</Typography>
+            <Typography variant="h6">Search Music Services</Typography>
             <IconButton onClick={() => setIsSearchOpen(false)}>
               <Close />
             </IconButton>
@@ -600,6 +801,12 @@ export default function PostAlbumPage() {
 
         <DialogContent>
           <Stack spacing={3}>
+            <Alert severity="info" sx={{ borderRadius: 2 }}>
+              <Typography variant="body2">
+                🎵 Searching across YouTube Music, Spotify, and Apple Music simultaneously for the best matches!
+              </Typography>
+            </Alert>
+
             {/* Search Input */}
             <TextField
               fullWidth
@@ -608,7 +815,7 @@ export default function PostAlbumPage() {
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyPress={(e) => {
                 if (e.key === "Enter") {
-                  searchYouTubeMusic();
+                  searchAllMusicServices();
                 }
               }}
               InputProps={{
@@ -621,7 +828,7 @@ export default function PostAlbumPage() {
                   <InputAdornment position="end">
                     <Button
                       variant="contained"
-                      onClick={searchYouTubeMusic}
+                      onClick={searchAllMusicServices}
                       disabled={isSearching || !searchQuery.trim()}
                       startIcon={
                         isSearching ? (
@@ -631,7 +838,7 @@ export default function PostAlbumPage() {
                         )
                       }
                     >
-                      Search
+                      Search All
                     </Button>
                   </InputAdornment>
                 ),
@@ -698,7 +905,35 @@ export default function PostAlbumPage() {
                         >
                           {album.artist}
                         </Typography>
-                        {album.year && <Chip label={album.year} size="small" />}
+                        <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap">
+                          {album.year && <Chip label={album.year} size="small" />}
+                          {album.genre && <Chip label={album.genre} size="small" color="secondary" />}
+                        </Stack>
+                        <Stack direction="row" spacing={0.5} flexWrap="wrap">
+                          {album.youtubeMusicUrl && (
+                            <Chip 
+                              icon={<YouTube />} 
+                              label="YT Music" 
+                              size="small" 
+                              sx={{ bgcolor: "#FF0000", color: "white", fontSize: "0.7rem" }}
+                            />
+                          )}
+                          {album.spotifyUrl && (
+                            <Chip 
+                              label="Spotify" 
+                              size="small" 
+                              sx={{ bgcolor: "#1DB954", color: "white", fontSize: "0.7rem" }}
+                            />
+                          )}
+                          {album.appleMusicUrl && (
+                            <Chip 
+                              icon={<Apple />} 
+                              label="Apple" 
+                              size="small" 
+                              sx={{ bgcolor: "#FA57C1", color: "white", fontSize: "0.7rem" }}
+                            />
+                          )}
+                        </Stack>
                       </Stack>
 
                       <IconButton color="primary">
@@ -714,13 +949,14 @@ export default function PostAlbumPage() {
               <Box textAlign="center" py={4}>
                 <CircularProgress />
                 <Typography variant="body2" color="text.secondary" mt={2}>
-                  Searching YouTube Music...
+                  Searching all music services...
                 </Typography>
               </Box>
             )}
           </Stack>
         </DialogContent>
       </Dialog>
+
     </Box>
   );
 }

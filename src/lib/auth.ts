@@ -22,8 +22,7 @@ const client = new MongoClient(process.env.MONGODB_URI!);
 const clientPromise = client.connect();
 
 export const authOptions: NextAuthOptions = {
-  // Don't use MongoDB adapter with credentials provider - causes session conflicts
-  // adapter: MongoDBAdapter(clientPromise),
+  // No adapter - we'll handle user storage manually for both OAuth and credentials
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
@@ -52,8 +51,6 @@ export const authOptions: NextAuthOptions = {
 
         try {
           await dbConnect();
-
-          // Import User model dynamically to avoid circular dependencies
           const { User } = await import("@/models/User");
 
           const user = await User.findOne({
@@ -79,6 +76,10 @@ export const authOptions: NextAuthOptions = {
             return null;
           }
 
+          // Skip updating lastActive for now to avoid save issues
+          // user.lastActive = new Date();
+          // await user.save();
+
           const returnUser = {
             id: user._id.toString(),
             email: user.email,
@@ -99,13 +100,85 @@ export const authOptions: NextAuthOptions = {
     strategy: "jwt",
   },
   callbacks: {
-    async jwt({ token, user }) {
-      console.log(
-        "🎫 JWT callback - user:",
-        !!user,
-        "token:",
-        Object.keys(token)
-      );
+    async signIn({ user, account, profile }) {
+      console.log("🔐 SignIn callback:", { user: !!user, account: account?.provider });
+      
+      if (account?.provider === "google" || account?.provider === "discord") {
+        await dbConnect();
+        const { User } = await import("@/models/User");
+        
+        try {
+          // Check if user exists in our User model
+          let existingUser = await User.findOne({ email: user.email });
+          
+          if (!existingUser) {
+            console.log("👤 Creating new OAuth user in User model");
+            
+            // Generate unique username
+            const baseUsername = user.email
+              ?.split("@")[0]
+              .toLowerCase()
+              .replace(/[^a-z0-9]/g, "") || "user";
+            let username = baseUsername;
+            let counter = 1;
+
+            while (await User.findOne({ username })) {
+              username = `${baseUsername}${counter}`;
+              counter++;
+            }
+
+            // Get next turn order
+            const lastUser = await User.findOne().sort({ turnOrder: -1 });
+            const turnOrder = lastUser ? lastUser.turnOrder + 1 : 1;
+
+            // Create user in our User model
+            existingUser = new User({
+              name: user.name,
+              email: user.email,
+              image: user.image,
+              username,
+              turnOrder,
+              favoriteGenres: [],
+              musicPlatforms: {},
+              isActive: true,
+              albumsPosted: 0,
+              commentsPosted: 0,
+              likesGiven: 0,
+              likesReceived: 0,
+              totalAlbumsPosted: 0,
+              notificationSettings: {
+                newThemes: true,
+                turnReminders: true,
+                comments: true,
+                likes: true,
+                emails: true,
+              },
+              role: "member",
+              isVerified: true, // OAuth users are considered verified
+              isBanned: false,
+              joinedAt: new Date(),
+              lastActive: new Date(),
+            });
+
+            await existingUser.save();
+            console.log("✅ OAuth user created in User model");
+          } else {
+            // Update last active
+            existingUser.lastActive = new Date();
+            await existingUser.save();
+            console.log("✅ OAuth user updated in User model");
+          }
+        } catch (error) {
+          console.error("❌ Error handling OAuth user:", error);
+          // Don't block sign in if User model sync fails
+        }
+      }
+      
+      return true;
+    },
+    async jwt({ token, user, account }) {
+      console.log("🎫 JWT callback - user:", !!user, "account:", account?.provider);
+      
       if (user) {
         token.id = user.id;
         token.email = user.email;
@@ -120,25 +193,24 @@ export const authOptions: NextAuthOptions = {
       return token;
     },
     async session({ session, token }) {
-      console.log(
-        "📋 Session callback - token:",
-        Object.keys(token),
-        "session:",
-        Object.keys(session)
-      );
+      console.log("📋 Session callback - token:", Object.keys(token));
+      
+      // For JWT sessions, use the token
       if (token) {
         session.user.id = token.id as string;
         session.user.email = token.email as string;
         session.user.name = token.name as string;
         session.user.image = token.image as string;
-        console.log("📋 Session - Updated session user:", session.user);
       }
+      
+      console.log("📋 Session - Final session user:", session.user);
       return session;
     },
   },
   pages: {
     signIn: "/auth/signin",
   },
+  debug: process.env.NODE_ENV === "development",
 };
 
 export default NextAuth(authOptions);

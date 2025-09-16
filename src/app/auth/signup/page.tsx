@@ -105,7 +105,7 @@ export default function SignUp() {
           "Account created but failed to sign in. Please try signing in manually."
         );
       } else {
-        router.push("/");
+        router.push("/dashboard");
         router.refresh();
       }
     } catch (err) {
@@ -118,7 +118,7 @@ export default function SignUp() {
   const handleProviderSignIn = async (provider: string) => {
     setIsLoading(true);
     try {
-      await signIn(provider, { callbackUrl: "/" });
+      await signIn(provider, { callbackUrl: "/dashboard" });
     } catch (err) {
       setError("Failed to sign in with provider");
       setIsLoading(false);

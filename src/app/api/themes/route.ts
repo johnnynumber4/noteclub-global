@@ -47,8 +47,7 @@ export async function GET(request: NextRequest) {
       .populate("createdBy", "name username image")
       .sort({ startDate: -1 })
       .skip(skip)
-      .limit(limit)
-      .lean();
+      .limit(limit);
 
     const total = await Theme.countDocuments(query);
 

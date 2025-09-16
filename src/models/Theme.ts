@@ -128,22 +128,26 @@ ThemeSchema.index({ createdBy: 1, createdAt: -1 });
 
 // Virtual for checking if theme is currently active
 ThemeSchema.virtual("isCurrentlyActive").get(function () {
+  if (!this.startDate || !this.endDate) return false;
   const now = new Date();
   return this.isActive && this.startDate <= now && this.endDate >= now;
 });
 
 // Virtual for checking if theme has ended
 ThemeSchema.virtual("hasEnded").get(function () {
+  if (!this.endDate) return false;
   return new Date() > this.endDate;
 });
 
 // Virtual for checking if theme has started
 ThemeSchema.virtual("hasStarted").get(function () {
+  if (!this.startDate) return false;
   return new Date() >= this.startDate;
 });
 
 // Virtual for days remaining
 ThemeSchema.virtual("daysRemaining").get(function () {
+  if (!this.endDate) return 0;
   const now = new Date();
   if (now > this.endDate) return 0;
   const diffTime = this.endDate.getTime() - now.getTime();

@@ -10,11 +10,29 @@ import { Navbar } from "@/components/navbar";
 import { NavbarMui } from "@/components/navbar-mui";
 import { Footer } from "@/components/footer";
 import MuiThemeProvider from "@/components/MuiThemeProvider";
+import AuthDebug from "@/components/AuthDebug";
+import NotificationManager from "@/components/NotificationManager";
+import PWAInstallPrompt from "@/components/PWAInstallPrompt";
+import "@/lib/sw-error-handler";
 
 export const metadata: Metadata = {
   title: "Note Club Modern",
   description:
-    "A modern music album sharing club - take turns sharing albums based on themes, in alphabetical order",
+    "Share and discover music albums with your friends in organized groups",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Note Club",
+  },
+  other: {
+    "mobile-web-app-capable": "yes",
+    "apple-mobile-web-app-capable": "yes",
+    "apple-mobile-web-app-status-bar-style": "default",
+    "apple-mobile-web-app-title": "Note Club",
+    "msapplication-TileColor": "#f44336",
+    "theme-color": "#f44336",
+  },
 };
 
 export default function RootLayout({
@@ -27,6 +45,8 @@ export default function RootLayout({
       <body>
         <MuiThemeProvider>
           <Providers>
+            <NotificationManager />
+            <PWAInstallPrompt />
             <NavbarMui />
             <main>{children}</main>
             <Footer />

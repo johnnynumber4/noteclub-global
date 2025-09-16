@@ -1,0 +1,63 @@
+{
+  "name": "Note Club Modern",
+  "short_name": "NoteClub",
+  "description": "Share and discover music albums with your friends",
+  "start_url": "/dashboard",
+  "display": "standalone",
+  "background_color": "#0f0f0f",
+  "theme_color": "#f44336",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icon-512x512.png", 
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icon-192x192.png",
+      "sizes": "192x192", 
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png", 
+      "purpose": "any"
+    }
+  ],
+  "categories": ["music", "entertainment", "social"],
+  "shortcuts": [
+    {
+      "name": "Share Album",
+      "short_name": "Share",
+      "description": "Share a new album with your group",
+      "url": "/post-album",
+      "icons": [
+        {
+          "src": "/icon-192x192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Browse Albums",
+      "short_name": "Browse", 
+      "description": "Browse shared albums",
+      "url": "/albums",
+      "icons": [
+        {
+          "src": "/icon-192x192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ]
+}

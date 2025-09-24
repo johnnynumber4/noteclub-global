@@ -1,4 +1,4 @@
-import mongoose, { Document, Schema } from "mongoose";
+import mongoose, { Document, Schema, model } from "mongoose";
 
 export interface IGroup extends Document {
   name: string;
@@ -143,8 +143,7 @@ const GroupSchema = new Schema<IGroup>(
   }
 );
 
-// Indexes for performance (single definitions to avoid duplicates)
-GroupSchema.index({ inviteCode: 1 }, { unique: true });
+// Indexes for performance (unique: true already defined in schema)
 GroupSchema.index({ members: 1 });
 GroupSchema.index({ createdBy: 1 });
 GroupSchema.index({ isPrivate: 1 });
@@ -270,7 +269,7 @@ GroupSchema.methods.advanceToNextTurn = async function() {
 GroupSchema.methods.getCurrentTurnUser = async function() {
   if (this.turnOrder.length === 0) return null;
   
-  const User = require("mongoose").model("User");
+  const User = mongoose.model("User");
   const currentUserId = this.turnOrder[this.currentTurnIndex];
   return await User.findById(currentUserId).select("name username image");
 };
@@ -279,7 +278,7 @@ GroupSchema.methods.getCurrentTurnUser = async function() {
 GroupSchema.methods.getNextTurnUser = async function() {
   if (this.turnOrder.length === 0) return null;
   
-  const User = require("mongoose").model("User");
+  const User = model("User");
   const nextIndex = (this.currentTurnIndex + 1) % this.turnOrder.length;
   const nextUserId = this.turnOrder[nextIndex];
   return await User.findById(nextUserId).select("name username image");

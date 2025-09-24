@@ -28,7 +28,7 @@ import {
 } from "@mui/icons-material";
 
 export default function Home() {
-  const { data: session, status } = useSession();
+  const { status } = useSession();
   const router = useRouter();
 
   useEffect(() => {
@@ -531,7 +531,7 @@ export default function Home() {
                   WebkitTextFillColor: "transparent",
                 }}
               >
-                "90s Nostalgia"
+                &ldquo;90s Nostalgia&rdquo;
               </Typography>
               <Typography
                 variant="h5"

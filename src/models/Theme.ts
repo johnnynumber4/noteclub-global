@@ -4,9 +4,9 @@ export interface ITheme extends Document {
   title: string;
   description: string;
 
-  // Theme timing
-  startDate: Date;
-  endDate: Date;
+  // Theme timing (optional)
+  startDate?: Date;
+  endDate?: Date;
 
   // Theme metadata
   createdBy: mongoose.Types.ObjectId;
@@ -46,17 +46,17 @@ const ThemeSchema = new Schema<ITheme>(
       maxlength: 1000,
     },
 
-    // Theme timing
+    // Theme timing (optional)
     startDate: {
       type: Date,
-      required: true,
+      required: false,
     },
     endDate: {
       type: Date,
-      required: true,
+      required: false,
       validate: {
         validator: function (this: ITheme, endDate: Date) {
-          return endDate > this.startDate;
+          return !this.startDate || !endDate || endDate > this.startDate;
         },
         message: "End date must be after start date",
       },
@@ -128,7 +128,9 @@ ThemeSchema.index({ createdBy: 1, createdAt: -1 });
 
 // Virtual for checking if theme is currently active
 ThemeSchema.virtual("isCurrentlyActive").get(function () {
-  if (!this.startDate || !this.endDate) return false;
+  // If no dates are set, theme is considered active if explicitly set to active
+  if (!this.startDate || !this.endDate) return this.isActive;
+
   const now = new Date();
   return this.isActive && this.startDate <= now && this.endDate >= now;
 });
@@ -141,13 +143,13 @@ ThemeSchema.virtual("hasEnded").get(function () {
 
 // Virtual for checking if theme has started
 ThemeSchema.virtual("hasStarted").get(function () {
-  if (!this.startDate) return false;
+  if (!this.startDate) return true; // Themes without start dates are considered started
   return new Date() >= this.startDate;
 });
 
 // Virtual for days remaining
 ThemeSchema.virtual("daysRemaining").get(function () {
-  if (!this.endDate) return 0;
+  if (!this.endDate) return null; // No end date means indefinite
   const now = new Date();
   if (now > this.endDate) return 0;
   const diffTime = this.endDate.getTime() - now.getTime();

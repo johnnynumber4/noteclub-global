@@ -6,14 +6,14 @@ import "@fontsource/roboto/500.css";
 import "@fontsource/roboto/700.css";
 import "@fontsource/roboto/900.css";
 import { Providers } from "@/components/providers";
-import { Navbar } from "@/components/navbar";
 import { NavbarMui } from "@/components/navbar-mui";
 import { Footer } from "@/components/footer";
 import MuiThemeProvider from "@/components/MuiThemeProvider";
-import AuthDebug from "@/components/AuthDebug";
 import NotificationManager from "@/components/NotificationManager";
 import PWAInstallPrompt from "@/components/PWAInstallPrompt";
 import "@/lib/sw-error-handler";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 
 export const metadata: Metadata = {
   title: "Note Club Modern",
@@ -35,16 +35,18 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const session = await getServerSession(authOptions);
+
   return (
     <html lang="en">
       <body>
         <MuiThemeProvider>
-          <Providers>
+          <Providers session={session}>
             <NotificationManager />
             <PWAInstallPrompt />
             <NavbarMui />

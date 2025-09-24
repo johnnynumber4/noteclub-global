@@ -3,8 +3,6 @@ import { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import DiscordProvider from "next-auth/providers/discord";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { MongoDBAdapter } from "@next-auth/mongodb-adapter";
-import { MongoClient } from "mongodb";
 import bcrypt from "bcryptjs";
 import dbConnect from "./mongodb";
 
@@ -17,9 +15,6 @@ declare module "next-auth" {
     } & DefaultSession["user"];
   }
 }
-
-const client = new MongoClient(process.env.MONGODB_URI!);
-const clientPromise = client.connect();
 
 export const authOptions: NextAuthOptions = {
   // No adapter - we'll handle user storage manually for both OAuth and credentials
@@ -100,25 +95,29 @@ export const authOptions: NextAuthOptions = {
     strategy: "jwt",
   },
   callbacks: {
-    async signIn({ user, account, profile }) {
-      console.log("🔐 SignIn callback:", { user: !!user, account: account?.provider });
-      
+    async signIn({ user, account }) {
+      console.log("🔐 SignIn callback:", {
+        user: !!user,
+        account: account?.provider,
+      });
+
       if (account?.provider === "google" || account?.provider === "discord") {
         await dbConnect();
         const { User } = await import("@/models/User");
-        
+
         try {
           // Check if user exists in our User model
           let existingUser = await User.findOne({ email: user.email });
-          
+
           if (!existingUser) {
             console.log("👤 Creating new OAuth user in User model");
-            
+
             // Generate unique username
-            const baseUsername = user.email
-              ?.split("@")[0]
-              .toLowerCase()
-              .replace(/[^a-z0-9]/g, "") || "user";
+            const baseUsername =
+              user.email
+                ?.split("@")[0]
+                .toLowerCase()
+                .replace(/[^a-z0-9]/g, "") || "user";
             let username = baseUsername;
             let counter = 1;
 
@@ -173,12 +172,17 @@ export const authOptions: NextAuthOptions = {
           // Don't block sign in if User model sync fails
         }
       }
-      
+
       return true;
     },
     async jwt({ token, user, account }) {
-      console.log("🎫 JWT callback - user:", !!user, "account:", account?.provider);
-      
+      console.log(
+        "🎫 JWT callback - user:",
+        !!user,
+        "account:",
+        account?.provider
+      );
+
       if (user) {
         token.id = user.id;
         token.email = user.email;
@@ -194,7 +198,7 @@ export const authOptions: NextAuthOptions = {
     },
     async session({ session, token }) {
       console.log("📋 Session callback - token:", Object.keys(token));
-      
+
       // For JWT sessions, use the token
       if (token) {
         session.user.id = token.id as string;
@@ -202,7 +206,7 @@ export const authOptions: NextAuthOptions = {
         session.user.name = token.name as string;
         session.user.image = token.image as string;
       }
-      
+
       console.log("📋 Session - Final session user:", session.user);
       return session;
     },

@@ -17,12 +17,12 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
+  DialogActions,
   IconButton,
   Chip,
   CircularProgress,
   InputAdornment,
   Divider,
-  Paper,
   FormControl,
   InputLabel,
   Select,
@@ -40,6 +40,7 @@ import {
   Description,
   Link as LinkIcon,
   Apple,
+  Add,
 } from "@mui/icons-material";
 
 interface UnifiedAlbumResult {
@@ -104,6 +105,15 @@ export default function PostAlbumPage() {
 
   // Override detection
   const [isOverride, setIsOverride] = useState(false);
+
+  // Theme creation modal state
+  const [isCreateThemeOpen, setIsCreateThemeOpen] = useState(false);
+  const [isCreatingTheme, setIsCreatingTheme] = useState(false);
+  const [themeFormData, setThemeFormData] = useState({
+    title: "",
+    description: "",
+    guidelines: "",
+  });
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -307,6 +317,56 @@ export default function PostAlbumPage() {
     }
   };
 
+  const handleCreateTheme = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!themeFormData.title || !themeFormData.description) {
+      setError("Please fill in title and description");
+      return;
+    }
+
+    setIsCreatingTheme(true);
+    setError("");
+
+    try {
+      const response = await fetch("/api/themes", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(themeFormData),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setSuccess(`Theme "${themeFormData.title}" created successfully!`);
+        setIsCreateThemeOpen(false);
+        setThemeFormData({
+          title: "",
+          description: "",
+          guidelines: "",
+        });
+
+        // Refresh themes list and select the new theme
+        await fetchThemes();
+        const newTheme = data.theme;
+        if (newTheme) {
+          setFormData(prev => ({ ...prev, themeId: newTheme._id }));
+        }
+
+        setTimeout(() => setSuccess(""), 3000);
+      } else {
+        const data = await response.json();
+        setError(data.error || "Failed to create theme");
+      }
+    } catch (error) {
+      console.error("Error creating theme:", error);
+      setError("Failed to create theme");
+    } finally {
+      setIsCreatingTheme(false);
+    }
+  };
+
   if (status === "loading") {
     return (
       <Box
@@ -360,10 +420,9 @@ export default function PostAlbumPage() {
                     }
                   >
                     {themes.map((theme) => (
-                      <MenuItem 
-                        key={theme._id} 
+                      <MenuItem
+                        key={theme._id}
                         value={theme._id}
-                        disabled={!theme.isCurrentlyActive && theme.title !== "Random"}
                       >
                         <Stack>
                           <Typography variant="body1">
@@ -417,10 +476,11 @@ export default function PostAlbumPage() {
                 <Button
                   variant="outlined"
                   size="small"
-                  disabled
-                  sx={{ alignSelf: "flex-start", opacity: 0.6 }}
+                  startIcon={<Add />}
+                  onClick={() => setIsCreateThemeOpen(true)}
+                  sx={{ alignSelf: "flex-start" }}
                 >
-                  + Add New Theme (Coming Soon)
+                  Add New Theme
                 </Button>
               </Stack>
             </Card>
@@ -455,7 +515,7 @@ export default function PostAlbumPage() {
                   🎯 Override Mode Active
                 </Typography>
                 <Typography variant="body2">
-                  - You're posting outside of turn order (turn order will remain
+                  - You&rsquo;re posting outside of turn order (turn order will remain
                   unchanged)
                 </Typography>
               </Stack>
@@ -955,6 +1015,74 @@ export default function PostAlbumPage() {
             )}
           </Stack>
         </DialogContent>
+      </Dialog>
+
+      {/* Theme Creation Modal */}
+      <Dialog
+        open={isCreateThemeOpen}
+        onClose={() => setIsCreateThemeOpen(false)}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle>Create New Theme</DialogTitle>
+        <form onSubmit={handleCreateTheme}>
+          <DialogContent>
+            <Stack spacing={3} sx={{ pt: 1 }}>
+              <TextField
+                label="Theme Title"
+                value={themeFormData.title}
+                onChange={(e) =>
+                  setThemeFormData((prev) => ({ ...prev, title: e.target.value }))
+                }
+                required
+                fullWidth
+                placeholder="e.g., Albums that tell a story"
+              />
+
+              <TextField
+                label="Description"
+                value={themeFormData.description}
+                onChange={(e) =>
+                  setThemeFormData((prev) => ({ ...prev, description: e.target.value }))
+                }
+                required
+                fullWidth
+                multiline
+                rows={3}
+                placeholder="Describe what makes albums fit this theme..."
+              />
+
+
+              <TextField
+                label="Guidelines (Optional)"
+                value={themeFormData.guidelines}
+                onChange={(e) =>
+                  setThemeFormData((prev) => ({ ...prev, guidelines: e.target.value }))
+                }
+                fullWidth
+                multiline
+                rows={2}
+                placeholder="Additional guidelines or examples..."
+              />
+            </Stack>
+          </DialogContent>
+          <DialogActions>
+            <Button
+              onClick={() => setIsCreateThemeOpen(false)}
+              disabled={isCreatingTheme}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              variant="contained"
+              disabled={isCreatingTheme}
+              startIcon={isCreatingTheme ? <CircularProgress size={16} /> : <Add />}
+            >
+              {isCreatingTheme ? "Creating..." : "Create Theme"}
+            </Button>
+          </DialogActions>
+        </form>
       </Dialog>
 
     </Box>

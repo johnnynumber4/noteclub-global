@@ -15,8 +15,6 @@ import {
   GitHub,
   Twitter,
   Email,
-  Album,
-  Event,
   Headphones,
   Favorite,
 } from "@mui/icons-material";

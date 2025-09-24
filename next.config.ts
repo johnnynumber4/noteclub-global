@@ -16,12 +16,6 @@ export default withPWA({
     image: "/icon-192x192.png",
     document: "/offline",
   },
-  // Improve workbox configuration
-  workboxOptions: {
-    disableDevLogs: true,
-    skipWaiting: true,
-    clientsClaim: true,
-  },
   runtimeCaching: [
     {
       urlPattern: /^https:\/\/.*\.(?:png|jpg|jpeg|svg|gif|webp)$/,

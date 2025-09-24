@@ -4,7 +4,6 @@ import { authOptions } from "@/lib/auth";
 import dbConnect from "@/lib/mongodb";
 import Album from "@/models/Album";
 import Theme from "@/models/Theme";
-import Turn from "@/models/Turn";
 import { User } from "@/models/User";
 import { Group } from "@/models/Group";
 import mongoose from "mongoose";
@@ -72,13 +71,13 @@ export async function GET(request: NextRequest) {
       .lean();
 
     // Manual user lookup to handle ObjectId type issues
-    const userIds = [...new Set(albums.map((album: any) => album.postedBy?.toString()).filter(Boolean))];
+    const userIds = [...new Set(albums.map((album: Record<string, unknown>) => album.postedBy?.toString()).filter(Boolean))];
     
     // Fetch all users and create string-based lookup map
     const users = await User.find({}, "name username image").lean();
     
     const userMap = new Map();
-    users.forEach((user: any) => {
+    users.forEach((user: Record<string, unknown>) => {
       // Add both string and ObjectId versions for maximum compatibility
       userMap.set(user._id.toString(), user);
       if (user._id instanceof mongoose.Types.ObjectId) {
@@ -185,11 +184,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Find user
+    // Find user by email (more reliable than session ID)
     const user = await User.findOne({ email: session.user.email });
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
+
+    // Use the actual user ID from database, not from session
+    const userId = user._id;
 
     // Find or create default group
     let defaultGroup = await Group.findOne({ name: 'Note Club' });
@@ -200,10 +202,10 @@ export async function POST(request: NextRequest) {
         isPrivate: false,
         inviteCode: 'DEFAULT',
         maxMembers: 100,
-        members: [user._id],
-        admins: [user._id],
-        createdBy: user._id,
-        turnOrder: [user._id],
+        members: [userId],
+        admins: [userId],
+        createdBy: userId,
+        turnOrder: [userId],
         currentTurnIndex: 0,
         turnDurationDays: 7,
         totalAlbumsShared: 0,
@@ -213,11 +215,11 @@ export async function POST(request: NextRequest) {
         notifyOnNewAlbums: true,
       });
       await defaultGroup.save();
-    } else if (!defaultGroup.members.includes(user._id)) {
+    } else if (!defaultGroup.members.includes(userId)) {
       // Add user to default group if not already a member
-      defaultGroup.members.push(user._id);
-      if (!defaultGroup.turnOrder.includes(user._id)) {
-        defaultGroup.turnOrder.push(user._id);
+      defaultGroup.members.push(userId);
+      if (!defaultGroup.turnOrder.includes(userId)) {
+        defaultGroup.turnOrder.push(userId);
       }
       await defaultGroup.save();
     }
@@ -238,47 +240,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Theme not found" }, { status: 404 });
     }
 
-    // Allow Random theme as fallback, or check if theme is currently active
-    const isRandomTheme = theme.title.toLowerCase() === 'random';
-    if (!theme.isCurrentlyActive && !isRandomTheme) {
-      return NextResponse.json(
-        { error: "Theme is not currently active" },
-        { status: 400 }
-      );
-    }
+    // Allow posting to any theme - removed active theme restriction
 
-    // Skip turn checking for Random theme OR override mode (allows anyone to post anytime)
-    let currentTurn = null;
-    if (!isRandomTheme && !isOverride) {
-      // Check if it's the user's turn (only for non-Random themes and non-override mode)
-      currentTurn = await Turn.findOne({
-        theme: themeId,
-        isActive: true,
-      }).populate("user");
+    // Allow all users to post anytime - removed turn restrictions
 
-      if (
-        !currentTurn ||
-        currentTurn.user._id.toString() !== user._id.toString()
-      ) {
-        return NextResponse.json(
-          { error: "It is not your turn to post" },
-          { status: 403 }
-        );
-      }
-    }
-
-    // Check if user has already posted for this theme
-    const existingAlbum = await Album.findOne({
-      theme: themeId,
-      postedBy: user._id,
-    });
-
-    if (existingAlbum) {
-      return NextResponse.json(
-        { error: "You have already posted an album for this theme" },
-        { status: 400 }
-      );
-    }
+    // Allow multiple posts per theme - removed restriction
 
     // Auto-fetch Wikipedia description if not provided
     let finalWikipediaUrl = wikipediaUrl;
@@ -308,8 +274,8 @@ export async function POST(request: NextRequest) {
       description,
       theme: themeId,
       group: groupId,
-      postedBy: user._id,
-      turnNumber: currentTurn?.turnNumber || 1,
+      postedBy: userId,
+      turnNumber: 1, // Default turn number since turn restrictions removed
       spotifyUrl,
       youtubeMusicUrl,
       appleMusicUrl,
@@ -325,33 +291,19 @@ export async function POST(request: NextRequest) {
 
     await album.save();
 
-    // Update turn status (only for themes with turn management and not override mode)
-    if (currentTurn && !isOverride) {
-      currentTurn.isCompleted = true;
-      currentTurn.completedAt = new Date();
-      currentTurn.album = album._id;
-      currentTurn.isActive = false;
-      await currentTurn.save();
-
-      // Activate next turn
-      const nextTurn = await Turn.findOne({
-        theme: themeId,
-        isCompleted: false,
-        isSkipped: false,
-      }).sort({ turnNumber: 1 });
-
-      if (nextTurn) {
-        nextTurn.isActive = true;
-        nextTurn.startedAt = new Date();
-        await nextTurn.save();
-      }
-    }
+    // Turn management disabled - all users can post anytime
 
     // Update user statistics
-    user.albumsPosted += 1;
-    user.totalAlbumsPosted += 1;
-    user.lastPostDate = new Date();
-    await user.save();
+    try {
+      user.albumsPosted += 1;
+      user.totalAlbumsPosted += 1;
+      user.lastPostDate = new Date();
+      await user.save();
+    } catch (userSaveError) {
+      console.error("Error updating user statistics:", userSaveError);
+      // Don't fail the album creation if user stats update fails
+      // The album has been successfully created, just log the error
+    }
 
     // Update theme statistics
     await Theme.updateOne(

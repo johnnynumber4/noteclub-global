@@ -108,7 +108,7 @@ export default function SignUp() {
         router.push("/dashboard");
         router.refresh();
       }
-    } catch (err) {
+    } catch {
       setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
       setIsLoading(false);
@@ -119,7 +119,7 @@ export default function SignUp() {
     setIsLoading(true);
     try {
       await signIn(provider, { callbackUrl: "/dashboard" });
-    } catch (err) {
+    } catch {
       setError("Failed to sign in with provider");
       setIsLoading(false);
     }

@@ -17,7 +17,6 @@ import {
   IconButton,
   InputAdornment,
   Alert,
-  Paper,
 } from "@mui/material";
 import {
   Google,
@@ -75,7 +74,7 @@ export default function SignIn() {
         console.log("❌ Unexpected sign in result:", result);
         setError("Unexpected error during sign in");
       }
-    } catch (err) {
+    } catch {
       setError("Something went wrong. Please try again.");
     } finally {
       setIsLoading(false);
@@ -86,7 +85,7 @@ export default function SignIn() {
     setIsLoading(true);
     try {
       await signIn(provider, { callbackUrl: "/dashboard" });
-    } catch (err) {
+    } catch {
       setError("Failed to sign in with provider");
       setIsLoading(false);
     }
@@ -276,7 +275,7 @@ export default function SignIn() {
                 {/* Sign Up Link */}
                 <Box textAlign="center">
                   <Typography variant="body2" color="text.secondary">
-                    Don't have an account?{" "}
+                    Don&apos;t have an account?{" "}
                     <Button
                       component={Link}
                       href="/auth/signup"

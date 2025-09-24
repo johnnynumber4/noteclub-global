@@ -276,8 +276,7 @@ UserSchema.methods.toJSON = function () {
 };
 
 // Indexes for performance
-UserSchema.index({ email: 1 });
-UserSchema.index({ username: 1 });
+// Email and username indexes already defined with unique: true in schema
 UserSchema.index({ turnOrder: 1 });
 UserSchema.index({ isActive: 1, turnOrder: 1 });
 UserSchema.index({ role: 1 });

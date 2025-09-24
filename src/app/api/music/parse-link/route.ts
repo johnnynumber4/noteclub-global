@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getBaseUrl } from "@/lib/url-utils";
 
 interface ParsedAlbumData {
   title: string;
@@ -17,7 +18,7 @@ interface ParsedAlbumData {
 export async function POST(request: NextRequest) {
   try {
     const { url } = await request.json();
-    
+
     if (!url) {
       return NextResponse.json(
         { error: "Music URL is required" },
@@ -41,7 +42,7 @@ export async function POST(request: NextRequest) {
     else if (url.includes("music.apple.com")) {
       albumData = await parseAppleMusicUrl(url);
     }
-    
+
     if (!albumData) {
       return NextResponse.json(
         { error: "Unsupported music platform or invalid URL" },
@@ -62,7 +63,8 @@ export async function POST(request: NextRequest) {
 async function parseSpotifyUrl(url: string): Promise<ParsedAlbumData | null> {
   try {
     // Call our Spotify parser
-    const response = await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/spotify/parse`, {
+    const baseUrl = getBaseUrl();
+    const response = await fetch(`${baseUrl}/api/spotify/parse`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ url }),
@@ -89,10 +91,10 @@ async function parseYouTubeUrl(url: string): Promise<ParsedAlbumData | null> {
     if (!playlistMatch) return null;
 
     const YoutubeMusicApi = require("node-youtube-music").default;
-    
+
     // Try to get album info from the playlist
     const albumInfo = await YoutubeMusicApi.getAlbum(playlistMatch[1]);
-    
+
     return {
       title: albumInfo.title,
       artist: albumInfo.artist?.name || albumInfo.artist,
@@ -108,14 +110,21 @@ async function parseYouTubeUrl(url: string): Promise<ParsedAlbumData | null> {
   }
 }
 
-async function parseAppleMusicUrl(url: string): Promise<ParsedAlbumData | null> {
+async function parseAppleMusicUrl(
+  url: string
+): Promise<ParsedAlbumData | null> {
   try {
     // Call our Apple Music parser
-    const response = await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/apple-music/parse`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ url }),
-    });
+    const response = await fetch(
+      `${
+        process.env.NEXTAUTH_URL || "http://localhost:3000"
+      }/api/apple-music/parse`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url }),
+      }
+    );
 
     if (!response.ok) return null;
 

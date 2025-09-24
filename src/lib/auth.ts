@@ -16,6 +16,11 @@ declare module "next-auth" {
   }
 }
 
+// Ensure NEXTAUTH_URL is set for Vercel deployments
+if (!process.env.NEXTAUTH_URL && process.env.VERCEL_URL) {
+  process.env.NEXTAUTH_URL = `https://${process.env.VERCEL_URL}`;
+}
+
 export const authOptions: NextAuthOptions = {
   // No adapter - we'll handle user storage manually for both OAuth and credentials
   providers: [
@@ -184,6 +189,7 @@ export const authOptions: NextAuthOptions = {
       );
 
       if (user) {
+        // Always use fresh user data from database
         token.id = user.id;
         token.email = user.email;
         token.name = user.name;
@@ -193,6 +199,19 @@ export const authOptions: NextAuthOptions = {
           email: user.email,
           name: user.name,
         });
+      } else if (token.email) {
+        // If no user object but we have email, refresh user data from database
+        try {
+          await dbConnect();
+          const { User } = await import("@/models/User");
+          const dbUser = await User.findOne({ email: token.email });
+          if (dbUser) {
+            token.id = dbUser._id.toString();
+            console.log("🎫 JWT - Refreshed user ID from database:", token.id);
+          }
+        } catch (error) {
+          console.error("🎫 JWT - Error refreshing user:", error);
+        }
       }
       return token;
     },

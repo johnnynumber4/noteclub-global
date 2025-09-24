@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
       `${albumTitle}_${artistName}_album`,
       `${albumTitle}`,
       `${albumTitle}_by_${artistName}`,
-      `${albumTitle}_(${artistName})`
+      `${albumTitle}_(${artistName})`,
     ];
 
     let bestResult = null;
@@ -31,51 +31,65 @@ export async function GET(request: NextRequest) {
     for (const searchTerm of searchTerms) {
       try {
         console.log(`Trying search term: ${searchTerm}`);
-        
+
         const wikiResponse = await fetch(
-          `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(searchTerm)}`,
+          `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(
+            searchTerm
+          )}`,
           {
             headers: {
-              'User-Agent': 'NoteClubModern/1.0 (https://noteclub.com)',
-              'Accept': 'application/json'
-            }
+              "User-Agent": "NoteClubModern/1.0 (https://noteclub.com)",
+              Accept: "application/json",
+            },
           }
         );
 
         if (wikiResponse.ok) {
           const wikiData = await wikiResponse.json();
-          
+
           // Check if this is a good result
-          if (wikiData.extract && 
-              wikiData.extract.length > 50 && 
-              !wikiData.extract.includes('may refer to') &&
-              !wikiData.extract.includes('is a disambiguation page') &&
-              wikiData.type === 'standard') {
-            
+          if (
+            wikiData.extract &&
+            wikiData.extract.length > 50 &&
+            !wikiData.extract.includes("may refer to") &&
+            !wikiData.extract.includes("is a disambiguation page") &&
+            wikiData.type === "standard"
+          ) {
             // Score the result based on relevance
             const extract = wikiData.extract.toLowerCase();
             const albumLower = albumTitle.toLowerCase();
             const artistLower = artistName.toLowerCase();
-            
+
             let score = 0;
             if (extract.includes(albumLower)) score += 3;
             if (extract.includes(artistLower)) score += 2;
-            if (extract.includes('album')) score += 1;
-            if (extract.includes('studio album')) score += 2;
-            if (extract.includes('debut album')) score += 2;
-            
+            if (extract.includes("album")) score += 1;
+            if (extract.includes("studio album")) score += 2;
+            if (extract.includes("debut album")) score += 2;
+
             // Prefer results that mention both album and artist
-            if (score >= 4 || (score >= 2 && extract.includes(albumLower) && extract.includes(artistLower))) {
+            if (
+              score >= 4 ||
+              (score >= 2 &&
+                extract.includes(albumLower) &&
+                extract.includes(artistLower))
+            ) {
               bestResult = {
                 description: wikiData.extract,
-                url: wikiData.content_urls?.desktop?.page || `https://en.wikipedia.org/wiki/${encodeURIComponent(searchTerm)}`,
+                url:
+                  wikiData.content_urls?.desktop?.page ||
+                  `https://en.wikipedia.org/wiki/${encodeURIComponent(
+                    searchTerm
+                  )}`,
                 title: wikiData.title,
-                score: score
+                score: score,
               };
-              
+
               // If we found a very good match, stop searching
               if (score >= 5) {
-                console.log(`Found excellent match with score ${score}: ${wikiData.title}`);
+                console.log(
+                  `Found excellent match with score ${score}: ${wikiData.title}`
+                );
                 break;
               }
             }
@@ -88,24 +102,25 @@ export async function GET(request: NextRequest) {
     }
 
     if (bestResult) {
-      console.log(`Found Wikipedia description: ${bestResult.title} (score: ${bestResult.score})`);
+      console.log(
+        `Found Wikipedia description: ${bestResult.title} (score: ${bestResult.score})`
+      );
       return NextResponse.json({
         description: bestResult.description,
         url: bestResult.url,
         title: bestResult.title,
-        source: 'wikipedia'
+        source: "wikipedia",
       });
     }
 
     // If no Wikipedia result found, return a fallback
-    console.log('No Wikipedia results found, returning fallback');
+    console.log("No Wikipedia results found, returning fallback");
     return NextResponse.json({
       description: `"${albumTitle}" is an album by ${artistName}.`,
       url: null,
       title: null,
-      source: 'fallback'
+      source: "fallback",
     });
-
   } catch (error) {
     console.error("Wikipedia search error:", error);
     return NextResponse.json(

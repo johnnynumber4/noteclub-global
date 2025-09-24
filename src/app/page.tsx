@@ -396,9 +396,9 @@ export default function Home() {
                       color="text.secondary"
                       lineHeight={1.8}
                     >
-                      Each rotation features a unique theme. From &quot;90s Grunge&quot;
-                      to &quot;Hidden Jazz Gems&quot; - explore curated collections that
-                      expand your musical boundaries.
+                      Each rotation features a unique theme. From &quot;90s
+                      Grunge&quot; to &quot;Hidden Jazz Gems&quot; - explore
+                      curated collections that expand your musical boundaries.
                     </Typography>
                     <Button
                       endIcon={<ArrowForward />}

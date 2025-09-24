@@ -6,11 +6,7 @@ import {
   Stack,
   Paper,
 } from "@mui/material";
-import {
-  CloudOff,
-  Refresh,
-  MusicNote,
-} from "@mui/icons-material";
+import { CloudOff, Refresh, MusicNote } from "@mui/icons-material";
 
 export default function OfflinePage() {
   const handleRefresh = () => {
@@ -53,7 +49,8 @@ export default function OfflinePage() {
                 Check your internet connection and try again
               </Typography>
               <Typography variant="body1" color="text.secondary">
-                Don&apos;t worry - your music will be waiting when you&apos;re back online!
+                Don&apos;t worry - your music will be waiting when you&apos;re
+                back online!
               </Typography>
             </Stack>
 
@@ -77,7 +74,8 @@ export default function OfflinePage() {
             </Stack>
 
             <Typography variant="caption" color="text.secondary">
-              Note Club works best with an internet connection for discovering new music
+              Note Club works best with an internet connection for discovering
+              new music
             </Typography>
           </Stack>
         </Paper>

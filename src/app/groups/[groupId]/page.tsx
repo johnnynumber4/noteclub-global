@@ -93,7 +93,7 @@ export default function GroupDetailPage() {
   const fetchGroupData = async () => {
     try {
       setLoading(true);
-      
+
       // Fetch group details
       const groupResponse = await fetch(`/api/groups/${groupId}`);
       if (groupResponse.ok) {
@@ -128,7 +128,7 @@ export default function GroupDetailPage() {
   };
 
   const isAdmin = () => {
-    return group?.admins.some(admin => admin._id === session?.user?.id);
+    return group?.admins.some((admin) => admin._id === session?.user?.id);
   };
 
   if (status === "loading" || loading) {
@@ -151,7 +151,14 @@ export default function GroupDetailPage() {
 
   if (error) {
     return (
-      <Box sx={{ minHeight: "100vh", bgcolor: "background.default", pt: 10, pb: 4 }}>
+      <Box
+        sx={{
+          minHeight: "100vh",
+          bgcolor: "background.default",
+          pt: 10,
+          pb: 4,
+        }}
+      >
         <Container maxWidth="md">
           <Stack spacing={4} alignItems="center" textAlign="center">
             <Typography variant="h4" fontWeight={700}>
@@ -177,7 +184,9 @@ export default function GroupDetailPage() {
   if (!group) return null;
 
   return (
-    <Box sx={{ minHeight: "100vh", bgcolor: "background.default", pt: 10, pb: 4 }}>
+    <Box
+      sx={{ minHeight: "100vh", bgcolor: "background.default", pt: 10, pb: 4 }}
+    >
       <Container maxWidth="lg">
         <Stack spacing={4}>
           {/* Header */}
@@ -229,10 +238,7 @@ export default function GroupDetailPage() {
                   Copy Invite
                 </Button>
                 {isAdmin() && (
-                  <Button
-                    variant="outlined"
-                    startIcon={<Settings />}
-                  >
+                  <Button variant="outlined" startIcon={<Settings />}>
                     Settings
                   </Button>
                 )}
@@ -256,12 +262,22 @@ export default function GroupDetailPage() {
                     <Typography variant="h5" fontWeight={700}>
                       Current Turn
                     </Typography>
-                    
+
                     {isMyTurn() ? (
-                      <Paper sx={{ p: 3, bgcolor: "rgba(76, 175, 80, 0.1)", textAlign: "center" }}>
+                      <Paper
+                        sx={{
+                          p: 3,
+                          bgcolor: "rgba(76, 175, 80, 0.1)",
+                          textAlign: "center",
+                        }}
+                      >
                         <Stack spacing={2}>
-                          <Typography variant="h4" fontWeight={700} color="success.main">
-                            🎵 It's Your Turn!
+                          <Typography
+                            variant="h4"
+                            fontWeight={700}
+                            color="success.main"
+                          >
+                            🎵 It&apos;s Your Turn!
                           </Typography>
                           <Typography variant="body1" color="text.secondary">
                             Share an album with your group
@@ -279,10 +295,16 @@ export default function GroupDetailPage() {
                         </Stack>
                       </Paper>
                     ) : group.currentTurnUserId ? (
-                      <Paper sx={{ p: 3, bgcolor: "rgba(33, 150, 243, 0.1)", textAlign: "center" }}>
+                      <Paper
+                        sx={{
+                          p: 3,
+                          bgcolor: "rgba(33, 150, 243, 0.1)",
+                          textAlign: "center",
+                        }}
+                      >
                         <Stack spacing={2}>
                           <Typography variant="h5" fontWeight={700}>
-                            Someone Else's Turn
+                            Someone Else&apos;s Turn
                           </Typography>
                           <Typography variant="body1" color="text.secondary">
                             Waiting for the next album share...
@@ -290,7 +312,13 @@ export default function GroupDetailPage() {
                         </Stack>
                       </Paper>
                     ) : (
-                      <Paper sx={{ p: 3, bgcolor: "rgba(255, 193, 7, 0.1)", textAlign: "center" }}>
+                      <Paper
+                        sx={{
+                          p: 3,
+                          bgcolor: "rgba(255, 193, 7, 0.1)",
+                          textAlign: "center",
+                        }}
+                      >
                         <Stack spacing={2}>
                           <Typography variant="h5" fontWeight={700}>
                             Waiting for Members
@@ -317,20 +345,38 @@ export default function GroupDetailPage() {
                       </Typography>
                       <Stack spacing={1}>
                         <Stack direction="row" justifyContent="space-between">
-                          <Typography variant="body2" color="text.secondary">Members</Typography>
-                          <Typography variant="body2" fontWeight={600}>{group.memberCount}</Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            Members
+                          </Typography>
+                          <Typography variant="body2" fontWeight={600}>
+                            {group.memberCount}
+                          </Typography>
                         </Stack>
                         <Stack direction="row" justifyContent="space-between">
-                          <Typography variant="body2" color="text.secondary">Albums Shared</Typography>
-                          <Typography variant="body2" fontWeight={600}>{group.totalAlbumsShared}</Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            Albums Shared
+                          </Typography>
+                          <Typography variant="body2" fontWeight={600}>
+                            {group.totalAlbumsShared}
+                          </Typography>
                         </Stack>
                         <Stack direction="row" justifyContent="space-between">
-                          <Typography variant="body2" color="text.secondary">Turn Duration</Typography>
-                          <Typography variant="body2" fontWeight={600}>{group.turnDurationDays} days</Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            Turn Duration
+                          </Typography>
+                          <Typography variant="body2" fontWeight={600}>
+                            {group.turnDurationDays} days
+                          </Typography>
                         </Stack>
                         <Stack direction="row" justifyContent="space-between">
-                          <Typography variant="body2" color="text.secondary">Invite Code</Typography>
-                          <Typography variant="body2" fontWeight={600} fontFamily="monospace">
+                          <Typography variant="body2" color="text.secondary">
+                            Invite Code
+                          </Typography>
+                          <Typography
+                            variant="body2"
+                            fontWeight={600}
+                            fontFamily="monospace"
+                          >
                             {group.inviteCode}
                           </Typography>
                         </Stack>
@@ -348,20 +394,37 @@ export default function GroupDetailPage() {
                       </Typography>
                       <Stack spacing={1}>
                         {group.members.map((member) => (
-                          <Stack key={member._id} direction="row" spacing={2} alignItems="center">
-                            <Avatar src={member?.image} sx={{ width: 32, height: 32 }}>
-                              {member?.name?.[0] || '?'}
+                          <Stack
+                            key={member._id}
+                            direction="row"
+                            spacing={2}
+                            alignItems="center"
+                          >
+                            <Avatar
+                              src={member?.image}
+                              sx={{ width: 32, height: 32 }}
+                            >
+                              {member?.name?.[0] || "?"}
                             </Avatar>
                             <Stack flex={1}>
                               <Typography variant="body2" fontWeight={600}>
-                                {member?.name || 'Unknown'}
+                                {member?.name || "Unknown"}
                               </Typography>
-                              <Typography variant="caption" color="text.secondary">
-                                @{member?.username || 'unknown'}
+                              <Typography
+                                variant="caption"
+                                color="text.secondary"
+                              >
+                                @{member?.username || "unknown"}
                               </Typography>
                             </Stack>
-                            {group.admins.some(admin => admin._id === member._id) && (
-                              <Chip label="Admin" size="small" color="primary" />
+                            {group.admins.some(
+                              (admin) => admin._id === member._id
+                            ) && (
+                              <Chip
+                                label="Admin"
+                                size="small"
+                                color="primary"
+                              />
                             )}
                           </Stack>
                         ))}
@@ -398,7 +461,9 @@ export default function GroupDetailPage() {
                 {albums.length === 0 ? (
                   <Paper sx={{ p: 6, textAlign: "center" }}>
                     <Stack spacing={3} alignItems="center">
-                      <AlbumIcon sx={{ fontSize: 80, color: "text.secondary" }} />
+                      <AlbumIcon
+                        sx={{ fontSize: 80, color: "text.secondary" }}
+                      />
                       <Typography variant="h5" fontWeight={700}>
                         No Albums Yet
                       </Typography>
@@ -456,14 +521,26 @@ export default function GroupDetailPage() {
                             )}
 
                             <Stack spacing={0.5} flex={1} minWidth={0}>
-                              <Typography variant="subtitle2" fontWeight={600} noWrap>
+                              <Typography
+                                variant="subtitle2"
+                                fontWeight={600}
+                                noWrap
+                              >
                                 {album.title}
                               </Typography>
-                              <Typography variant="caption" color="text.secondary" noWrap>
+                              <Typography
+                                variant="caption"
+                                color="text.secondary"
+                                noWrap
+                              >
                                 {album.artist}
                               </Typography>
-                              <Typography variant="caption" color="text.secondary" noWrap>
-                                by {album.postedBy?.name || 'Unknown'}
+                              <Typography
+                                variant="caption"
+                                color="text.secondary"
+                                noWrap
+                              >
+                                by {album.postedBy?.name || "Unknown"}
                               </Typography>
                             </Stack>
                           </Stack>

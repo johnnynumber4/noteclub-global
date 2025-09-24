@@ -92,7 +92,7 @@ const PushSubscriptionSchema = new Schema<IPushSubscription>({
 
 // Indexes
 PushSubscriptionSchema.index({ user: 1, isActive: 1 });
-PushSubscriptionSchema.index({ endpoint: 1 });
+// Endpoint index already defined with unique: true in schema
 PushSubscriptionSchema.index({ lastUsed: 1 });
 
 // Update last used timestamp

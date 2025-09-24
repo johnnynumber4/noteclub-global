@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getBaseUrl } from "@/lib/url-utils";
 
 interface UnifiedAlbumResult {
   id: string;
@@ -88,10 +89,14 @@ export async function GET(request: NextRequest) {
   }
 }
 
-async function searchSpotify(query: string, limit: number): Promise<UnifiedAlbumResult[]> {
+async function searchSpotify(
+  query: string,
+  limit: number
+): Promise<UnifiedAlbumResult[]> {
   try {
+    const baseUrl = getBaseUrl();
     const response = await fetch(
-      `${process.env.NEXTAUTH_URL || "http://localhost:3000"}/api/spotify/search?q=${encodeURIComponent(
+      `${baseUrl}/api/spotify/search?q=${encodeURIComponent(
         query
       )}&type=album&limit=${limit}`
     );
@@ -101,35 +106,41 @@ async function searchSpotify(query: string, limit: number): Promise<UnifiedAlbum
     }
 
     const data = await response.json();
-    return (data.results || []).map((album: any): UnifiedAlbumResult => ({
-      id: `spotify_${album.id}`,
-      title: album.title,
-      artist: album.artist,
-      year: album.year,
-      thumbnail: album.thumbnail,
-      source: "spotify" as const,
-      spotifyUrl: album.spotifyUrl,
-      trackCount: album.trackCount,
-      albumType: album.albumType,
-      genres: album.genres,
-    }));
+    return (data.results || []).map(
+      (album: any): UnifiedAlbumResult => ({
+        id: `spotify_${album.id}`,
+        title: album.title,
+        artist: album.artist,
+        year: album.year,
+        thumbnail: album.thumbnail,
+        source: "spotify" as const,
+        spotifyUrl: album.spotifyUrl,
+        trackCount: album.trackCount,
+        albumType: album.albumType,
+        genres: album.genres,
+      })
+    );
   } catch (error) {
     console.error("Spotify search error:", error);
     throw error;
   }
 }
 
-async function searchYouTubeMusic(query: string, limit: number): Promise<UnifiedAlbumResult[]> {
+async function searchYouTubeMusic(
+  query: string,
+  limit: number
+): Promise<UnifiedAlbumResult[]> {
   try {
     // Try v2 API first, fallback to original
+    const baseUrl = getBaseUrl();
     let response = await fetch(
-      `${process.env.NEXTAUTH_URL || "http://localhost:3000"}/api/youtube-music/search-v2?q=${encodeURIComponent(query)}`
+      `${baseUrl}/api/youtube-music/search-v2?q=${encodeURIComponent(query)}`
     );
 
     if (!response.ok) {
       // Fallback to original API
       response = await fetch(
-        `${process.env.NEXTAUTH_URL || "http://localhost:3000"}/api/youtube-music/search?q=${encodeURIComponent(query)}`
+        `${baseUrl}/api/youtube-music/search?q=${encodeURIComponent(query)}`
       );
     }
 
@@ -138,21 +149,23 @@ async function searchYouTubeMusic(query: string, limit: number): Promise<Unified
     }
 
     const data = await response.json();
-    return (data.albums || []).slice(0, limit).map((album: any): UnifiedAlbumResult => ({
-      id: `youtube_${album.id}`,
-      title: album.title,
-      artist: album.artist,
-      year: album.year,
-      thumbnail: album.thumbnails?.medium || album.thumbnail,
-      source: "youtube" as const,
-      youtubeMusicUrl: album.youtubeUrl,
-      trackCount: album.trackCount,
-      explicit: album.explicit,
-      description: album.description,
-      type: album.type,
-      duration: album.duration,
-      thumbnails: album.thumbnails,
-    }));
+    return (data.albums || []).slice(0, limit).map(
+      (album: any): UnifiedAlbumResult => ({
+        id: `youtube_${album.id}`,
+        title: album.title,
+        artist: album.artist,
+        year: album.year,
+        thumbnail: album.thumbnails?.medium || album.thumbnail,
+        source: "youtube" as const,
+        youtubeMusicUrl: album.youtubeUrl,
+        trackCount: album.trackCount,
+        explicit: album.explicit,
+        description: album.description,
+        type: album.type,
+        duration: album.duration,
+        thumbnails: album.thumbnails,
+      })
+    );
   } catch (error) {
     console.error("YouTube Music search error:", error);
     throw error;

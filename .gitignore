@@ -40,5 +40,10 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# PWA auto-generated files
+/public/sw.js
+/public/fallback-*.js
+/public/workbox-*.js
+
 # local files
 cookies.txt

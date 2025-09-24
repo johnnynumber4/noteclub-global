@@ -366,16 +366,31 @@ export default function ProfilePage() {
                   <Stack spacing={2}>
                     {profile.musicPlatforms.spotify && (
                       <Stack direction="row" justifyContent="space-between" alignItems="center">
-                        <Typography variant="body2" color="#1DB954">
-                          Spotify
-                        </Typography>
+                        <Stack direction="row" spacing={1} alignItems="center">
+                          <Box
+                            component="svg"
+                            viewBox="0 0 24 24"
+                            sx={{ width: 20, height: 20, fill: '#1DB954' }}
+                          >
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 14.4c-.17.29-.55.39-.84.22-2.29-1.4-5.18-1.72-8.58-.94-.33.07-.66-.13-.73-.46-.07-.33.13-.66.46-.73 3.74-.85 6.96-.49 9.51 1.05.29.17.39.55.22.84v.02zm1.2-2.68c-.21.34-.66.45-1 .24-2.62-1.61-6.61-2.07-9.72-1.13-.39.12-.8-.09-.92-.48s.09-.8.48-.92c3.56-1.08 8.02-.57 11.42 1.3.34.21.45.66.24 1v-.01zm.11-2.8C14.3 9 8.52 8.8 4.95 9.98c-.46.15-.94-.1-1.09-.56s.1-.94.56-1.09C8.69 7.14 15.1 7.38 19.33 9.5c.42.21.58.72.37 1.14-.21.42-.72.58-1.14.37-.01-.01-.02-.01-.03-.02v.03z"/>
+                          </Box>
+                          <Typography variant="body2" color="#1DB954">
+                            Spotify
+                          </Typography>
+                        </Stack>
                         <IconButton
                           component="a"
                           href={profile.musicPlatforms.spotify}
                           target="_blank"
                           rel="noopener noreferrer"
                           size="small"
-                          sx={{ color: "#1DB954" }}
+                          sx={{
+                            color: "#1DB954",
+                            '&:hover': {
+                              bgcolor: 'rgba(29, 185, 84, 0.1)'
+                            }
+                          }}
+                          title="View Spotify Profile"
                         >
                           <OpenInNew sx={{ fontSize: 16 }} />
                         </IconButton>
@@ -383,16 +398,31 @@ export default function ProfilePage() {
                     )}
                     {profile.musicPlatforms.youtubeMusic && (
                       <Stack direction="row" justifyContent="space-between" alignItems="center">
-                        <Typography variant="body2" color="#FF0000">
-                          YouTube Music
-                        </Typography>
+                        <Stack direction="row" spacing={1} alignItems="center">
+                          <Box
+                            component="svg"
+                            viewBox="0 0 24 24"
+                            sx={{ width: 20, height: 20, fill: '#FF0000' }}
+                          >
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.31-.22-.69-.32-1.09-.32H8.45c-.4 0-.78.1-1.09.32S6.8 9.37 6.8 9.8v4.4c0 .43.25.8.56 1.02s.69.32 1.09.32h7.1c.4 0 .78-.1 1.09-.32s.56-.59.56-1.02V9.8c0-.43-.25-.8-.56-1.02zM14 12.5l-2.5 1.73c-.32.22-.7.01-.7-.38V10.15c0-.39.38-.6.7-.38L14 11.5c.32.22.32.78 0 1z"/>
+                          </Box>
+                          <Typography variant="body2" color="#FF0000">
+                            YouTube Music
+                          </Typography>
+                        </Stack>
                         <IconButton
                           component="a"
                           href={profile.musicPlatforms.youtubeMusic}
                           target="_blank"
                           rel="noopener noreferrer"
                           size="small"
-                          sx={{ color: "#FF0000" }}
+                          sx={{
+                            color: "#FF0000",
+                            '&:hover': {
+                              bgcolor: 'rgba(255, 0, 0, 0.1)'
+                            }
+                          }}
+                          title="View YouTube Music Profile"
                         >
                           <OpenInNew sx={{ fontSize: 16 }} />
                         </IconButton>
@@ -400,16 +430,31 @@ export default function ProfilePage() {
                     )}
                     {profile.musicPlatforms.appleMusic && (
                       <Stack direction="row" justifyContent="space-between" alignItems="center">
-                        <Typography variant="body2" color="#FA57C1">
-                          Apple Music
-                        </Typography>
+                        <Stack direction="row" spacing={1} alignItems="center">
+                          <Box
+                            component="svg"
+                            viewBox="0 0 24 24"
+                            sx={{ width: 20, height: 20, fill: '#FA57C1' }}
+                          >
+                            <path d="M23.997 6.124c0-.738-.065-1.47-.24-2.19-.317-1.31-1.062-2.31-2.18-3.043C21.003.517 20.373.285 19.7.164c-.517-.093-1.038-.135-1.564-.123-.31-.004-.62.01-.93.035-.5.04-.99.117-1.36.28-.96.42-1.51 1.01-1.51 1.01s-.55-.59-1.51-1.01c-.37-.163-.86-.24-1.36-.28-.31-.025-.62-.04-.93-.035-.526-.012-1.047.03-1.564.123-.673.12-1.303.353-1.877.817-1.118.734-1.863 1.734-2.18 3.043-.175.72-.24 1.452-.24 2.19 0 .02 0 .04.001.06v12.457c0 1.102.898 2 2 2h.01c.665 0 1.275-.388 1.556-.991l6.831-14.68c.78-1.675 2.77-2.51 4.445-1.73.835.39 1.34 1.195 1.34 2.08v9.32c0 2.21-1.79 4-4 4s-4-1.79-4-4V9.124c0-.552.448-1 1-1s1 .448 1 1v3.876c0 1.105.895 2 2 2s2-.895 2-2v-9.32c0-.423-.203-.823-.55-1.07-.695-.495-1.73-.35-2.225.345L9.776 17.633c-.1.177-.29.29-.498.29-.552 0-1-.448-1-1V6.185c0-.517.06-1.022.179-1.515.24-.99.79-1.64 1.314-1.968.394-.246.84-.35 1.29-.35.31 0 .62.04.91.12.54.15.99.44 1.31.85.32-.41.77-.7 1.31-.85.29-.08.6-.12.91-.12.45 0 .896.104 1.29.35.524.328 1.074.978 1.314 1.968.119.493.179.998.179 1.515z"/>
+                          </Box>
+                          <Typography variant="body2" color="#FA57C1">
+                            Apple Music
+                          </Typography>
+                        </Stack>
                         <IconButton
                           component="a"
                           href={profile.musicPlatforms.appleMusic}
                           target="_blank"
                           rel="noopener noreferrer"
                           size="small"
-                          sx={{ color: "#FA57C1" }}
+                          sx={{
+                            color: "#FA57C1",
+                            '&:hover': {
+                              bgcolor: 'rgba(250, 87, 193, 0.1)'
+                            }
+                          }}
+                          title="View Apple Music Profile"
                         >
                           <OpenInNew sx={{ fontSize: 16 }} />
                         </IconButton>

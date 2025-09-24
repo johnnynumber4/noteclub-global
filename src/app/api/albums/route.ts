@@ -9,6 +9,31 @@ import { Group } from "@/models/Group";
 import mongoose from "mongoose";
 import { fetchWikipediaDescription } from "@/lib/utils";
 
+// Type definitions for better type safety
+interface UserLookup {
+  _id: string | mongoose.Types.ObjectId;
+  name: string;
+  username: string;
+  image?: string;
+}
+
+interface ThemeData {
+  title?: string;
+  name?: string;
+}
+
+interface ArtworkData {
+  large?: string;
+  medium?: string;
+  small?: string;
+}
+
+interface LinksData {
+  spotify?: string;
+  youtubeMusic?: string;
+  appleMusic?: string;
+}
+
 export async function GET(request: NextRequest) {
   try {
     await dbConnect();
@@ -29,11 +54,11 @@ export async function GET(request: NextRequest) {
     const skip = (page - 1) * limit;
 
     // Build query - support both old and new schema
-    const query: Record<string, unknown> = { 
+    const query: Record<string, unknown> = {
       $or: [
         { isApproved: true, isHidden: false }, // Old schema
-        { status: 'published' } // New migrated schema
-      ]
+        { status: "published" }, // New migrated schema
+      ],
     };
 
     if (theme) {
@@ -71,59 +96,88 @@ export async function GET(request: NextRequest) {
       .lean();
 
     // Manual user lookup to handle ObjectId type issues
-    const userIds = [...new Set(albums.map((album: Record<string, unknown>) => album.postedBy?.toString()).filter(Boolean))];
-    
+    const userIds = [
+      ...new Set(
+        albums
+          .map((album: Record<string, unknown>) => album.postedBy?.toString())
+          .filter(Boolean)
+      ),
+    ];
+
     // Fetch all users and create string-based lookup map
-    const users = await User.find({}, "name username image").lean();
-    
+    const users = await User.find({}, "_id name username image").lean();
+
     const userMap = new Map();
-    users.forEach((user: Record<string, unknown>) => {
-      // Add both string and ObjectId versions for maximum compatibility
-      userMap.set(user._id.toString(), user);
-      if (user._id instanceof mongoose.Types.ObjectId) {
-        userMap.set(user._id.toString(), user);
+    users.forEach((user) => {
+      // Handle both ObjectId and string cases for maximum compatibility
+      if (user._id) {
+        const userIdString =
+          user._id instanceof mongoose.Types.ObjectId
+            ? user._id.toString()
+            : user._id.toString();
+        userMap.set(userIdString, user);
       }
     });
 
     // Add user like status and normalize mixed data structures
-    const albumsWithLikeStatus = albums.map((album: Record<string, unknown>) => {
-      // Get user from our manual lookup (handle both author and postedBy)
-      const userId = (album.postedBy || album.author)?.toString();
-      const user = userId ? userMap.get(userId) || { name: 'Unknown', username: 'unknown', image: null } 
-                          : { name: 'Unknown', username: 'unknown', image: null };
-      
-      // Normalize theme (handle both title and name)
-      const theme = album.theme ? {
-        title: (album.theme as any)?.title || (album.theme as any)?.name || 'No Theme'
-      } : { title: 'No Theme' };
-      
-      // Normalize cover image (handle both coverImageUrl and artwork object)
-      const coverImageUrl = album.coverImageUrl || 
-        (album.artwork as any)?.large || 
-        (album.artwork as any)?.medium || 
-        (album.artwork as any)?.small || 
-        null;
-      
-      // Normalize streaming links (handle both flat and nested structures)
-      const spotifyUrl = album.spotifyUrl || (album.links as any)?.spotify || null;
-      const youtubeMusicUrl = album.youtubeMusicUrl || (album.links as any)?.youtubeMusic || null;
-      const appleMusicUrl = album.appleMusicUrl || (album.links as any)?.appleMusic || null;
-      
-      return {
-        ...album,
-        // Ensure consistent field names
-        postedBy: user,
-        theme,
-        coverImageUrl,
-        spotifyUrl,
-        youtubeMusicUrl,
-        appleMusicUrl,
-        isLikedByUser: currentUser && Array.isArray(album.likes) 
-          ? album.likes.includes(currentUser._id) 
-          : false,
-        likeCount: Array.isArray(album.likes) ? album.likes.length : 0,
-      };
-    });
+    const albumsWithLikeStatus = albums.map(
+      (album: Record<string, unknown>) => {
+        // Get user from our manual lookup (handle both author and postedBy)
+        const userId = (album.postedBy || album.author)?.toString();
+        const user = userId
+          ? userMap.get(userId) || {
+              _id: userId,
+              name: "Unknown",
+              username: "unknown",
+              image: null,
+            }
+          : { _id: null, name: "Unknown", username: "unknown", image: null };
+
+        // Normalize theme (handle both title and name)
+        const theme = album.theme
+          ? {
+              title:
+                (album.theme as ThemeData)?.title ||
+                (album.theme as ThemeData)?.name ||
+                "No Theme",
+            }
+          : { title: "No Theme" };
+
+        // Normalize cover image (handle both coverImageUrl and artwork object)
+        const coverImageUrl =
+          album.coverImageUrl ||
+          (album.artwork as ArtworkData)?.large ||
+          (album.artwork as ArtworkData)?.medium ||
+          (album.artwork as ArtworkData)?.small ||
+          null;
+
+        // Normalize streaming links (handle both flat and nested structures)
+        const spotifyUrl =
+          album.spotifyUrl || (album.links as LinksData)?.spotify || null;
+        const youtubeMusicUrl =
+          album.youtubeMusicUrl ||
+          (album.links as LinksData)?.youtubeMusic ||
+          null;
+        const appleMusicUrl =
+          album.appleMusicUrl || (album.links as LinksData)?.appleMusic || null;
+
+        return {
+          ...album,
+          // Ensure consistent field names
+          postedBy: user,
+          theme,
+          coverImageUrl,
+          spotifyUrl,
+          youtubeMusicUrl,
+          appleMusicUrl,
+          isLikedByUser:
+            currentUser && Array.isArray(album.likes)
+              ? album.likes.includes(currentUser._id)
+              : false,
+          likeCount: Array.isArray(album.likes) ? album.likes.length : 0,
+        };
+      }
+    );
 
     const total = await Album.countDocuments(query);
 
@@ -194,13 +248,13 @@ export async function POST(request: NextRequest) {
     const userId = user._id;
 
     // Find or create default group
-    let defaultGroup = await Group.findOne({ name: 'Note Club' });
+    let defaultGroup = await Group.findOne({ name: "Note Club" });
     if (!defaultGroup) {
       defaultGroup = new Group({
-        name: 'Note Club',
-        description: 'Default group for all Note Club members',
+        name: "Note Club",
+        description: "Default group for all Note Club members",
         isPrivate: false,
-        inviteCode: 'DEFAULT',
+        inviteCode: "DEFAULT",
         maxMembers: 100,
         members: [userId],
         admins: [userId],
@@ -249,18 +303,23 @@ export async function POST(request: NextRequest) {
     // Auto-fetch Wikipedia description if not provided
     let finalWikipediaUrl = wikipediaUrl;
     let finalWikipediaDescription = wikipediaDescription;
-    
+
     if (!wikipediaDescription && title && artist) {
       try {
-        console.log(`Auto-fetching Wikipedia description for: ${title} by ${artist}`);
+        console.log(
+          `Auto-fetching Wikipedia description for: ${title} by ${artist}`
+        );
         const wikiData = await fetchWikipediaDescription(title, artist);
-        if (wikiData.description && wikiData.source === 'wikipedia') {
+        if (wikiData.description && wikiData.source === "wikipedia") {
           finalWikipediaDescription = wikiData.description;
           finalWikipediaUrl = wikiData.url;
           console.log(`✅ Found Wikipedia description for ${title}`);
         }
       } catch (error) {
-        console.log(`Failed to auto-fetch Wikipedia description for ${title}:`, error);
+        console.log(
+          `Failed to auto-fetch Wikipedia description for ${title}:`,
+          error
+        );
         // Continue without Wikipedia data
       }
     }
@@ -306,10 +365,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Update theme statistics
-    await Theme.updateOne(
-      { _id: themeId },
-      { $inc: { albumCount: 1 } }
-    );
+    await Theme.updateOne({ _id: themeId }, { $inc: { albumCount: 1 } });
 
     // Populate the album for response
     await album.populate("postedBy", "name username image");

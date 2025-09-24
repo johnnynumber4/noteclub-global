@@ -32,8 +32,8 @@ export async function GET(
 
     // Manual user lookup for comments to handle ObjectId type issues
     const commentUserIds = [...new Set((album.comments || []).map((comment: any) => comment.postedBy?.toString()).filter(Boolean))];
-    const users = await User.find({}, "name username image").lean();
-    
+    const users = await User.find({}, "_id name username image").lean();
+
     const userMap = new Map();
     users.forEach((user: any) => {
       userMap.set(user._id.toString(), user);
@@ -41,8 +41,8 @@ export async function GET(
 
     const comments = (album.comments || []).map((comment: any) => {
       const userId = comment.postedBy?.toString();
-      const user = userId ? userMap.get(userId) || { name: 'Unknown', username: 'unknown', image: null } 
-                          : { name: 'Unknown', username: 'unknown', image: null };
+      const user = userId ? userMap.get(userId) || { _id: userId, name: 'Unknown', username: 'unknown', image: null }
+                          : { _id: null, name: 'Unknown', username: 'unknown', image: null };
       
       return {
         ...comment,

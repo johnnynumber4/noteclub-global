@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSession, signOut } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -41,6 +41,7 @@ export function NavbarMui() {
   const router = useRouter();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
   const handleProfileMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -59,6 +60,27 @@ export function NavbarMui() {
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
   };
+
+  // Fetch current user's ID when session changes
+  useEffect(() => {
+    const fetchUserId = async () => {
+      if (session?.user?.email) {
+        try {
+          const response = await fetch('/api/auth/me');
+          if (response.ok) {
+            const userData = await response.json();
+            setCurrentUserId(userData.user?._id);
+          }
+        } catch (error) {
+          console.error('Error fetching user ID:', error);
+        }
+      } else {
+        setCurrentUserId(null);
+      }
+    };
+
+    fetchUserId();
+  }, [session]);
 
   const navigationItems = [
     { label: "Home", href: "/", icon: <Home /> },
@@ -115,7 +137,14 @@ export function NavbarMui() {
         {session ? (
           <>
             <ListItem disablePadding>
-              <ListItemButton onClick={() => router.push("/profile")}>
+              <ListItemButton
+                onClick={() => {
+                  if (currentUserId) {
+                    router.push(`/profile/${currentUserId}`);
+                  }
+                }}
+                disabled={!currentUserId}
+              >
                 <ListItemIcon>
                   <Person />
                 </ListItemIcon>
@@ -347,8 +376,11 @@ export function NavbarMui() {
         <MenuItem
           onClick={() => {
             handleMenuClose();
-            router.push("/profile");
+            if (currentUserId) {
+              router.push(`/profile/${currentUserId}`);
+            }
           }}
+          disabled={!currentUserId}
         >
           <Person sx={{ mr: 1 }} />
           Profile

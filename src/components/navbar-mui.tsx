@@ -29,7 +29,6 @@ import {
   MusicNote,
   Menu as MenuIcon,
   Album,
-  Event,
   Person,
   Login,
   Logout,
@@ -64,7 +63,6 @@ export function NavbarMui() {
   const navigationItems = [
     { label: "Home", href: "/", icon: <Home /> },
     { label: "Albums", href: "/albums", icon: <Album /> },
-    { label: "Themes", href: "/themes", icon: <Event /> },
   ];
 
   const drawer = (

@@ -7,8 +7,9 @@ export interface IAlbum extends Document {
   genre?: string;
   description?: string;
 
-  // Theme and posting info
-  theme: mongoose.Types.ObjectId;
+  // Group and posting info
+  group: mongoose.Types.ObjectId;
+  theme?: mongoose.Types.ObjectId;
   postedBy: mongoose.Types.ObjectId;
   postedAt: Date;
 
@@ -33,7 +34,7 @@ export interface IAlbum extends Document {
 
   // Engagement
   likes: mongoose.Types.ObjectId[];
-  comments: mongoose.Types.ObjectId[];
+  comments: any[]; // Changed to allow embedded comments
 
   // Moderation
   isApproved: boolean;
@@ -78,11 +79,15 @@ const AlbumSchema = new Schema<IAlbum>(
       maxlength: 2000,
     },
 
-    // Theme and posting info
+    // Group and posting info
+    group: {
+      type: Schema.Types.ObjectId,
+      ref: "Group",
+      required: true,
+    },
     theme: {
       type: Schema.Types.ObjectId,
       ref: "Theme",
-      required: true,
     },
     postedBy: {
       type: Schema.Types.ObjectId,
@@ -164,8 +169,22 @@ const AlbumSchema = new Schema<IAlbum>(
     ],
     comments: [
       {
-        type: Schema.Types.ObjectId,
-        ref: "Comment",
+        _id: String,
+        content: {
+          type: String,
+          required: true,
+          trim: true,
+          maxlength: 1000,
+        },
+        postedBy: {
+          type: Schema.Types.ObjectId,
+          ref: "User",
+          required: true,
+        },
+        postedAt: {
+          type: Date,
+          default: Date.now,
+        },
       },
     ],
 
@@ -199,6 +218,8 @@ const AlbumSchema = new Schema<IAlbum>(
 );
 
 // Indexes for performance
+AlbumSchema.index({ group: 1, postedAt: -1 });
+AlbumSchema.index({ group: 1, turnNumber: 1 });
 AlbumSchema.index({ theme: 1, turnNumber: 1 });
 AlbumSchema.index({ postedBy: 1, postedAt: -1 });
 AlbumSchema.index({ artist: 1, title: 1 });
@@ -218,8 +239,8 @@ AlbumSchema.virtual("commentCount").get(function () {
 // Ensure virtuals are included in JSON
 AlbumSchema.set("toJSON", { virtuals: true });
 
-// Prevent duplicate album submissions for the same theme by the same user
-AlbumSchema.index({ theme: 1, postedBy: 1 }, { unique: true });
+// Prevent duplicate album submissions for the same theme by the same user (if theme-based)
+AlbumSchema.index({ group: 1, theme: 1, postedBy: 1 }, { unique: true, sparse: true });
 
 // Text search index
 AlbumSchema.index({

@@ -17,7 +17,6 @@ import {
   IconButton,
   InputAdornment,
   Alert,
-  Paper,
 } from "@mui/material";
 import {
   Google,
@@ -53,14 +52,29 @@ export default function SignIn() {
         redirect: false,
       });
 
+      console.log("🔐 Sign in result:", result);
+
       if (result?.error) {
+        console.log("❌ Sign in error:", result.error);
         setError("Invalid email or password");
+      } else if (result?.ok) {
+        console.log("✅ Sign in successful, getting session...");
+        const newSession = await getSession();
+        console.log("📋 New session:", newSession);
+        
+        if (newSession) {
+          console.log("🎯 Redirecting to dashboard...");
+          router.push("/dashboard");
+          router.refresh();
+        } else {
+          console.log("❌ No session after successful login");
+          setError("Login succeeded but session not created. Please try again.");
+        }
       } else {
-        await getSession();
-        router.push("/");
-        router.refresh();
+        console.log("❌ Unexpected sign in result:", result);
+        setError("Unexpected error during sign in");
       }
-    } catch (err) {
+    } catch {
       setError("Something went wrong. Please try again.");
     } finally {
       setIsLoading(false);
@@ -70,8 +84,8 @@ export default function SignIn() {
   const handleProviderSignIn = async (provider: string) => {
     setIsLoading(true);
     try {
-      await signIn(provider, { callbackUrl: "/" });
-    } catch (err) {
+      await signIn(provider, { callbackUrl: "/dashboard" });
+    } catch {
       setError("Failed to sign in with provider");
       setIsLoading(false);
     }
@@ -261,7 +275,7 @@ export default function SignIn() {
                 {/* Sign Up Link */}
                 <Box textAlign="center">
                   <Typography variant="body2" color="text.secondary">
-                    Don't have an account?{" "}
+                    Don&apos;t have an account?{" "}
                     <Button
                       component={Link}
                       href="/auth/signup"

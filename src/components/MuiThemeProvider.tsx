@@ -2,7 +2,7 @@
 
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { CssBaseline } from "@mui/material";
-import { red, blue, purple } from "@mui/material/colors";
+import { red, blue } from "@mui/material/colors";
 
 // YouTube Music inspired theme
 const theme = createTheme({

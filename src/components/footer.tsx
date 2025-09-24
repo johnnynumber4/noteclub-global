@@ -15,8 +15,6 @@ import {
   GitHub,
   Twitter,
   Email,
-  Album,
-  Event,
   Headphones,
   Favorite,
 } from "@mui/icons-material";
@@ -132,18 +130,6 @@ export function Footer() {
                         }}
                       >
                         Browse Albums
-                      </Typography>
-                    </Link>
-                    <Link href="/themes" style={{ textDecoration: "none" }}>
-                      <Typography
-                        variant="body2"
-                        color="text.secondary"
-                        sx={{
-                          "&:hover": { color: "primary.main" },
-                          transition: "color 0.3s ease",
-                        }}
-                      >
-                        Current Themes
                       </Typography>
                     </Link>
                   </Stack>

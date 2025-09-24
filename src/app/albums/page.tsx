@@ -17,7 +17,6 @@ import {
   Paper,
   InputAdornment,
   CircularProgress,
-  Grid,
 } from "@mui/material";
 import {
   MusicNote,
@@ -29,6 +28,7 @@ import {
   CalendarToday,
   Album as AlbumIcon,
   PlayArrow,
+  Close,
 } from "@mui/icons-material";
 
 interface Album {
@@ -54,6 +54,7 @@ interface Album {
   commentCount: number;
   postedAt: string;
   turnNumber: number;
+  isLikedByUser: boolean;
 }
 
 interface ApiResponse {
@@ -72,6 +73,7 @@ export default function AlbumsPage() {
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredAlbums, setFilteredAlbums] = useState<Album[]>([]);
+  const [expandedPlayAlbum, setExpandedPlayAlbum] = useState<string | null>(null);
 
   useEffect(() => {
     fetchAlbums();
@@ -82,7 +84,7 @@ export default function AlbumsPage() {
       (album) =>
         album.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         album.artist.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        album.theme.title.toLowerCase().includes(searchTerm.toLowerCase())
+        album.theme?.title?.toLowerCase().includes(searchTerm.toLowerCase())
     );
     setFilteredAlbums(filtered);
   }, [albums, searchTerm]);
@@ -90,7 +92,7 @@ export default function AlbumsPage() {
   const fetchAlbums = async () => {
     try {
       setLoading(true);
-      const response = await fetch("/api/albums");
+      const response = await fetch("/api/albums?limit=100");
       if (!response.ok) {
         throw new Error("Failed to fetch albums");
       }
@@ -110,6 +112,46 @@ export default function AlbumsPage() {
       month: "short",
       day: "numeric",
     });
+  };
+
+  const handlePlayClick = (albumId: string, event: React.MouseEvent) => {
+    event.stopPropagation(); // Prevent card click
+    setExpandedPlayAlbum(expandedPlayAlbum === albumId ? null : albumId);
+  };
+
+  const handleServiceClick = (url: string, event: React.MouseEvent) => {
+    event.stopPropagation(); // Prevent card click
+    window.open(url, '_blank', 'noopener,noreferrer');
+  };
+
+  const handleAlbumClick = (albumId: string) => {
+    // Navigate to album detail page (we'll create this route)
+    window.location.href = `/albums/${albumId}`;
+  };
+
+  const handleLikeClick = async (albumId: string, event: React.MouseEvent) => {
+    event.stopPropagation(); // Prevent card click
+    try {
+      const response = await fetch(`/api/albums/${albumId}/like`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (response.ok) {
+        // Refresh albums to get updated like count
+        fetchAlbums();
+      }
+    } catch (error) {
+      console.error('Error liking album:', error);
+    }
+  };
+
+  const handleCommentClick = (albumId: string, event: React.MouseEvent) => {
+    event.stopPropagation(); // Prevent card click
+    // Navigate to album page and focus comment section
+    window.location.href = `/albums/${albumId}#comments`;
   };
 
   if (loading) {
@@ -270,6 +312,7 @@ export default function AlbumsPage() {
               {filteredAlbums.map((album) => (
                 <Card
                   key={album._id}
+                  onClick={() => handleAlbumClick(album._id)}
                   sx={{
                     height: "100%",
                     background:
@@ -316,24 +359,93 @@ export default function AlbumsPage() {
                         left: "50%",
                         transform: "translate(-50%, -50%)",
                         opacity: 0,
-                        transition: "opacity 0.3s ease",
+                        transition: "all 0.3s ease",
                         ".MuiCard-root:hover &": {
                           opacity: 1,
                         },
                       }}
                     >
-                      <IconButton
-                        sx={{
-                          bgcolor: "rgba(244, 67, 54, 0.9)",
-                          color: "white",
-                          "&:hover": {
-                            bgcolor: "primary.main",
-                          },
-                        }}
-                        size="large"
-                      >
-                        <PlayArrow sx={{ fontSize: 32 }} />
-                      </IconButton>
+                      {expandedPlayAlbum === album._id ? (
+                        // Expanded streaming service icons
+                        <Stack 
+                          direction="row" 
+                          spacing={1}
+                          sx={{
+                            bgcolor: "rgba(0, 0, 0, 0.8)",
+                            borderRadius: "24px",
+                            p: 1,
+                          }}
+                        >
+                          {album.spotifyUrl && (
+                            <IconButton
+                              onClick={(e) => album.spotifyUrl && handleServiceClick(album.spotifyUrl, e)}
+                              sx={{
+                                bgcolor: "#1DB954",
+                                color: "white",
+                                "&:hover": {
+                                  bgcolor: "#1ed760",
+                                },
+                                width: 40,
+                                height: 40,
+                              }}
+                              title="Listen on Spotify"
+                            >
+                              <Box
+                                component="svg"
+                                viewBox="0 0 24 24"
+                                sx={{ width: 20, height: 20, fill: 'currentColor' }}
+                              >
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 14.4c-.17.29-.55.39-.84.22-2.29-1.4-5.18-1.72-8.58-.94-.33.07-.66-.13-.73-.46-.07-.33.13-.66.46-.73 3.74-.85 6.96-.49 9.51 1.05.29.17.39.55.22.84v.02zm1.2-2.68c-.21.34-.66.45-1 .24-2.62-1.61-6.61-2.07-9.72-1.13-.39.12-.8-.09-.92-.48s.09-.8.48-.92c3.56-1.08 8.02-.57 11.42 1.3.34.21.45.66.24 1v-.01zm.11-2.8C14.3 9 8.52 8.8 4.95 9.98c-.46.15-.94-.1-1.09-.56s.1-.94.56-1.09C8.69 7.14 15.1 7.38 19.33 9.5c.42.21.58.72.37 1.14-.21.42-.72.58-1.14.37-.01-.01-.02-.01-.03-.02v.03z"/>
+                              </Box>
+                            </IconButton>
+                          )}
+                          {album.youtubeMusicUrl && (
+                            <IconButton
+                              onClick={(e) => album.youtubeMusicUrl && handleServiceClick(album.youtubeMusicUrl, e)}
+                              sx={{
+                                bgcolor: "#FF0000",
+                                color: "white",
+                                "&:hover": {
+                                  bgcolor: "#ff1744",
+                                },
+                                width: 40,
+                                height: 40,
+                              }}
+                            >
+                              <PlayArrow />
+                            </IconButton>
+                          )}
+                          <IconButton
+                            onClick={(e) => handlePlayClick(album._id, e)}
+                            sx={{
+                              bgcolor: "rgba(255, 255, 255, 0.2)",
+                              color: "white",
+                              "&:hover": {
+                                bgcolor: "rgba(255, 255, 255, 0.3)",
+                              },
+                              width: 40,
+                              height: 40,
+                            }}
+                          >
+                            <Close />
+                          </IconButton>
+                        </Stack>
+                      ) : (
+                        // Collapsed play button
+                        <IconButton
+                          onClick={(e) => handlePlayClick(album._id, e)}
+                          sx={{
+                            bgcolor: "rgba(244, 67, 54, 0.9)",
+                            color: "white",
+                            "&:hover": {
+                              bgcolor: "primary.main",
+                            },
+                          }}
+                          size="large"
+                        >
+                          <PlayArrow sx={{ fontSize: 32 }} />
+                        </IconButton>
+                      )}
                     </Box>
                   </Box>
 
@@ -360,7 +472,7 @@ export default function AlbumsPage() {
 
                       {/* Theme */}
                       <Chip
-                        label={album.theme.title}
+                        label={album.theme?.title || 'No Theme'}
                         size="small"
                         color="secondary"
                         variant="outlined"
@@ -369,14 +481,14 @@ export default function AlbumsPage() {
                       {/* Posted By */}
                       <Stack direction="row" spacing={1} alignItems="center">
                         <Avatar
-                          src={album.postedBy.image}
-                          alt={album.postedBy.name}
+                          src={album.postedBy?.image}
+                          alt={album.postedBy?.name || 'Unknown'}
                           sx={{ width: 24, height: 24 }}
                         >
-                          {album.postedBy.name[0]?.toUpperCase()}
+                          {album.postedBy?.name?.[0]?.toUpperCase() || '?'}
                         </Avatar>
                         <Typography variant="caption" color="text.secondary">
-                          by {album.postedBy.name}
+                          by {album.postedBy?.name || 'Unknown'}
                         </Typography>
                       </Stack>
 
@@ -400,13 +512,32 @@ export default function AlbumsPage() {
                             icon={<Favorite />}
                             label={album.likeCount}
                             size="small"
-                            variant="outlined"
+                            variant={album.isLikedByUser ? "filled" : "outlined"}
+                            color={album.isLikedByUser ? "error" : "default"}
+                            onClick={(e) => handleLikeClick(album._id, e)}
+                            sx={{ 
+                              cursor: 'pointer',
+                              '&:hover': {
+                                bgcolor: album.isLikedByUser 
+                                  ? 'rgba(244, 67, 54, 0.8)' 
+                                  : 'rgba(244, 67, 54, 0.1)',
+                                borderColor: 'error.main'
+                              }
+                            }}
                           />
                           <Chip
                             icon={<Comment />}
                             label={album.commentCount}
                             size="small"
                             variant="outlined"
+                            onClick={(e) => handleCommentClick(album._id, e)}
+                            sx={{ 
+                              cursor: 'pointer',
+                              '&:hover': {
+                                bgcolor: 'rgba(33, 150, 243, 0.1)',
+                                borderColor: 'secondary.main'
+                              }
+                            }}
                           />
                         </Stack>
 

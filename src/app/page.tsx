@@ -1,3 +1,8 @@
+"use client";
+
+import { useEffect } from "react";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   Box,
@@ -9,6 +14,7 @@ import {
   Chip,
   Stack,
   Paper,
+  CircularProgress,
 } from "@mui/material";
 import {
   MusicNote,
@@ -22,6 +28,35 @@ import {
 } from "@mui/icons-material";
 
 export default function Home() {
+  const { status } = useSession();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (status === "authenticated") {
+      router.push("/dashboard");
+    }
+  }, [status, router]);
+
+  if (status === "loading") {
+    return (
+      <Box
+        sx={{
+          minHeight: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          bgcolor: "background.default",
+        }}
+      >
+        <CircularProgress size={60} />
+      </Box>
+    );
+  }
+
+  if (status === "authenticated") {
+    return null; // Will redirect to dashboard
+  }
+
   return (
     <Box sx={{ minHeight: "100vh", bgcolor: "background.default" }}>
       {/* Hero Section */}
@@ -496,7 +531,7 @@ export default function Home() {
                   WebkitTextFillColor: "transparent",
                 }}
               >
-                "90s Nostalgia"
+                &ldquo;90s Nostalgia&rdquo;
               </Typography>
               <Typography
                 variant="h5"
@@ -539,12 +574,12 @@ export default function Home() {
                 </Button>
                 <Button
                   component={Link}
-                  href="/themes"
+                  href="/albums"
                   variant="outlined"
                   size="large"
                   startIcon={<Event />}
                 >
-                  View All Themes
+                  View All Albums
                 </Button>
               </Stack>
             </Stack>

@@ -1,68 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-
-// Mock data for demonstration - replace with real YouTube Music API later
-const mockAlbums = [
-  {
-    id: "OLAK5uy_k6WqVQjPCT5ykN_w8mB2M1L0",
-    title: "Blood Sugar Sex Magik",
-    artist: "Red Hot Chili Peppers",
-    year: 1991,
-    thumbnail: "https://via.placeholder.com/150x150/d32f2f/ffffff?text=BSSM",
-    youtubeUrl:
-      "https://music.youtube.com/playlist?list=OLAK5uy_k6WqVQjPCT5ykN_w8mB2M1L0",
-    type: "Album",
-  },
-  {
-    id: "OLAK5uy_nBEE5TNHEA2Ryx2F3qLQvF2V",
-    title: "Californication",
-    artist: "Red Hot Chili Peppers",
-    year: 1999,
-    thumbnail: "https://via.placeholder.com/150x150/1976d2/ffffff?text=CALIF",
-    youtubeUrl:
-      "https://music.youtube.com/playlist?list=OLAK5uy_nBEE5TNHEA2Ryx2F3qLQvF2V",
-    type: "Album",
-  },
-  {
-    id: "OLAK5uy_lyCGJwR1Q9QxJPSWGJ8s7J8s",
-    title: "Stadium Arcadium",
-    artist: "Red Hot Chili Peppers",
-    year: 2006,
-    thumbnail: "https://via.placeholder.com/150x150/388e3c/ffffff?text=SA",
-    youtubeUrl:
-      "https://music.youtube.com/playlist?list=OLAK5uy_lyCGJwR1Q9QxJPSWGJ8s7J8s",
-    type: "Album",
-  },
-  {
-    id: "OLAK5uy_mByTheWay8FnA8FnA8FnA8Fn",
-    title: "By the Way",
-    artist: "Red Hot Chili Peppers",
-    year: 2002,
-    thumbnail: "https://via.placeholder.com/150x150/7b1fa2/ffffff?text=BTW",
-    youtubeUrl:
-      "https://music.youtube.com/playlist?list=OLAK5uy_mByTheWay8FnA8FnA8FnA8Fn",
-    type: "Album",
-  },
-  {
-    id: "OLAK5uy_mothersmilk123456789",
-    title: "Mother's Milk",
-    artist: "Red Hot Chili Peppers",
-    year: 1989,
-    thumbnail: "https://via.placeholder.com/150x150/f57c00/ffffff?text=MM",
-    youtubeUrl:
-      "https://music.youtube.com/playlist?list=OLAK5uy_mothersmilk123456789",
-    type: "Album",
-  },
-  {
-    id: "OLAK5uy_unlimited_love_2022",
-    title: "Unlimited Love",
-    artist: "Red Hot Chili Peppers",
-    year: 2022,
-    thumbnail: "https://via.placeholder.com/150x150/e91e63/ffffff?text=UL",
-    youtubeUrl:
-      "https://music.youtube.com/playlist?list=OLAK5uy_unlimited_love_2022",
-    type: "Album",
-  },
-];
+import YTMusic from "ytmusic-api";
 
 export async function GET(request: NextRequest) {
   try {
@@ -76,27 +13,97 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    console.log("Searching for:", query);
+    console.log("Searching YouTube Music for:", query);
 
-    // Simulate search delay
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    // Initialize ytmusic-api
+    const ytmusic = new YTMusic();
+    await ytmusic.initialize();
 
-    // Filter mock results based on query
-    const filteredAlbums = mockAlbums.filter(
-      (album) =>
-        album.title.toLowerCase().includes(query.toLowerCase()) ||
-        album.artist.toLowerCase().includes(query.toLowerCase())
-    );
+    let searchResults = [];
+    
+    try {
+      // Search for albums specifically
+      const results = await ytmusic.searchAlbums(query);
+      searchResults = results;
+      console.log(`Found ${searchResults.length} results from YouTube Music`);
+    } catch (apiError: any) {
+      console.warn("YouTube Music API error:", apiError?.message || apiError);
+      throw apiError;
+    }
+    
+    // Helper function to get the best quality thumbnail
+    const getBestThumbnail = (thumbnails: any[]) => {
+      if (!thumbnails || thumbnails.length === 0) return null;
+      
+      // Sort by width/height to get the highest quality
+      const sorted = thumbnails.sort((a, b) => {
+        const aSize = (a.width || 0) * (a.height || 0);
+        const bSize = (b.width || 0) * (b.height || 0);
+        return bSize - aSize;
+      });
+      
+      return sorted[0]?.url;
+    };
 
-    // If no specific matches, return all mock albums for demo
-    const results = filteredAlbums.length > 0 ? filteredAlbums : mockAlbums;
+    // Transform results to match our interface with enhanced details
+    const albums = searchResults.slice(0, 12).map((album: any) => ({
+      id: album.albumId || album.browseId || album.id,
+      title: album.name || album.title,
+      artist: album.artist?.name || album.author?.name || album.author || album.artist,
+      year: album.year,
+      thumbnail: getBestThumbnail(album.thumbnails) || album.thumbnail,
+      youtubeUrl: album.albumId 
+        ? `https://music.youtube.com/browse/${album.albumId}`
+        : album.playlistId
+        ? `https://music.youtube.com/playlist?list=${album.playlistId}`
+        : `https://music.youtube.com/browse/${album.browseId || album.id}`,
+      type: album.type || "Album",
+      
+      // Additional metadata for better UX
+      duration: album.duration,
+      trackCount: album.trackCount,
+      explicit: album.explicit,
+      
+      // Multiple thumbnail sizes
+      thumbnails: {
+        small: album.thumbnails?.find((t: any) => t.width <= 150)?.url,
+        medium: album.thumbnails?.find((t: any) => t.width >= 200 && t.width <= 400)?.url,
+        large: album.thumbnails?.find((t: any) => t.width >= 500)?.url,
+        original: getBestThumbnail(album.thumbnails)
+      }
+    }));
 
-    return NextResponse.json({ albums: results });
+    return NextResponse.json({ albums });
   } catch (error) {
     console.error("YouTube Music search error:", error);
-    return NextResponse.json(
-      { error: "Failed to search YouTube Music: " + (error as Error).message },
-      { status: 500 }
-    );
+    
+    const { searchParams } = new URL(request.url);
+    const query = searchParams.get("q") || "unknown";
+    
+    // Provide helpful mock data that suggests the user try manual entry
+    const mockAlbums = [
+      {
+        id: "manual_entry_suggestion",
+        title: `Search: "${query}"`,
+        artist: "YouTube Music API temporarily unavailable",
+        year: new Date().getFullYear(),
+        thumbnail: "https://via.placeholder.com/300x300/FF0000/ffffff?text=YTM+UNAVAILABLE",
+        youtubeUrl: `https://music.youtube.com/search?q=${encodeURIComponent(query)}`,
+        type: "Manual Entry Suggestion",
+        trackCount: 0,
+        thumbnails: {
+          small: "https://via.placeholder.com/150x150/FF0000/ffffff?text=YTM",
+          medium: "https://via.placeholder.com/300x300/FF0000/ffffff?text=YTM",
+          large: "https://via.placeholder.com/500x500/FF0000/ffffff?text=YTM",
+          original: "https://via.placeholder.com/500x500/FF0000/ffffff?text=YTM"
+        }
+      }
+    ];
+    
+    return NextResponse.json({ 
+      albums: mockAlbums,
+      error: "YouTube Music API temporarily unavailable. Try manual entry or paste a music link instead.",
+      suggestion: "Use the 'Paste Music Link' feature above for better results."
+    });
   }
 }

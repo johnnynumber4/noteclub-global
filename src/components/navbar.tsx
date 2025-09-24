@@ -65,12 +65,6 @@ export function Navbar() {
             Albums
           </Link>
           <Link
-            href="/themes"
-            className="text-sm font-semibold text-gray-300 hover:text-blue-400 transition-colors duration-200 hover:scale-105"
-          >
-            Themes
-          </Link>
-          <Link
             href="/members"
             className="text-sm font-semibold text-gray-300 hover:text-purple-400 transition-colors duration-200 hover:scale-105"
           >
@@ -243,13 +237,6 @@ export function Navbar() {
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Albums
-              </Link>
-              <Link
-                href="/themes"
-                className="block text-base font-semibold text-gray-300 hover:text-blue-400 transition-colors py-2"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Themes
               </Link>
               <Link
                 href="/members"

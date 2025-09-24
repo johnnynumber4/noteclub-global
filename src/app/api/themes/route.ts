@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
     const skip = (page - 1) * limit;
 
     // Build query based on status
-    let query: any = {};
+    let query: Record<string, unknown> = {};
     const now = new Date();
 
     switch (status) {
@@ -47,8 +47,7 @@ export async function GET(request: NextRequest) {
       .populate("createdBy", "name username image")
       .sort({ startDate: -1 })
       .skip(skip)
-      .limit(limit)
-      .lean();
+      .limit(limit);
 
     const total = await Theme.countDocuments(query);
 
@@ -92,9 +91,9 @@ export async function POST(request: NextRequest) {
     } = body;
 
     // Validate required fields
-    if (!title || !description || !startDate || !endDate) {
+    if (!title || !description) {
       return NextResponse.json(
-        { error: "Title, description, start date, and end date are required" },
+        { error: "Title and description are required" },
         { status: 400 }
       );
     }
@@ -105,56 +104,42 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    // Check if user has permission to create themes (moderator or admin)
-    if (user.role !== "moderator" && user.role !== "admin") {
-      return NextResponse.json(
-        { error: "Insufficient permissions" },
-        { status: 403 }
-      );
-    }
+    // Allow all users to create themes
 
-    // Validate dates
-    const start = new Date(startDate);
-    const end = new Date(endDate);
+    // Optional date validation
+    let start, end;
+    if (startDate && endDate) {
+      start = new Date(startDate);
+      end = new Date(endDate);
 
-    if (start >= end) {
-      return NextResponse.json(
-        { error: "End date must be after start date" },
-        { status: 400 }
-      );
-    }
-
-    // Check for overlapping active themes
-    const overlapping = await Theme.findOne({
-      isActive: true,
-      $or: [
-        {
-          startDate: { $lte: end },
-          endDate: { $gte: start },
-        },
-      ],
-    });
-
-    if (overlapping) {
-      return NextResponse.json(
-        { error: "Theme dates overlap with an existing active theme" },
-        { status: 400 }
-      );
+      if (start >= end) {
+        return NextResponse.json(
+          { error: "End date must be after start date" },
+          { status: 400 }
+        );
+      }
     }
 
     // Create the theme
-    const theme = new Theme({
+    const themeData: any = {
       title,
       description,
-      startDate: start,
-      endDate: end,
       createdBy: user._id,
       guidelines,
       examples,
       imageUrl,
       maxTurns,
-      isActive: start <= new Date(), // Auto-activate if start date is now or past
-    });
+      isActive: false, // Themes are inactive by default when no dates provided
+    };
+
+    // Only add dates if they were provided
+    if (start && end) {
+      themeData.startDate = start;
+      themeData.endDate = end;
+      themeData.isActive = start <= new Date(); // Auto-activate if start date is now or past
+    }
+
+    const theme = new Theme(themeData);
 
     await theme.save();
 

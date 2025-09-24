@@ -4,12 +4,20 @@ import { authOptions } from "@/lib/auth";
 import dbConnect from "@/lib/mongodb";
 import Album from "@/models/Album";
 import Theme from "@/models/Theme";
-import Turn from "@/models/Turn";
 import { User } from "@/models/User";
+import { Group } from "@/models/Group";
+import mongoose from "mongoose";
+import { fetchWikipediaDescription } from "@/lib/utils";
 
 export async function GET(request: NextRequest) {
   try {
     await dbConnect();
+
+    const session = await getServerSession(authOptions);
+    let currentUser = null;
+    if (session?.user?.email) {
+      currentUser = await User.findOne({ email: session.user.email });
+    }
 
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get("page") || "1");
@@ -20,8 +28,13 @@ export async function GET(request: NextRequest) {
 
     const skip = (page - 1) * limit;
 
-    // Build query
-    const query: any = { isApproved: true, isHidden: false };
+    // Build query - support both old and new schema
+    const query: Record<string, unknown> = { 
+      $or: [
+        { isApproved: true, isHidden: false }, // Old schema
+        { status: 'published' } // New migrated schema
+      ]
+    };
 
     if (theme) {
       query.theme = theme;
@@ -32,10 +45,10 @@ export async function GET(request: NextRequest) {
     }
 
     // Build sort
-    let sortQuery: any = {};
+    let sortQuery: Record<string, 1 | -1> = {};
     switch (sort) {
       case "newest":
-        sortQuery = { postedAt: -1 };
+        sortQuery = { postedAt: -1 }; // Now using postedAt as per schema
         break;
       case "oldest":
         sortQuery = { postedAt: 1 };
@@ -51,17 +64,71 @@ export async function GET(request: NextRequest) {
     }
 
     const albums = await Album.find(query)
-      .populate("postedBy", "name username image")
       .populate("theme", "title")
       .sort(sortQuery)
       .skip(skip)
       .limit(limit)
       .lean();
 
+    // Manual user lookup to handle ObjectId type issues
+    const userIds = [...new Set(albums.map((album: Record<string, unknown>) => album.postedBy?.toString()).filter(Boolean))];
+    
+    // Fetch all users and create string-based lookup map
+    const users = await User.find({}, "name username image").lean();
+    
+    const userMap = new Map();
+    users.forEach((user: Record<string, unknown>) => {
+      // Add both string and ObjectId versions for maximum compatibility
+      userMap.set(user._id.toString(), user);
+      if (user._id instanceof mongoose.Types.ObjectId) {
+        userMap.set(user._id.toString(), user);
+      }
+    });
+
+    // Add user like status and normalize mixed data structures
+    const albumsWithLikeStatus = albums.map((album: Record<string, unknown>) => {
+      // Get user from our manual lookup (handle both author and postedBy)
+      const userId = (album.postedBy || album.author)?.toString();
+      const user = userId ? userMap.get(userId) || { name: 'Unknown', username: 'unknown', image: null } 
+                          : { name: 'Unknown', username: 'unknown', image: null };
+      
+      // Normalize theme (handle both title and name)
+      const theme = album.theme ? {
+        title: (album.theme as any)?.title || (album.theme as any)?.name || 'No Theme'
+      } : { title: 'No Theme' };
+      
+      // Normalize cover image (handle both coverImageUrl and artwork object)
+      const coverImageUrl = album.coverImageUrl || 
+        (album.artwork as any)?.large || 
+        (album.artwork as any)?.medium || 
+        (album.artwork as any)?.small || 
+        null;
+      
+      // Normalize streaming links (handle both flat and nested structures)
+      const spotifyUrl = album.spotifyUrl || (album.links as any)?.spotify || null;
+      const youtubeMusicUrl = album.youtubeMusicUrl || (album.links as any)?.youtubeMusic || null;
+      const appleMusicUrl = album.appleMusicUrl || (album.links as any)?.appleMusic || null;
+      
+      return {
+        ...album,
+        // Ensure consistent field names
+        postedBy: user,
+        theme,
+        coverImageUrl,
+        spotifyUrl,
+        youtubeMusicUrl,
+        appleMusicUrl,
+        isLikedByUser: currentUser && Array.isArray(album.likes) 
+          ? album.likes.includes(currentUser._id) 
+          : false,
+        likeCount: Array.isArray(album.likes) ? album.likes.length : 0,
+      };
+    });
+
     const total = await Album.countDocuments(query);
 
     return NextResponse.json({
-      albums,
+      albums: albumsWithLikeStatus,
       pagination: {
         page,
         limit,
@@ -106,6 +173,7 @@ export async function POST(request: NextRequest) {
       trackCount,
       duration,
       label,
+      isOverride,
     } = body;
 
     // Validate required fields
@@ -116,11 +184,47 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Find user
+    // Find user by email (more reliable than session ID)
     const user = await User.findOne({ email: session.user.email });
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
+
+    // Use the actual user ID from database, not from session
+    const userId = user._id;
+
+    // Find or create default group
+    let defaultGroup = await Group.findOne({ name: 'Note Club' });
+    if (!defaultGroup) {
+      defaultGroup = new Group({
+        name: 'Note Club',
+        description: 'Default group for all Note Club members',
+        isPrivate: false,
+        inviteCode: 'DEFAULT',
+        maxMembers: 100,
+        members: [userId],
+        admins: [userId],
+        createdBy: userId,
+        turnOrder: [userId],
+        currentTurnIndex: 0,
+        turnDurationDays: 7,
+        totalAlbumsShared: 0,
+        totalThemes: 0,
+        allowMemberInvites: true,
+        requireApprovalForAlbums: false,
+        notifyOnNewAlbums: true,
+      });
+      await defaultGroup.save();
+    } else if (!defaultGroup.members.includes(userId)) {
+      // Add user to default group if not already a member
+      defaultGroup.members.push(userId);
+      if (!defaultGroup.turnOrder.includes(userId)) {
+        defaultGroup.turnOrder.push(userId);
+      }
+      await defaultGroup.save();
+    }
+
+    const groupId = defaultGroup._id;
 
     // Check if user is active and can post
     if (!user.isActive) {
@@ -136,40 +240,29 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Theme not found" }, { status: 404 });
     }
 
-    if (!theme.isCurrentlyActive) {
-      return NextResponse.json(
-        { error: "Theme is not currently active" },
-        { status: 400 }
-      );
-    }
+    // Allow posting to any theme - removed active theme restriction
 
-    // Check if it's the user's turn
-    const currentTurn = await Turn.findOne({
-      theme: themeId,
-      isActive: true,
-    }).populate("user");
+    // Allow all users to post anytime - removed turn restrictions
 
-    if (
-      !currentTurn ||
-      currentTurn.user._id.toString() !== user._id.toString()
-    ) {
-      return NextResponse.json(
-        { error: "It is not your turn to post" },
-        { status: 403 }
-      );
-    }
+    // Allow multiple posts per theme - removed restriction
 
-    // Check if user has already posted for this theme
-    const existingAlbum = await Album.findOne({
-      theme: themeId,
-      postedBy: user._id,
-    });
-
-    if (existingAlbum) {
-      return NextResponse.json(
-        { error: "You have already posted an album for this theme" },
-        { status: 400 }
-      );
+    // Auto-fetch Wikipedia description if not provided
+    let finalWikipediaUrl = wikipediaUrl;
+    let finalWikipediaDescription = wikipediaDescription;
+    
+    if (!wikipediaDescription && title && artist) {
+      try {
+        console.log(`Auto-fetching Wikipedia description for: ${title} by ${artist}`);
+        const wikiData = await fetchWikipediaDescription(title, artist);
+        if (wikiData.description && wikiData.source === 'wikipedia') {
+          finalWikipediaDescription = wikiData.description;
+          finalWikipediaUrl = wikiData.url;
+          console.log(`✅ Found Wikipedia description for ${title}`);
+        }
+      } catch (error) {
+        console.log(`Failed to auto-fetch Wikipedia description for ${title}:`, error);
+        // Continue without Wikipedia data
+      }
     }
 
     // Create the album
@@ -180,16 +273,17 @@ export async function POST(request: NextRequest) {
       genre,
       description,
       theme: themeId,
-      postedBy: user._id,
-      turnNumber: currentTurn.turnNumber,
+      group: groupId,
+      postedBy: userId,
+      turnNumber: 1, // Default turn number since turn restrictions removed
       spotifyUrl,
       youtubeMusicUrl,
       appleMusicUrl,
       tidalUrl,
       deezerUrl,
       coverImageUrl,
-      wikipediaUrl,
-      wikipediaDescription,
+      wikipediaUrl: finalWikipediaUrl,
+      wikipediaDescription: finalWikipediaDescription,
       trackCount,
       duration,
       label,
@@ -197,35 +291,25 @@ export async function POST(request: NextRequest) {
 
     await album.save();
 
-    // Update turn status
-    currentTurn.isCompleted = true;
-    currentTurn.completedAt = new Date();
-    currentTurn.album = album._id;
-    currentTurn.isActive = false;
-    await currentTurn.save();
+    // Turn management disabled - all users can post anytime
 
     // Update user statistics
-    user.albumsPosted += 1;
-    user.totalAlbumsPosted += 1;
-    user.lastPostDate = new Date();
-    await user.save();
+    try {
+      user.albumsPosted += 1;
+      user.totalAlbumsPosted += 1;
+      user.lastPostDate = new Date();
+      await user.save();
+    } catch (userSaveError) {
+      console.error("Error updating user statistics:", userSaveError);
+      // Don't fail the album creation if user stats update fails
+      // The album has been successfully created, just log the error
+    }
 
     // Update theme statistics
-    theme.albumCount += 1;
-    await theme.save();
-
-    // Activate next turn
-    const nextTurn = await Turn.findOne({
-      theme: themeId,
-      isCompleted: false,
-      isSkipped: false,
-    }).sort({ turnNumber: 1 });
-
-    if (nextTurn) {
-      nextTurn.isActive = true;
-      nextTurn.startedAt = new Date();
-      await nextTurn.save();
-    }
+    await Theme.updateOne(
+      { _id: themeId },
+      { $inc: { albumCount: 1 } }
+    );
 
     // Populate the album for response
     await album.populate("postedBy", "name username image");

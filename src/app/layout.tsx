@@ -6,27 +6,49 @@ import "@fontsource/roboto/500.css";
 import "@fontsource/roboto/700.css";
 import "@fontsource/roboto/900.css";
 import { Providers } from "@/components/providers";
-import { Navbar } from "@/components/navbar";
 import { NavbarMui } from "@/components/navbar-mui";
 import { Footer } from "@/components/footer";
 import MuiThemeProvider from "@/components/MuiThemeProvider";
+import NotificationManager from "@/components/NotificationManager";
+import PWAInstallPrompt from "@/components/PWAInstallPrompt";
+import "@/lib/sw-error-handler";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 
 export const metadata: Metadata = {
   title: "Note Club Modern",
   description:
-    "A modern music album sharing club - take turns sharing albums based on themes, in alphabetical order",
+    "Share and discover music albums with your friends in organized groups",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Note Club",
+  },
+  other: {
+    "mobile-web-app-capable": "yes",
+    "apple-mobile-web-app-capable": "yes",
+    "apple-mobile-web-app-status-bar-style": "default",
+    "apple-mobile-web-app-title": "Note Club",
+    "msapplication-TileColor": "#f44336",
+    "theme-color": "#f44336",
+  },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const session = await getServerSession(authOptions);
+
   return (
     <html lang="en">
       <body>
         <MuiThemeProvider>
-          <Providers>
+          <Providers session={session}>
+            <NotificationManager />
+            <PWAInstallPrompt />
             <NavbarMui />
             <main>{children}</main>
             <Footer />

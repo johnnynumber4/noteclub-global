@@ -1,23 +1,14 @@
 import type { NextConfig } from "next";
 import withPWA from "next-pwa";
 
-const nextConfig: NextConfig = {
-  /* config options here */
-  eslint: {
-    // Allow production builds to complete even if project has ESLint errors
-    ignoreDuringBuilds: true,
-  },
-  typescript: {
-    // Allow production builds to complete even if project has type errors
-    ignoreBuildErrors: true,
-  },
-};
+const isTurbopack = process.env.TURBOPACK === "1";
 
-export default withPWA({
+// PWA configuration with Turbopack compatibility
+const pwaConfig = {
   dest: "public",
   register: true,
   skipWaiting: true,
-  disable: process.env.NODE_ENV === "development",
+  disable: process.env.NODE_ENV === "development" || isTurbopack,
   buildExcludes: [/middleware-manifest\.json$/],
   // Add fallback handling for service worker errors
   fallbacks: {
@@ -73,4 +64,23 @@ export default withPWA({
       },
     },
   ],
-})(nextConfig);
+};
+
+const nextConfig: NextConfig = {
+  /* config options here */
+  eslint: {
+    // Allow production builds to complete even if project has ESLint errors
+    ignoreDuringBuilds: true,
+  },
+  typescript: {
+    // Allow production builds to complete even if project has type errors
+    ignoreBuildErrors: true,
+  },
+  // Turbopack configuration
+  turbopack: {
+    // Add any turbopack-specific configurations here if needed
+    resolveExtensions: [".mdx", ".tsx", ".ts", ".jsx", ".js", ".mjs", ".json"],
+  },
+};
+
+export default withPWA(pwaConfig)(nextConfig);

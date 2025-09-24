@@ -27,7 +27,6 @@ export async function GET(request: NextRequest) {
     ];
 
     let bestResult = null;
-    let wikipediaUrl = null;
 
     for (const searchTerm of searchTerms) {
       try {

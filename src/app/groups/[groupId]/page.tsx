@@ -261,7 +261,7 @@ export default function GroupDetailPage() {
                       <Paper sx={{ p: 3, bgcolor: "rgba(76, 175, 80, 0.1)", textAlign: "center" }}>
                         <Stack spacing={2}>
                           <Typography variant="h4" fontWeight={700} color="success.main">
-                            🎵 It's Your Turn!
+                            🎵 It&apos;s Your Turn!
                           </Typography>
                           <Typography variant="body1" color="text.secondary">
                             Share an album with your group
@@ -282,7 +282,7 @@ export default function GroupDetailPage() {
                       <Paper sx={{ p: 3, bgcolor: "rgba(33, 150, 243, 0.1)", textAlign: "center" }}>
                         <Stack spacing={2}>
                           <Typography variant="h5" fontWeight={700}>
-                            Someone Else's Turn
+                            Someone Else&apos;s Turn
                           </Typography>
                           <Typography variant="body1" color="text.secondary">
                             Waiting for the next album share...

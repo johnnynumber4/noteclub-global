@@ -47,13 +47,13 @@ export default function OfflinePage() {
 
             <Stack spacing={2} textAlign="center">
               <Typography variant="h3" fontWeight={900}>
-                You're Offline
+                You&apos;re Offline
               </Typography>
               <Typography variant="h6" color="text.secondary">
                 Check your internet connection and try again
               </Typography>
               <Typography variant="body1" color="text.secondary">
-                Don't worry - your music will be waiting when you're back online!
+                Don&apos;t worry - your music will be waiting when you&apos;re back online!
               </Typography>
             </Stack>
 

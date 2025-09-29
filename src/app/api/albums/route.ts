@@ -50,6 +50,7 @@ export async function GET(request: NextRequest) {
     const theme = searchParams.get("theme");
     const search = searchParams.get("search");
     const sort = searchParams.get("sort") || "newest";
+    const groupId = searchParams.get("groupId");
 
     const skip = (page - 1) * limit;
 
@@ -63,6 +64,10 @@ export async function GET(request: NextRequest) {
 
     if (theme) {
       query.theme = theme;
+    }
+
+    if (groupId) {
+      query.group = groupId;
     }
 
     if (search) {
@@ -88,21 +93,19 @@ export async function GET(request: NextRequest) {
         sortQuery = { postedAt: -1 };
     }
 
-    const albums = await Album.find(query)
+    // When searching, don't limit results to allow full search across all albums
+    const albumsQuery = Album.find(query)
       .populate("theme", "title")
+      .populate("group", "name")
       .sort(sortQuery)
-      .skip(skip)
-      .limit(limit)
       .lean();
 
-    // Manual user lookup to handle ObjectId type issues
-    const userIds = [
-      ...new Set(
-        albums
-          .map((album: Record<string, unknown>) => album.postedBy?.toString())
-          .filter(Boolean)
-      ),
-    ];
+    if (!search) {
+      // Only apply pagination when not searching
+      albumsQuery.skip(skip).limit(limit);
+    }
+
+    const albums = await albumsQuery;
 
     // Fetch all users and create string-based lookup map
     const users = await User.find({}, "_id name username image").lean();
@@ -161,11 +164,17 @@ export async function GET(request: NextRequest) {
         const appleMusicUrl =
           album.appleMusicUrl || (album.links as LinksData)?.appleMusic || null;
 
+        // Normalize group information
+        const group = album.group
+          ? { name: (album.group as { name: string }).name }
+          : { name: "NoteClub OGs" }; // Default group name
+
         return {
           ...album,
           // Ensure consistent field names
           postedBy: user,
           theme,
+          group,
           coverImageUrl,
           spotifyUrl,
           youtubeMusicUrl,
@@ -227,7 +236,6 @@ export async function POST(request: NextRequest) {
       trackCount,
       duration,
       label,
-      isOverride,
     } = body;
 
     // Validate required fields
@@ -248,11 +256,12 @@ export async function POST(request: NextRequest) {
     const userId = user._id;
 
     // Find or create default group
-    let defaultGroup = await Group.findOne({ name: "Note Club" });
+    let defaultGroup = await Group.findOne({ name: "NoteClub OGs" });
     if (!defaultGroup) {
       defaultGroup = new Group({
-        name: "Note Club",
-        description: "Default group for all Note Club members",
+        name: "NoteClub OGs",
+        description:
+          "The original Note Club community - music discovery pioneers",
         isPrivate: false,
         inviteCode: "DEFAULT",
         maxMembers: 100,
@@ -310,10 +319,16 @@ export async function POST(request: NextRequest) {
           `Auto-fetching Wikipedia description for: ${title} by ${artist}`
         );
         const wikiData = await fetchWikipediaDescription(title, artist);
-        if (wikiData.description && wikiData.source === "wikipedia") {
+        if (
+          wikiData.description &&
+          (wikiData.source === "wikipedia" ||
+            wikiData.source === "music-search")
+        ) {
           finalWikipediaDescription = wikiData.description;
           finalWikipediaUrl = wikiData.url;
-          console.log(`✅ Found Wikipedia description for ${title}`);
+          console.log(
+            `✅ Found description for ${title} from ${wikiData.source}`
+          );
         }
       } catch (error) {
         console.log(
@@ -374,6 +389,77 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ album }, { status: 201 });
   } catch (error) {
     console.error("Error creating album:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions);
+
+    // Only allow jyoungiv@gmail.com to delete albums
+    if (!session?.user?.email || session.user.email !== "jyoungiv@gmail.com") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    }
+
+    await dbConnect();
+
+    const { searchParams } = new URL(request.url);
+    const albumId = searchParams.get("id");
+
+    if (!albumId) {
+      return NextResponse.json(
+        { error: "Album ID is required" },
+        { status: 400 }
+      );
+    }
+
+    // Validate ObjectId format
+    if (!mongoose.Types.ObjectId.isValid(albumId)) {
+      return NextResponse.json({ error: "Invalid album ID" }, { status: 400 });
+    }
+
+    // Find and delete the album
+    const deletedAlbum = await Album.findByIdAndDelete(albumId);
+
+    if (!deletedAlbum) {
+      return NextResponse.json({ error: "Album not found" }, { status: 404 });
+    }
+
+    // Update theme statistics if the album had a theme
+    if (deletedAlbum.theme) {
+      await Theme.updateOne(
+        { _id: deletedAlbum.theme },
+        { $inc: { albumCount: -1 } }
+      );
+    }
+
+    // Update user statistics if possible
+    if (deletedAlbum.postedBy) {
+      await User.updateOne(
+        { _id: deletedAlbum.postedBy },
+        {
+          $inc: {
+            albumsPosted: -1,
+            totalAlbumsPosted: -1,
+          },
+        }
+      );
+    }
+
+    return NextResponse.json({
+      message: "Album deleted successfully",
+      deletedAlbum: {
+        id: deletedAlbum._id,
+        title: deletedAlbum.title,
+        artist: deletedAlbum.artist,
+      },
+    });
+  } catch (error) {
+    console.error("Error deleting album:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

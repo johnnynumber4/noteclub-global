@@ -145,17 +145,27 @@ export default function PostAlbumPage() {
         const active = data.themes?.find(
           (theme: Theme) => theme.isCurrentlyActive
         );
-        
+
         if (active) {
           setActiveTheme(active);
           setFormData((prev) => ({ ...prev, themeId: active._id }));
         } else {
-          // Fallback to "Random" theme if no active theme
-          const randomTheme = data.themes?.find(
-            (theme: Theme) => theme.title === "Random"
+          // If no active theme, use the latest added theme (first in sorted list)
+          // Skip "Random" theme and get the most recently created theme
+          const latestTheme = data.themes?.find(
+            (theme: Theme) => theme.title !== "Random"
           );
-          if (randomTheme) {
-            setFormData((prev) => ({ ...prev, themeId: randomTheme._id }));
+          if (latestTheme) {
+            setActiveTheme(latestTheme);
+            setFormData((prev) => ({ ...prev, themeId: latestTheme._id }));
+          } else {
+            // Final fallback to "Random" theme if no other themes exist
+            const randomTheme = data.themes?.find(
+              (theme: Theme) => theme.title === "Random"
+            );
+            if (randomTheme) {
+              setFormData((prev) => ({ ...prev, themeId: randomTheme._id }));
+            }
           }
         }
       }
@@ -428,18 +438,26 @@ export default function PostAlbumPage() {
                           <Typography variant="body1">
                             {theme.title}
                             {theme.isCurrentlyActive && (
-                              <Chip 
-                                label="Currently Active" 
-                                size="small" 
-                                color="success" 
+                              <Chip
+                                label="Currently Active"
+                                size="small"
+                                color="success"
+                                sx={{ ml: 1 }}
+                              />
+                            )}
+                            {!theme.isCurrentlyActive && theme._id === activeTheme?._id && (
+                              <Chip
+                                label="Current Theme"
+                                size="small"
+                                color="primary"
                                 sx={{ ml: 1 }}
                               />
                             )}
                             {theme.title === "Random" && (
-                              <Chip 
-                                label="Always Available" 
-                                size="small" 
-                                color="default" 
+                              <Chip
+                                label="Always Available"
+                                size="small"
+                                color="default"
                                 sx={{ ml: 1 }}
                               />
                             )}

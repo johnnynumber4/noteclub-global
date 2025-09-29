@@ -16,20 +16,20 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 
 export const metadata: Metadata = {
-  title: "Note Club Modern",
+  title: "NoteClub Modern",
   description:
     "Share and discover music albums with your friends in organized groups",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "Note Club",
+    title: "NoteClub",
   },
   other: {
     "mobile-web-app-capable": "yes",
     "apple-mobile-web-app-capable": "yes",
     "apple-mobile-web-app-status-bar-style": "default",
-    "apple-mobile-web-app-title": "Note Club",
+    "apple-mobile-web-app-title": "NoteClub",
     "msapplication-TileColor": "#f44336",
     "theme-color": "#f44336",
   },

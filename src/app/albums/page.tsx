@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
 import {
   Box,
   Container,
@@ -29,6 +30,7 @@ import {
   Album as AlbumIcon,
   PlayArrow,
   Close,
+  Delete,
 } from "@mui/icons-material";
 
 interface Album {
@@ -69,31 +71,40 @@ interface ApiResponse {
 }
 
 export default function AlbumsPage() {
+  const { data: session } = useSession();
   const [albums, setAlbums] = useState<Album[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [filteredAlbums, setFilteredAlbums] = useState<Album[]>([]);
   const [expandedPlayAlbum, setExpandedPlayAlbum] = useState<string | null>(null);
+  const [deletingAlbumId, setDeletingAlbumId] = useState<string | null>(null);
+
+  // Check if current user is admin (jyoungiv@gmail.com)
+  const isAdmin = session?.user?.email === "jyoungiv@gmail.com";
 
   useEffect(() => {
     fetchAlbums();
   }, []);
 
   useEffect(() => {
-    const filtered = albums.filter(
-      (album) =>
-        album.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        album.artist.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        album.theme?.title?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-    setFilteredAlbums(filtered);
-  }, [albums, searchTerm]);
+    // Debounce search to avoid too many API calls
+    const timeoutId = setTimeout(() => {
+      fetchAlbums();
+    }, 300);
+
+    return () => clearTimeout(timeoutId);
+  }, [searchTerm]);
 
   const fetchAlbums = async () => {
     try {
       setLoading(true);
-      const response = await fetch("/api/albums?limit=100");
+      const params = new URLSearchParams();
+      if (searchTerm) {
+        params.append('search', searchTerm);
+      } else {
+        params.append('limit', '100');
+      }
+      const response = await fetch(`/api/albums?${params.toString()}`);
       if (!response.ok) {
         throw new Error("Failed to fetch albums");
       }
@@ -128,6 +139,49 @@ export default function AlbumsPage() {
   const handleAlbumClick = (albumId: string) => {
     // Navigate to album detail page (we'll create this route)
     window.location.href = `/albums/${albumId}`;
+  };
+
+  const handleDeleteClick = async (albumId: string, event: React.MouseEvent) => {
+    event.stopPropagation(); // Prevent card click
+
+    if (!isAdmin) {
+      alert("You don't have permission to delete albums.");
+      return;
+    }
+
+    const album = albums.find(a => a._id === albumId);
+    if (!album) return;
+
+    const confirmDelete = window.confirm(
+      `Are you sure you want to delete "${album.title}" by ${album.artist}? This action cannot be undone.`
+    );
+
+    if (!confirmDelete) return;
+
+    try {
+      setDeletingAlbumId(albumId);
+
+      const response = await fetch(`/api/albums?id=${albumId}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to delete album');
+      }
+
+      // Remove album from local state
+      setAlbums(prevAlbums => prevAlbums.filter(a => a._id !== albumId));
+
+      const result = await response.json();
+      alert(`Successfully deleted "${result.deletedAlbum.title}" by ${result.deletedAlbum.artist}`);
+
+    } catch (err) {
+      console.error('Error deleting album:', err);
+      alert(err instanceof Error ? err.message : 'Failed to delete album');
+    } finally {
+      setDeletingAlbumId(null);
+    }
   };
 
   const handleLikeClick = async (albumId: string, event: React.MouseEvent) => {
@@ -268,7 +322,7 @@ export default function AlbumsPage() {
               />
               <Chip
                 icon={<FilterList />}
-                label={`${filteredAlbums.length} Results`}
+                label={`${albums.length} Results`}
                 color="secondary"
                 variant="outlined"
               />
@@ -276,7 +330,7 @@ export default function AlbumsPage() {
           </Stack>
 
           {/* Albums Grid */}
-          {filteredAlbums.length === 0 ? (
+          {albums.length === 0 ? (
             <Paper sx={{ p: 8, textAlign: "center" }}>
               <Stack spacing={3} alignItems="center">
                 <MusicNote sx={{ fontSize: 80, color: "text.secondary" }} />
@@ -310,7 +364,7 @@ export default function AlbumsPage() {
                 gap: 3,
               }}
             >
-              {filteredAlbums.map((album) => (
+              {albums.map((album) => (
                 <Card
                   key={album._id}
                   onClick={() => handleAlbumClick(album._id)}
@@ -550,7 +604,7 @@ export default function AlbumsPage() {
                             size="small"
                             variant="outlined"
                             onClick={(e) => handleCommentClick(album._id, e)}
-                            sx={{ 
+                            sx={{
                               cursor: 'pointer',
                               '&:hover': {
                                 bgcolor: 'rgba(33, 150, 243, 0.1)',
@@ -558,6 +612,25 @@ export default function AlbumsPage() {
                               }
                             }}
                           />
+                          {/* Delete button - only visible to admin */}
+                          {isAdmin && (
+                            <Chip
+                              icon={deletingAlbumId === album._id ? <CircularProgress size={16} /> : <Delete />}
+                              label="Delete"
+                              size="small"
+                              variant="outlined"
+                              color="error"
+                              disabled={deletingAlbumId === album._id}
+                              onClick={(e) => handleDeleteClick(album._id, e)}
+                              sx={{
+                                cursor: 'pointer',
+                                '&:hover': {
+                                  bgcolor: 'rgba(244, 67, 54, 0.1)',
+                                  borderColor: 'error.main'
+                                }
+                              }}
+                            />
+                          )}
                         </Stack>
 
                         {/* Streaming Links */}

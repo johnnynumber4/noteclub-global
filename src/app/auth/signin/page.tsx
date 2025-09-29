@@ -61,14 +61,16 @@ export default function SignIn() {
         console.log("✅ Sign in successful, getting session...");
         const newSession = await getSession();
         console.log("📋 New session:", newSession);
-        
+
         if (newSession) {
           console.log("🎯 Redirecting to dashboard...");
           router.push("/dashboard");
           router.refresh();
         } else {
           console.log("❌ No session after successful login");
-          setError("Login succeeded but session not created. Please try again.");
+          setError(
+            "Login succeeded but session not created. Please try again."
+          );
         }
       } else {
         console.log("❌ Unexpected sign in result:", result);
@@ -132,7 +134,7 @@ export default function SignIn() {
                 WebkitTextFillColor: "transparent",
               }}
             >
-              Note Club
+              NoteClub
             </Typography>
           </Stack>
 

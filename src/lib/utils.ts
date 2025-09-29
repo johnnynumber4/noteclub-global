@@ -6,12 +6,12 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 /**
- * Fetches Wikipedia description for an album
+ * Fetches Wikipedia description for an album, with fallback to music search APIs
  */
 export async function fetchWikipediaDescription(albumTitle: string, artistName: string): Promise<{
   description: string | null;
   url: string | null;
-  source: 'wikipedia' | 'fallback';
+  source: 'wikipedia' | 'music-search' | 'fallback';
 }> {
   try {
     // Try multiple Wikipedia search strategies
@@ -69,12 +69,62 @@ export async function fetchWikipediaDescription(albumTitle: string, artistName: 
             }
           }
         }
-      } catch (e) {
+      } catch {
         continue;
       }
     }
 
-    // No good match found
+    // If Wikipedia fails, try MusicBrainz API for album information
+    try {
+      console.log(`📀 Wikipedia failed for "${albumTitle}" by ${artistName}, trying MusicBrainz...`);
+
+      // Search MusicBrainz for album information
+      const searchQuery = `${albumTitle} AND artist:${artistName}`;
+      const mbResponse = await fetch(
+        `https://musicbrainz.org/ws/2/release-group?query=${encodeURIComponent(searchQuery)}&fmt=json&limit=3`,
+        {
+          headers: {
+            'User-Agent': 'NoteClubModern/1.0 (https://noteclub.com)',
+            'Accept': 'application/json'
+          }
+        }
+      );
+
+      if (mbResponse.ok) {
+        const mbData = await mbResponse.json();
+
+        for (const releaseGroup of mbData['release-groups'] || []) {
+          // Check if this is a good match
+          if (releaseGroup.title &&
+              releaseGroup.title.toLowerCase().includes(albumTitle.toLowerCase()) &&
+              releaseGroup['artist-credit'] &&
+              releaseGroup['artist-credit'][0]?.name.toLowerCase().includes(artistName.toLowerCase())) {
+
+            // Create a basic description from MusicBrainz data
+            const artist = releaseGroup['artist-credit'][0]?.name;
+            const year = releaseGroup['first-release-date']?.slice(0, 4);
+            const type = releaseGroup['primary-type'];
+
+            const description = `${releaseGroup.title} is ${year ? `a ${year} ` : ''}${type?.toLowerCase() || 'album'} by ${artist}.${
+              releaseGroup.disambiguation ? ` ${releaseGroup.disambiguation}` : ''
+            }`;
+
+            if (description.length > 30) {
+              console.log(`✅ Found basic info from MusicBrainz`);
+              return {
+                description: description,
+                url: `https://musicbrainz.org/release-group/${releaseGroup.id}`,
+                source: 'music-search'
+              };
+            }
+          }
+        }
+      }
+    } catch (mbError) {
+      console.log('MusicBrainz search failed:', mbError);
+    }
+
+    // No good match found from any source
     return {
       description: null,
       url: null,

@@ -74,7 +74,7 @@ export default function OfflinePage() {
             </Stack>
 
             <Typography variant="caption" color="text.secondary">
-              Note Club works best with an internet connection for discovering
+              NoteClub works best with an internet connection for discovering
               new music
             </Typography>
           </Stack>

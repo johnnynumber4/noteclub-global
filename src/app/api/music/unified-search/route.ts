@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Search both platforms in parallel
+    // Search both platforms in parallel with timeout
     const [spotifyResults, youtubeResults] = await Promise.allSettled([
       searchSpotify(query, limit),
       searchYouTubeMusic(query, limit),
@@ -98,7 +98,10 @@ async function searchSpotify(
     const response = await fetch(
       `${baseUrl}/api/spotify/search?q=${encodeURIComponent(
         query
-      )}&type=album&limit=${limit}`
+      )}&type=album&limit=${limit}`,
+      {
+        signal: AbortSignal.timeout(15000) // 15 second timeout
+      }
     );
 
     if (!response.ok) {
@@ -134,13 +137,19 @@ async function searchYouTubeMusic(
     // Try v2 API first, fallback to original
     const baseUrl = getBaseUrl();
     let response = await fetch(
-      `${baseUrl}/api/youtube-music/search-v2?q=${encodeURIComponent(query)}`
+      `${baseUrl}/api/youtube-music/search-v2?q=${encodeURIComponent(query)}`,
+      {
+        signal: AbortSignal.timeout(15000) // 15 second timeout
+      }
     );
 
     if (!response.ok) {
       // Fallback to original API
       response = await fetch(
-        `${baseUrl}/api/youtube-music/search?q=${encodeURIComponent(query)}`
+        `${baseUrl}/api/youtube-music/search?q=${encodeURIComponent(query)}`,
+        {
+          signal: AbortSignal.timeout(15000) // 15 second timeout
+        }
       );
     }
 

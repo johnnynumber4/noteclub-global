@@ -21,26 +21,27 @@ export async function GET(request: NextRequest) {
     }
 
     // Find or create default group (handle migrated data)
-    let defaultGroup = await Group.findOne({ 
+    let defaultGroup = await Group.findOne({
       $or: [
-        { name: 'Original Note Club' }, 
-        { name: 'Note Club' },
-        { name: 'Migrated Albums' }  // From the migration
-      ] 
+        { name: "NoteClub OGs" },
+        { name: "Original Note Club" },
+        { name: "Note Club" },
+        { name: "Migrated Albums" }, // From the migration
+      ],
     });
-    
+
     if (!defaultGroup) {
       // Create default group if it doesn't exist
       const allUsers = await User.find({}).sort({ name: 1 }); // Sort by first name
-      const userIds = allUsers.map(user => user._id);
-      
+      const userIds = allUsers.map((user) => user._id);
+
       console.log(`Creating default group with ${allUsers.length} users`);
-      
+
       defaultGroup = new Group({
-        name: 'Note Club',
-        description: 'Default group for all Note Club members',
+        name: "NoteClub OGs",
+        description: "Default group for all Note Club members",
         isPrivate: false,
-        inviteCode: 'DEFAULT',
+        inviteCode: "DEFAULT",
         maxMembers: 100,
         members: userIds,
         admins: [currentUser._id],
@@ -59,36 +60,50 @@ export async function GET(request: NextRequest) {
       // Add current user if not already in group
       if (!defaultGroup.members.includes(currentUser._id)) {
         defaultGroup.members.push(currentUser._id);
-        
+
         // Update turn order with alphabetical sorting
-        const allGroupUsers = await User.find({ 
-          _id: { $in: defaultGroup.members } 
+        const allGroupUsers = await User.find({
+          _id: { $in: defaultGroup.members },
         }).sort({ name: 1 });
-        
-        defaultGroup.turnOrder = allGroupUsers.map(user => user._id);
+
+        defaultGroup.turnOrder = allGroupUsers.map((user) => user._id);
         await defaultGroup.save();
       }
     }
 
     // Populate current turn user info
-    const currentTurnUserId = defaultGroup.turnOrder[defaultGroup.currentTurnIndex];
-    const currentTurnUser = await User.findById(currentTurnUserId).select('name username image');
-    
-    // Get next turn user
-    const nextTurnIndex = (defaultGroup.currentTurnIndex + 1) % defaultGroup.turnOrder.length;
-    const nextTurnUserId = defaultGroup.turnOrder[nextTurnIndex];
-    const nextTurnUser = await User.findById(nextTurnUserId).select('name username image');
+    const currentTurnUserId =
+      defaultGroup.turnOrder[defaultGroup.currentTurnIndex];
+    const currentTurnUser = await User.findById(currentTurnUserId).select(
+      "name username image"
+    );
 
-    const isMyTurn = currentTurnUserId?.toString() === currentUser._id.toString();
-    
+    // Get next turn user
+    const nextTurnIndex =
+      (defaultGroup.currentTurnIndex + 1) % defaultGroup.turnOrder.length;
+    const nextTurnUserId = defaultGroup.turnOrder[nextTurnIndex];
+    const nextTurnUser = await User.findById(nextTurnUserId).select(
+      "name username image"
+    );
+
+    const isMyTurn =
+      currentTurnUserId?.toString() === currentUser._id.toString();
+
     // Get all users in turn order for display
-    const allTurnUsers = await User.find({ 
-      _id: { $in: defaultGroup.turnOrder } 
-    }).select('name username image');
-    
+    const allTurnUsers = await User.find({
+      _id: { $in: defaultGroup.turnOrder },
+    }).select("name username image");
+
     const orderedUsers = defaultGroup.turnOrder
-      .map((userId: any) => allTurnUsers.find((user: any) => user._id.toString() === userId.toString()))
-      .filter((user: any): user is NonNullable<typeof user> => user != null && user.name != null);
+      .map((userId: any) =>
+        allTurnUsers.find(
+          (user: any) => user._id.toString() === userId.toString()
+        )
+      )
+      .filter(
+        (user: any): user is NonNullable<typeof user> =>
+          user != null && user.name != null
+      );
 
     return NextResponse.json({
       isMyTurn,
@@ -99,7 +114,6 @@ export async function GET(request: NextRequest) {
       turnOrder: orderedUsers,
       groupName: defaultGroup.name,
     });
-
   } catch (error) {
     console.error("Error fetching turn status:", error);
     return NextResponse.json(

@@ -346,7 +346,7 @@ export default function Home() {
               <Typography variant="h2" fontWeight={900}>
                 How{" "}
                 <Box component="span" color="primary.main">
-                  Note Club
+                  NoteClub
                 </Box>{" "}
                 Works
               </Typography>
@@ -490,7 +490,6 @@ export default function Home() {
           </Stack>
         </Container>
       </Box>
-
     </Box>
   );
 }

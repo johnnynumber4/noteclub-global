@@ -36,6 +36,8 @@ interface Album {
   year?: number;
   genre?: string;
   description?: string;
+  wikipediaDescription?: string;
+  wikipediaUrl?: string;
   coverImageUrl?: string;
   spotifyUrl?: string;
   youtubeMusicUrl?: string;
@@ -269,13 +271,46 @@ export default function AlbumDetailPage() {
                   sx={{ alignSelf: "flex-start" }}
                 />
 
-                {/* Description */}
-                {album.description && (
-                  <Paper sx={{ p: 3, bgcolor: "rgba(255, 255, 255, 0.05)" }}>
-                    <Typography variant="body1" lineHeight={1.7}>
-                      {album.description}
-                    </Typography>
-                  </Paper>
+                {/* Descriptions */}
+                {(album.description || album.wikipediaDescription) && (
+                  <Stack spacing={2}>
+                    {album.description && (
+                      <Paper sx={{ p: 3, bgcolor: "rgba(255, 255, 255, 0.05)" }}>
+                        <Typography variant="subtitle2" fontWeight={600} color="secondary" gutterBottom>
+                          User Description
+                        </Typography>
+                        <Typography variant="body1" lineHeight={1.7}>
+                          {album.description}
+                        </Typography>
+                      </Paper>
+                    )}
+
+                    {album.wikipediaDescription && (
+                      <Paper sx={{ p: 3, bgcolor: "rgba(33, 150, 243, 0.05)" }}>
+                        <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 1 }}>
+                          <Typography variant="subtitle2" fontWeight={600} color="primary" gutterBottom>
+                            Album Information
+                          </Typography>
+                          {album.wikipediaUrl && (
+                            <IconButton
+                              component="a"
+                              href={album.wikipediaUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              size="small"
+                              sx={{ color: 'primary.main' }}
+                              title="Read more on Wikipedia"
+                            >
+                              <OpenInNew fontSize="small" />
+                            </IconButton>
+                          )}
+                        </Stack>
+                        <Typography variant="body1" lineHeight={1.7}>
+                          {album.wikipediaDescription}
+                        </Typography>
+                      </Paper>
+                    )}
+                  </Stack>
                 )}
 
                 {/* Actions */}

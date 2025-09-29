@@ -45,7 +45,7 @@ export async function GET(request: NextRequest) {
 
     const themes = await Theme.find(query)
       .populate("createdBy", "name username image")
-      .sort({ startDate: -1 })
+      .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
 

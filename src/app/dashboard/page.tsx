@@ -20,11 +20,7 @@ import {
   CircularProgress,
   Alert,
 } from "@mui/material";
-import {
-  MusicNote,
-  PlayArrow,
-  Schedule,
-} from "@mui/icons-material";
+import { MusicNote, PlayArrow, Schedule } from "@mui/icons-material";
 
 interface Album {
   _id: string;
@@ -88,13 +84,13 @@ export default function DashboardPage() {
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
-      
+
       // Fetch turn status (replaces groups functionality)
       const turnResponse = await fetch("/api/turn-status");
       if (turnResponse.ok) {
         const turnData = await turnResponse.json();
         // Validate the data structure before setting state
-        if (turnData && typeof turnData === 'object') {
+        if (turnData && typeof turnData === "object") {
           setTurnStatus(turnData);
         } else {
           console.error("Invalid turn status data:", turnData);
@@ -106,7 +102,7 @@ export default function DashboardPage() {
       if (albumsResponse.ok) {
         const albumsData = await albumsResponse.json();
         setRecentAlbums(albumsData.albums || []);
-        
+
         // Set current album as the most recent
         if (albumsData.albums && albumsData.albums.length > 0) {
           setCurrentAlbum(albumsData.albums[0]);
@@ -118,7 +114,6 @@ export default function DashboardPage() {
       setLoading(false);
     }
   };
-
 
   if (status === "loading" || loading || !session?.user) {
     return (
@@ -139,7 +134,9 @@ export default function DashboardPage() {
   if (!session?.user?.name) return null;
 
   return (
-    <Box sx={{ minHeight: "100vh", bgcolor: "background.default", pt: 10, pb: 4 }}>
+    <Box
+      sx={{ minHeight: "100vh", bgcolor: "background.default", pt: 10, pb: 4 }}
+    >
       <Container maxWidth="lg">
         <Stack spacing={4}>
           {/* Header */}
@@ -158,6 +155,16 @@ export default function DashboardPage() {
               </Typography>
             </Stack>
 
+            <Stack direction="row" spacing={2}>
+              <Button
+                variant="outlined"
+                component={Link}
+                href="/groups"
+                startIcon={<MusicNote />}
+              >
+                Manage Groups
+              </Button>
+            </Stack>
           </Stack>
 
           {/* Success/Error Messages */}
@@ -167,8 +174,8 @@ export default function DashboardPage() {
             </Alert>
           )}
           {error && (
-            <Alert 
-              severity="error" 
+            <Alert
+              severity="error"
               sx={{ borderRadius: 2 }}
               onClose={() => setError("")}
             >
@@ -183,25 +190,34 @@ export default function DashboardPage() {
             </Typography>
 
             {turnStatus ? (
-              <Paper sx={{ 
-                p: 4, 
-                background: turnStatus.isMyTurn 
-                  ? "linear-gradient(135deg, rgba(244, 67, 54, 0.1), rgba(33, 150, 243, 0.1))"
-                  : "background.paper",
-                border: turnStatus.isMyTurn ? "2px solid" : "1px solid",
-                borderColor: turnStatus.isMyTurn ? "primary.main" : "divider",
-              }}>
+              <Paper
+                sx={{
+                  p: 4,
+                  background: turnStatus.isMyTurn
+                    ? "linear-gradient(135deg, rgba(244, 67, 54, 0.1), rgba(33, 150, 243, 0.1))"
+                    : "background.paper",
+                  border: turnStatus.isMyTurn ? "2px solid" : "1px solid",
+                  borderColor: turnStatus.isMyTurn ? "primary.main" : "divider",
+                }}
+              >
                 <Stack spacing={3}>
                   {turnStatus.isMyTurn ? (
                     <>
                       <Stack direction="row" alignItems="center" spacing={2}>
-                        <PlayArrow sx={{ fontSize: 40, color: "primary.main" }} />
-                        <Typography variant="h5" fontWeight={700} color="primary">
+                        <PlayArrow
+                          sx={{ fontSize: 40, color: "primary.main" }}
+                        />
+                        <Typography
+                          variant="h5"
+                          fontWeight={700}
+                          color="primary"
+                        >
                           Your Turn to Pick! 🎵
                         </Typography>
                       </Stack>
                       <Typography variant="body1" color="text.secondary">
-                        Choose an amazing album to share with the Note Club community!
+                        Choose an amazing album to share with the NoteClub
+                        community!
                       </Typography>
                       <Button
                         variant="contained"
@@ -210,11 +226,13 @@ export default function DashboardPage() {
                         component={Link}
                         href="/post-album"
                         sx={{
-                          background: "linear-gradient(45deg, #f44336 30%, #2196f3 90%)",
+                          background:
+                            "linear-gradient(45deg, #f44336 30%, #2196f3 90%)",
                           "&:hover": {
-                            background: "linear-gradient(45deg, #d32f2f 30%, #1976d2 90%)",
+                            background:
+                              "linear-gradient(45deg, #d32f2f 30%, #1976d2 90%)",
                           },
-                          width: "fit-content"
+                          width: "fit-content",
                         }}
                       >
                         Pick Your Album
@@ -223,24 +241,30 @@ export default function DashboardPage() {
                   ) : (
                     <>
                       <Stack direction="row" alignItems="center" spacing={2}>
-                        <Schedule sx={{ fontSize: 40, color: "text.secondary" }} />
+                        <Schedule
+                          sx={{ fontSize: 40, color: "text.secondary" }}
+                        />
                         <Typography variant="h5" fontWeight={700}>
-                          Next Pick By: {turnStatus.currentTurnUser?.name || "Unknown User"}
+                          Next Pick By:{" "}
+                          {turnStatus.currentTurnUser?.name || "Unknown User"}
                         </Typography>
                       </Stack>
                       <Typography variant="body1" color="text.secondary">
                         {turnStatus.nextTurnUser?.name && (
-                          <>Up next: <strong>{turnStatus.nextTurnUser?.name}</strong></>
+                          <>
+                            Up next:{" "}
+                            <strong>{turnStatus.nextTurnUser?.name}</strong>
+                          </>
                         )}
                       </Typography>
-                      
+
                       <Button
                         variant="outlined"
                         size="medium"
                         startIcon={<MusicNote />}
                         component={Link}
                         href="/post-album?override=true"
-                        sx={{ 
+                        sx={{
                           width: "fit-content",
                           mt: 2,
                           borderColor: "primary.main",
@@ -248,40 +272,65 @@ export default function DashboardPage() {
                           "&:hover": {
                             backgroundColor: "primary.main",
                             color: "white",
-                          }
+                          },
                         }}
                       >
                         Pick Anyway (Override)
                       </Button>
                     </>
                   )}
-                  
+
                   {/* Turn Order Display */}
-                  {turnStatus.turnOrder && Array.isArray(turnStatus.turnOrder) && turnStatus.turnOrder.length > 0 && (
-                    <Box>
-                      <Typography variant="h6" gutterBottom>
-                        Turn Order (Alphabetical)
-                      </Typography>
-                      <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
-                        {turnStatus.turnOrder.filter((user: any) => user && user._id).map((user: any, index: number) => (
-                          <Chip
-                            key={user._id}
-                            avatar={<Avatar src={user?.image}>{user?.name?.[0] || '?'}</Avatar>}
-                            label={user?.name || 'Unknown User'}
-                            variant={index === turnStatus.currentTurnIndex ? "filled" : "outlined"}
-                            color={index === turnStatus.currentTurnIndex ? "primary" : "default"}
-                            size="small"
-                          />
-                        ))}
-                      </Stack>
-                    </Box>
-                  )}
+                  {turnStatus.turnOrder &&
+                    Array.isArray(turnStatus.turnOrder) &&
+                    turnStatus.turnOrder.length > 0 && (
+                      <Box>
+                        <Typography variant="h6" gutterBottom>
+                          Turn Order (Alphabetical)
+                        </Typography>
+                        <Stack
+                          direction="row"
+                          spacing={1}
+                          flexWrap="wrap"
+                          useFlexGap
+                        >
+                          {turnStatus.turnOrder
+                            .filter((user: any) => user && user._id)
+                            .map((user: any, index: number) => (
+                              <Chip
+                                key={user._id}
+                                avatar={
+                                  <Avatar src={user?.image}>
+                                    {user?.name?.[0] || "?"}
+                                  </Avatar>
+                                }
+                                label={user?.name || "Unknown User"}
+                                variant={
+                                  index === turnStatus.currentTurnIndex
+                                    ? "filled"
+                                    : "outlined"
+                                }
+                                color={
+                                  index === turnStatus.currentTurnIndex
+                                    ? "primary"
+                                    : "default"
+                                }
+                                size="small"
+                              />
+                            ))}
+                        </Stack>
+                      </Box>
+                    )}
                 </Stack>
               </Paper>
             ) : (
               <Paper sx={{ p: 6, textAlign: "center" }}>
                 <CircularProgress />
-                <Typography variant="body1" color="text.secondary" sx={{ mt: 2 }}>
+                <Typography
+                  variant="body1"
+                  color="text.secondary"
+                  sx={{ mt: 2 }}
+                >
                   Loading turn status...
                 </Typography>
               </Paper>
@@ -294,9 +343,19 @@ export default function DashboardPage() {
               <Typography variant="h4" fontWeight={700}>
                 Current Album Pick
               </Typography>
-              
-              <Paper sx={{ p: 4, background: "linear-gradient(135deg, rgba(33, 150, 243, 0.05), rgba(244, 67, 54, 0.05))" }}>
-                <Stack direction={{ xs: "column", md: "row" }} spacing={3} alignItems="center">
+
+              <Paper
+                sx={{
+                  p: 4,
+                  background:
+                    "linear-gradient(135deg, rgba(33, 150, 243, 0.05), rgba(244, 67, 54, 0.05))",
+                }}
+              >
+                <Stack
+                  direction={{ xs: "column", md: "row" }}
+                  spacing={3}
+                  alignItems="center"
+                >
                   {currentAlbum.coverImageUrl && (
                     <Box
                       sx={{
@@ -315,7 +374,7 @@ export default function DashboardPage() {
                       />
                     </Box>
                   )}
-                  
+
                   <Stack spacing={2} flex={1}>
                     <Stack spacing={1}>
                       <Typography variant="h5" fontWeight={700}>
@@ -325,10 +384,12 @@ export default function DashboardPage() {
                         {currentAlbum.artist}
                       </Typography>
                       <Typography variant="body2" color="text.secondary">
-                        Latest pick by {currentAlbum.postedBy?.name || 'Unknown'} • {currentAlbum.group?.name || 'Unknown Group'}
+                        Latest pick by{" "}
+                        {currentAlbum.postedBy?.name || "Unknown"} •{" "}
+                        {currentAlbum.group?.name || "Unknown Group"}
                       </Typography>
                     </Stack>
-                    
+
                     <Button
                       variant="outlined"
                       size="small"
@@ -373,6 +434,8 @@ export default function DashboardPage() {
                         height: "100%",
                         cursor: "pointer",
                         transition: "all 0.3s ease",
+                        border: "none",
+                        boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
                         "&:hover": {
                           transform: "translateY(-4px)",
                           boxShadow: "0 8px 16px rgba(0,0,0,0.2)",
@@ -393,11 +456,16 @@ export default function DashboardPage() {
                         <Typography variant="h6" fontWeight={700} noWrap>
                           {album.title}
                         </Typography>
-                        <Typography variant="body2" color="text.secondary" noWrap>
+                        <Typography
+                          variant="body2"
+                          color="text.secondary"
+                          noWrap
+                        >
                           {album.artist}
                         </Typography>
                         <Typography variant="caption" color="text.secondary">
-                          by {album.postedBy?.name || 'Unknown'} • {album.group?.name || 'Unknown Group'}
+                          by {album.postedBy?.name || "Unknown"} •{" "}
+                          {album.group?.name || "Unknown Group"}
                         </Typography>
                       </CardContent>
                     </Card>

@@ -30,19 +30,21 @@ export async function GET(
     }
 
     // Manual user lookup to handle ObjectId type issues
-    let user = { name: 'Unknown', username: 'unknown', image: null };
+    let user = { _id: null, name: 'Unknown', username: 'unknown', image: null };
     if ((album as any).postedBy) {
       // Use the same approach as the main albums API
-      const users = await User.find({}, "name username image").lean();
+      const users = await User.find({}, "_id name username image").lean();
       const userMap = new Map();
       users.forEach((u: any) => {
         userMap.set(u._id.toString(), u);
       });
-      
+
       const foundUser = userMap.get((album as any).postedBy.toString());
-      
+
       if (foundUser) {
         user = foundUser;
+      } else {
+        user._id = (album as any).postedBy.toString();
       }
     }
 

@@ -9,6 +9,31 @@ import { Group } from "@/models/Group";
 import mongoose from "mongoose";
 import { fetchWikipediaDescription } from "@/lib/utils";
 
+// Type definitions for better type safety
+interface UserLookup {
+  _id: string | mongoose.Types.ObjectId;
+  name: string;
+  username: string;
+  image?: string;
+}
+
+interface ThemeData {
+  title?: string;
+  name?: string;
+}
+
+interface ArtworkData {
+  large?: string;
+  medium?: string;
+  small?: string;
+}
+
+interface LinksData {
+  spotify?: string;
+  youtubeMusic?: string;
+  appleMusic?: string;
+}
+
 export async function GET(request: NextRequest) {
   try {
     await dbConnect();
@@ -25,19 +50,24 @@ export async function GET(request: NextRequest) {
     const theme = searchParams.get("theme");
     const search = searchParams.get("search");
     const sort = searchParams.get("sort") || "newest";
+    const groupId = searchParams.get("groupId");
 
     const skip = (page - 1) * limit;
 
     // Build query - support both old and new schema
-    const query: Record<string, unknown> = { 
+    const query: Record<string, unknown> = {
       $or: [
         { isApproved: true, isHidden: false }, // Old schema
-        { status: 'published' } // New migrated schema
-      ]
+        { status: "published" }, // New migrated schema
+      ],
     };
 
     if (theme) {
       query.theme = theme;
+    }
+
+    if (groupId) {
+      query.group = groupId;
     }
 
     if (search) {
@@ -63,67 +93,100 @@ export async function GET(request: NextRequest) {
         sortQuery = { postedAt: -1 };
     }
 
-    const albums = await Album.find(query)
+    // When searching, don't limit results to allow full search across all albums
+    const albumsQuery = Album.find(query)
       .populate("theme", "title")
+      .populate("group", "name")
       .sort(sortQuery)
-      .skip(skip)
-      .limit(limit)
       .lean();
 
-    // Manual user lookup to handle ObjectId type issues
-    const userIds = [...new Set(albums.map((album: Record<string, unknown>) => album.postedBy?.toString()).filter(Boolean))];
-    
+    if (!search) {
+      // Only apply pagination when not searching
+      albumsQuery.skip(skip).limit(limit);
+    }
+
+    const albums = await albumsQuery;
+
     // Fetch all users and create string-based lookup map
-    const users = await User.find({}, "name username image").lean();
-    
+    const users = await User.find({}, "_id name username image").lean();
+
     const userMap = new Map();
-    users.forEach((user: Record<string, unknown>) => {
-      // Add both string and ObjectId versions for maximum compatibility
-      userMap.set(user._id.toString(), user);
-      if (user._id instanceof mongoose.Types.ObjectId) {
-        userMap.set(user._id.toString(), user);
+    users.forEach((user) => {
+      // Handle both ObjectId and string cases for maximum compatibility
+      if (user._id) {
+        const userIdString =
+          user._id instanceof mongoose.Types.ObjectId
+            ? user._id.toString()
+            : user._id.toString();
+        userMap.set(userIdString, user);
       }
     });
 
     // Add user like status and normalize mixed data structures
-    const albumsWithLikeStatus = albums.map((album: Record<string, unknown>) => {
-      // Get user from our manual lookup (handle both author and postedBy)
-      const userId = (album.postedBy || album.author)?.toString();
-      const user = userId ? userMap.get(userId) || { name: 'Unknown', username: 'unknown', image: null } 
-                          : { name: 'Unknown', username: 'unknown', image: null };
-      
-      // Normalize theme (handle both title and name)
-      const theme = album.theme ? {
-        title: (album.theme as any)?.title || (album.theme as any)?.name || 'No Theme'
-      } : { title: 'No Theme' };
-      
-      // Normalize cover image (handle both coverImageUrl and artwork object)
-      const coverImageUrl = album.coverImageUrl || 
-        (album.artwork as any)?.large || 
-        (album.artwork as any)?.medium || 
-        (album.artwork as any)?.small || 
-        null;
-      
-      // Normalize streaming links (handle both flat and nested structures)
-      const spotifyUrl = album.spotifyUrl || (album.links as any)?.spotify || null;
-      const youtubeMusicUrl = album.youtubeMusicUrl || (album.links as any)?.youtubeMusic || null;
-      const appleMusicUrl = album.appleMusicUrl || (album.links as any)?.appleMusic || null;
-      
-      return {
-        ...album,
-        // Ensure consistent field names
-        postedBy: user,
-        theme,
-        coverImageUrl,
-        spotifyUrl,
-        youtubeMusicUrl,
-        appleMusicUrl,
-        isLikedByUser: currentUser && Array.isArray(album.likes) 
-          ? album.likes.includes(currentUser._id) 
-          : false,
-        likeCount: Array.isArray(album.likes) ? album.likes.length : 0,
-      };
-    });
+    const albumsWithLikeStatus = albums.map(
+      (album: Record<string, unknown>) => {
+        // Get user from our manual lookup (handle both author and postedBy)
+        const userId = (album.postedBy || album.author)?.toString();
+        const user = userId
+          ? userMap.get(userId) || {
+              _id: userId,
+              name: "Unknown",
+              username: "unknown",
+              image: null,
+            }
+          : { _id: null, name: "Unknown", username: "unknown", image: null };
+
+        // Normalize theme (handle both title and name)
+        const theme = album.theme
+          ? {
+              title:
+                (album.theme as ThemeData)?.title ||
+                (album.theme as ThemeData)?.name ||
+                "No Theme",
+            }
+          : { title: "No Theme" };
+
+        // Normalize cover image (handle both coverImageUrl and artwork object)
+        const coverImageUrl =
+          album.coverImageUrl ||
+          (album.artwork as ArtworkData)?.large ||
+          (album.artwork as ArtworkData)?.medium ||
+          (album.artwork as ArtworkData)?.small ||
+          null;
+
+        // Normalize streaming links (handle both flat and nested structures)
+        const spotifyUrl =
+          album.spotifyUrl || (album.links as LinksData)?.spotify || null;
+        const youtubeMusicUrl =
+          album.youtubeMusicUrl ||
+          (album.links as LinksData)?.youtubeMusic ||
+          null;
+        const appleMusicUrl =
+          album.appleMusicUrl || (album.links as LinksData)?.appleMusic || null;
+
+        // Normalize group information
+        const group = album.group
+          ? { name: (album.group as { name: string }).name }
+          : { name: "NoteClub OGs" }; // Default group name
+
+        return {
+          ...album,
+          // Ensure consistent field names
+          postedBy: user,
+          theme,
+          group,
+          coverImageUrl,
+          spotifyUrl,
+          youtubeMusicUrl,
+          appleMusicUrl,
+          isLikedByUser:
+            currentUser && Array.isArray(album.likes)
+              ? album.likes.includes(currentUser._id)
+              : false,
+          likeCount: Array.isArray(album.likes) ? album.likes.length : 0,
+        };
+      }
+    );
 
     const total = await Album.countDocuments(query);
 
@@ -173,7 +236,6 @@ export async function POST(request: NextRequest) {
       trackCount,
       duration,
       label,
-      isOverride,
     } = body;
 
     // Validate required fields
@@ -194,13 +256,14 @@ export async function POST(request: NextRequest) {
     const userId = user._id;
 
     // Find or create default group
-    let defaultGroup = await Group.findOne({ name: 'Note Club' });
+    let defaultGroup = await Group.findOne({ name: "NoteClub OGs" });
     if (!defaultGroup) {
       defaultGroup = new Group({
-        name: 'Note Club',
-        description: 'Default group for all Note Club members',
+        name: "NoteClub OGs",
+        description:
+          "The original Note Club community - music discovery pioneers",
         isPrivate: false,
-        inviteCode: 'DEFAULT',
+        inviteCode: "DEFAULT",
         maxMembers: 100,
         members: [userId],
         admins: [userId],
@@ -249,18 +312,29 @@ export async function POST(request: NextRequest) {
     // Auto-fetch Wikipedia description if not provided
     let finalWikipediaUrl = wikipediaUrl;
     let finalWikipediaDescription = wikipediaDescription;
-    
+
     if (!wikipediaDescription && title && artist) {
       try {
-        console.log(`Auto-fetching Wikipedia description for: ${title} by ${artist}`);
+        console.log(
+          `Auto-fetching Wikipedia description for: ${title} by ${artist}`
+        );
         const wikiData = await fetchWikipediaDescription(title, artist);
-        if (wikiData.description && wikiData.source === 'wikipedia') {
+        if (
+          wikiData.description &&
+          (wikiData.source === "wikipedia" ||
+            wikiData.source === "music-search")
+        ) {
           finalWikipediaDescription = wikiData.description;
           finalWikipediaUrl = wikiData.url;
-          console.log(`✅ Found Wikipedia description for ${title}`);
+          console.log(
+            `✅ Found description for ${title} from ${wikiData.source}`
+          );
         }
       } catch (error) {
-        console.log(`Failed to auto-fetch Wikipedia description for ${title}:`, error);
+        console.log(
+          `Failed to auto-fetch Wikipedia description for ${title}:`,
+          error
+        );
         // Continue without Wikipedia data
       }
     }
@@ -306,10 +380,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Update theme statistics
-    await Theme.updateOne(
-      { _id: themeId },
-      { $inc: { albumCount: 1 } }
-    );
+    await Theme.updateOne({ _id: themeId }, { $inc: { albumCount: 1 } });
 
     // Populate the album for response
     await album.populate("postedBy", "name username image");
@@ -318,6 +389,77 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ album }, { status: 201 });
   } catch (error) {
     console.error("Error creating album:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions);
+
+    // Only allow jyoungiv@gmail.com to delete albums
+    if (!session?.user?.email || session.user.email !== "jyoungiv@gmail.com") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    }
+
+    await dbConnect();
+
+    const { searchParams } = new URL(request.url);
+    const albumId = searchParams.get("id");
+
+    if (!albumId) {
+      return NextResponse.json(
+        { error: "Album ID is required" },
+        { status: 400 }
+      );
+    }
+
+    // Validate ObjectId format
+    if (!mongoose.Types.ObjectId.isValid(albumId)) {
+      return NextResponse.json({ error: "Invalid album ID" }, { status: 400 });
+    }
+
+    // Find and delete the album
+    const deletedAlbum = await Album.findByIdAndDelete(albumId);
+
+    if (!deletedAlbum) {
+      return NextResponse.json({ error: "Album not found" }, { status: 404 });
+    }
+
+    // Update theme statistics if the album had a theme
+    if (deletedAlbum.theme) {
+      await Theme.updateOne(
+        { _id: deletedAlbum.theme },
+        { $inc: { albumCount: -1 } }
+      );
+    }
+
+    // Update user statistics if possible
+    if (deletedAlbum.postedBy) {
+      await User.updateOne(
+        { _id: deletedAlbum.postedBy },
+        {
+          $inc: {
+            albumsPosted: -1,
+            totalAlbumsPosted: -1,
+          },
+        }
+      );
+    }
+
+    return NextResponse.json({
+      message: "Album deleted successfully",
+      deletedAlbum: {
+        id: deletedAlbum._id,
+        title: deletedAlbum.title,
+        artist: deletedAlbum.artist,
+      },
+    });
+  } catch (error) {
+    console.error("Error deleting album:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

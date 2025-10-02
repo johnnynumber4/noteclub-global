@@ -51,7 +51,7 @@ export function Navbar() {
                 backgroundClip: "text",
               }}
             >
-              Note Club
+              NoteClub
             </span>
           </Link>
         </div>
@@ -63,6 +63,12 @@ export function Navbar() {
             className="text-sm font-semibold text-gray-300 hover:text-red-400 transition-colors duration-200 hover:scale-105"
           >
             Albums
+          </Link>
+          <Link
+            href="/groups"
+            className="text-sm font-semibold text-gray-300 hover:text-blue-400 transition-colors duration-200 hover:scale-105"
+          >
+            Groups
           </Link>
           <Link
             href="/members"
@@ -237,6 +243,13 @@ export function Navbar() {
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Albums
+              </Link>
+              <Link
+                href="/groups"
+                className="block text-base font-semibold text-gray-300 hover:text-blue-400 transition-colors py-2"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Groups
               </Link>
               <Link
                 href="/members"

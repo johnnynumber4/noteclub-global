@@ -16,38 +16,66 @@ export async function GET(
     const session = await getServerSession(authOptions);
     const { userId } = await params;
 
-    // Find the user
-    const user = await User.findById(userId).select("-password").lean();
+    // Validate ObjectId format
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return NextResponse.json({ error: "Invalid user ID format" }, { status: 400 });
+    }
+
+    // Find the user - Atlas stores IDs as strings, not ObjectIds
+    // Use raw MongoDB query for Atlas compatibility
+    const db = mongoose.connection.db;
+    let user = await db.collection('users').findOne({ _id: userId });
+
+    if (user) {
+      // Remove the password field manually since we can't use .select() with raw queries
+      delete user.password;
+    }
 
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    // Get user's albums
-    const userAlbums = await Album.find({ postedBy: userId })
-      .populate("theme", "title")
+    // Get user's albums using raw query for Atlas compatibility
+    const userAlbums = await db.collection('albums').find({ postedBy: userId })
       .sort({ postedAt: -1 })
       .limit(20)
-      .lean();
+      .toArray();
+
+    // Manually populate theme data
+    const themeIds = [...new Set(userAlbums.map(album => album.theme).filter(Boolean))];
+    const themes = await db.collection('themes').find({ _id: { $in: themeIds } }).toArray();
+    const themeMap = new Map(themes.map(theme => [theme._id, theme]));
+
+    // Add theme titles to albums
+    userAlbums.forEach(album => {
+      if (album.theme && themeMap.has(album.theme)) {
+        album.theme = { title: themeMap.get(album.theme).title };
+      } else {
+        album.theme = { title: 'No Theme' };
+      }
+    });
 
     // Check if current user is viewing their own profile
     let currentUser = null;
     if (session?.user?.email) {
-      currentUser = await User.findOne({ email: session.user.email });
+      currentUser = await db.collection('users').findOne({ email: session.user.email });
     }
 
-    const isOwnProfile = currentUser && currentUser._id.toString() === userId;
+    const isOwnProfile = currentUser && currentUser._id === userId;
 
-    // Calculate additional stats
-    const totalLikesReceived = await Album.aggregate([
-      { $match: { postedBy: new mongoose.Types.ObjectId(userId) } },
-      { $group: { _id: null, totalLikes: { $sum: { $size: "$likes" } } } }
-    ]);
+    // Calculate additional stats using raw MongoDB queries
+    const likesResult = await db.collection('albums').aggregate([
+      { $match: { postedBy: userId } },
+      { $group: { _id: null, totalLikes: { $sum: { $size: { $ifNull: ["$likes", []] } } } } }
+    ]).toArray();
 
-    const totalCommentsReceived = await Album.aggregate([
-      { $match: { postedBy: new mongoose.Types.ObjectId(userId) } },
+    const commentsResult = await db.collection('albums').aggregate([
+      { $match: { postedBy: userId } },
       { $group: { _id: null, totalComments: { $sum: { $size: { $ifNull: ["$comments", []] } } } } }
-    ]);
+    ]).toArray();
+
+    const totalLikesReceived = likesResult.length > 0 ? likesResult[0].totalLikes : 0;
+    const totalCommentsReceived = commentsResult.length > 0 ? commentsResult[0].totalComments : 0;
 
     // Prepare user profile data
     const profileData = {
@@ -55,8 +83,8 @@ export async function GET(
       albums: userAlbums,
       stats: {
         albumsPosted: user.albumsPosted || 0,
-        likesReceived: totalLikesReceived[0]?.totalLikes || 0,
-        commentsReceived: totalCommentsReceived[0]?.totalComments || 0,
+        likesReceived: totalLikesReceived,
+        commentsReceived: totalCommentsReceived,
         profileCompletion: calculateProfileCompletion(user),
       },
       isOwnProfile,

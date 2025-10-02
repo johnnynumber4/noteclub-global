@@ -108,8 +108,8 @@ export default function SignUp() {
         router.push("/dashboard");
         router.refresh();
       }
-    } catch {
-      setError(err instanceof Error ? err.message : "Something went wrong");
+    } catch (error) {
+      setError(error instanceof Error ? error.message : "Something went wrong");
     } finally {
       setIsLoading(false);
     }
@@ -166,7 +166,7 @@ export default function SignUp() {
                 WebkitTextFillColor: "transparent",
               }}
             >
-              Note Club
+              NoteClub
             </Typography>
           </Stack>
 

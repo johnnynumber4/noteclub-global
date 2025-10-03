@@ -312,18 +312,20 @@ export default function PostAlbumPage() {
 
       if (response.ok) {
         setSuccess("Album posted successfully!");
+        // Keep button disabled and redirect
         setTimeout(() => {
           router.push("/albums");
         }, 2000);
+        // Don't reset isSubmitting on success - keep button disabled
       } else {
         const data = await response.json();
         setError(data.error || "Failed to post album");
+        setIsSubmitting(false); // Re-enable on error
       }
     } catch (error) {
       console.error("Submit error:", error);
       setError("Failed to post album");
-    } finally {
-      setIsSubmitting(false);
+      setIsSubmitting(false); // Re-enable on error
     }
   };
 

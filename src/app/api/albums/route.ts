@@ -255,31 +255,23 @@ export async function POST(request: NextRequest) {
     // Use the actual user ID from database, not from session
     const userId = user._id;
 
-    // Find or create default group
-    let defaultGroup = await Group.findOne({ name: "NoteClub OGs" });
+    // Find the established group from migration
+    const defaultGroup = await Group.findOne({
+      $or: [
+        { name: "Original Note Club" },
+        { name: "NoteClub OGs" }
+      ]
+    }).sort({ createdAt: 1 }); // Get the oldest group (the original)
+
     if (!defaultGroup) {
-      defaultGroup = new Group({
-        name: "NoteClub OGs",
-        description:
-          "The original Note Club community - music discovery pioneers",
-        isPrivate: false,
-        inviteCode: "DEFAULT",
-        maxMembers: 100,
-        members: [userId],
-        admins: [userId],
-        createdBy: userId,
-        turnOrder: [userId],
-        currentTurnIndex: 0,
-        turnDurationDays: 7,
-        totalAlbumsShared: 0,
-        totalThemes: 0,
-        allowMemberInvites: true,
-        requireApprovalForAlbums: false,
-        notifyOnNewAlbums: true,
-      });
-      await defaultGroup.save();
-    } else if (!defaultGroup.members.includes(userId)) {
-      // Add user to default group if not already a member
+      return NextResponse.json(
+        { error: "Default group not found. Please contact administrator." },
+        { status: 500 }
+      );
+    }
+
+    // Add user to group if not already a member
+    if (!defaultGroup.members.includes(userId)) {
       defaultGroup.members.push(userId);
       if (!defaultGroup.turnOrder.includes(userId)) {
         defaultGroup.turnOrder.push(userId);
@@ -325,7 +317,10 @@ export async function POST(request: NextRequest) {
             wikiData.source === "music-search")
         ) {
           finalWikipediaDescription = wikiData.description;
-          finalWikipediaUrl = wikiData.url;
+          // Only set wikipediaUrl if it's actually from Wikipedia (not MusicBrainz)
+          if (wikiData.source === "wikipedia") {
+            finalWikipediaUrl = wikiData.url;
+          }
           console.log(
             `✅ Found description for ${title} from ${wikiData.source}`
           );

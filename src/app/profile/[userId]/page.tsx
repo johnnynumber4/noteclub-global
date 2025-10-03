@@ -18,6 +18,8 @@ import {
   IconButton,
   CircularProgress,
   LinearProgress,
+  TextField,
+  InputAdornment,
 } from "@mui/material";
 import {
   Person,
@@ -33,6 +35,7 @@ import {
   OpenInNew,
   Verified,
   Star,
+  Search,
 } from "@mui/icons-material";
 import { useSession } from "next-auth/react";
 
@@ -88,15 +91,29 @@ export default function ProfilePage() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+
+  // Debounce search input
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   useEffect(() => {
     fetchProfile();
-  }, [userId]);
+  }, [userId, debouncedSearch]);
 
   const fetchProfile = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`/api/users/${userId}`);
+      const url = debouncedSearch
+        ? `/api/users/${userId}?search=${encodeURIComponent(debouncedSearch)}`
+        : `/api/users/${userId}`;
+      const response = await fetch(url);
       if (!response.ok) {
         throw new Error("Failed to fetch profile");
       }
@@ -474,16 +491,27 @@ export default function ProfilePage() {
             <Grid item xs={12} md={8}>
               <Paper sx={{ p: 3 }}>
                 <Stack spacing={3}>
-                  <Stack direction="row" justifyContent="space-between" alignItems="center">
+                  <Stack direction="row" justifyContent="space-between" alignItems="center" flexWrap="wrap" gap={2}>
                     <Typography variant="h6" fontWeight={700}>
                       Recent Albums ({profile.albums.length})
                     </Typography>
-                    {profile.albums.length > 0 && (
-                      <Button variant="outlined" size="small">
-                        View All
-                      </Button>
-                    )}
                   </Stack>
+
+                  {/* Search Field */}
+                  <TextField
+                    fullWidth
+                    size="small"
+                    placeholder="Search albums by title or artist..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <Search />
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
 
                   {profile.albums.length === 0 ? (
                     <Stack spacing={3} alignItems="center" textAlign="center" py={6}>

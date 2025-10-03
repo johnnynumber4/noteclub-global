@@ -35,10 +35,45 @@ export async function GET(
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
+    // Get search parameter from URL if provided
+    const searchParams = request.nextUrl.searchParams;
+    const search = searchParams.get('search');
+
     // Get user's albums using raw query for Atlas compatibility
-    const userAlbums = await db.collection('albums').find({ postedBy: userId })
+    // Try both string ID and ObjectId for compatibility
+    const albumQuery: any = {
+      $or: [
+        { postedBy: userId },
+        { postedBy: new mongoose.Types.ObjectId(userId) }
+      ]
+    };
+
+    // Add search filter if provided
+    if (search) {
+      const searchRegex = { $regex: search, $options: 'i' };
+      albumQuery.$and = [
+        { $or: albumQuery.$or },
+        {
+          $or: [
+            { title: searchRegex },
+            { artist: searchRegex }
+          ]
+        }
+      ];
+      delete albumQuery.$or;
+    }
+
+    // Get total count of all user's albums (not just the limited results)
+    const totalAlbumsCount = await db.collection('albums').countDocuments({
+      $or: [
+        { postedBy: userId },
+        { postedBy: new mongoose.Types.ObjectId(userId) }
+      ]
+    });
+
+    const userAlbums = await db.collection('albums').find(albumQuery)
       .sort({ postedAt: -1 })
-      .limit(20)
+      .limit(search ? 1000 : 50)
       .toArray();
 
     // Manually populate theme data
@@ -64,13 +99,21 @@ export async function GET(
     const isOwnProfile = currentUser && currentUser._id === userId;
 
     // Calculate additional stats using raw MongoDB queries
+    // Match both string ID and ObjectId for compatibility
+    const statsMatchQuery = {
+      $or: [
+        { postedBy: userId },
+        { postedBy: new mongoose.Types.ObjectId(userId) }
+      ]
+    };
+
     const likesResult = await db.collection('albums').aggregate([
-      { $match: { postedBy: userId } },
+      { $match: statsMatchQuery },
       { $group: { _id: null, totalLikes: { $sum: { $size: { $ifNull: ["$likes", []] } } } } }
     ]).toArray();
 
     const commentsResult = await db.collection('albums').aggregate([
-      { $match: { postedBy: userId } },
+      { $match: statsMatchQuery },
       { $group: { _id: null, totalComments: { $sum: { $size: { $ifNull: ["$comments", []] } } } } }
     ]).toArray();
 
@@ -82,7 +125,7 @@ export async function GET(
       ...user,
       albums: userAlbums,
       stats: {
-        albumsPosted: user.albumsPosted || 0,
+        albumsPosted: totalAlbumsCount, // Total count of all albums
         likesReceived: totalLikesReceived,
         commentsReceived: totalCommentsReceived,
         profileCompletion: calculateProfileCompletion(user),

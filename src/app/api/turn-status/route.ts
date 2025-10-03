@@ -71,29 +71,34 @@ export async function GET(request: NextRequest) {
       }
     }
 
+    // Get all users first to avoid ObjectId comparison issues
+    const allUsers = await User.find({}).select("name username image _id");
+
+    // Convert turnOrder IDs to strings for matching
+    const turnOrderStrings = defaultGroup.turnOrder.map((id: any) => id.toString());
+    const allTurnUsers = allUsers.filter((u) =>
+      turnOrderStrings.includes(u._id.toString())
+    );
+
     // Populate current turn user info
     const currentTurnUserId =
       defaultGroup.turnOrder[defaultGroup.currentTurnIndex];
-    const currentTurnUser = await User.findById(currentTurnUserId).select(
-      "name username image"
+    const currentTurnUser = allTurnUsers.find(
+      (u) => u._id.toString() === currentTurnUserId?.toString()
     );
 
     // Get next turn user
     const nextTurnIndex =
       (defaultGroup.currentTurnIndex + 1) % defaultGroup.turnOrder.length;
     const nextTurnUserId = defaultGroup.turnOrder[nextTurnIndex];
-    const nextTurnUser = await User.findById(nextTurnUserId).select(
-      "name username image"
+    const nextTurnUser = allTurnUsers.find(
+      (u) => u._id.toString() === nextTurnUserId?.toString()
     );
 
     const isMyTurn =
       currentTurnUserId?.toString() === currentUser._id.toString();
 
-    // Get all users in turn order for display
-    const allTurnUsers = await User.find({
-      _id: { $in: defaultGroup.turnOrder },
-    }).select("name username image");
-
+    // Map turn order to users in correct order
     const orderedUsers = defaultGroup.turnOrder
       .map((userId: any) =>
         allTurnUsers.find(

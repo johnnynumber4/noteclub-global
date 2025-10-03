@@ -31,6 +31,7 @@ import {
   PlayArrow,
   Close,
   Delete,
+  Casino,
 } from "@mui/icons-material";
 
 interface Album {
@@ -78,6 +79,7 @@ export default function AlbumsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [expandedPlayAlbum, setExpandedPlayAlbum] = useState<string | null>(null);
   const [deletingAlbumId, setDeletingAlbumId] = useState<string | null>(null);
+  const [luckyLoading, setLuckyLoading] = useState(false);
 
   // Check if current user is admin (jyoungiv@gmail.com)
   const isAdmin = session?.user?.email === "jyoungiv@gmail.com";
@@ -124,6 +126,16 @@ export default function AlbumsPage() {
       month: "short",
       day: "numeric",
     });
+  };
+
+  const formatYouTubeMusicUrl = (url: string | undefined): string | undefined => {
+    if (!url) return undefined;
+    // If it's already a full URL, return it
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      return url;
+    }
+    // If it's just an ID, construct the full URL
+    return `https://music.youtube.com/playlist?list=${url}`;
   };
 
   const handlePlayClick = (albumId: string, event: React.MouseEvent) => {
@@ -209,6 +221,28 @@ export default function AlbumsPage() {
     window.location.href = `/albums/${albumId}#comments`;
   };
 
+  const handleImFeelingLucky = async () => {
+    try {
+      setLuckyLoading(true);
+      const response = await fetch('/api/albums/random');
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch random album');
+      }
+
+      const data = await response.json();
+
+      if (data.albumId) {
+        window.location.href = `/albums/${data.albumId}`;
+      }
+    } catch (error) {
+      console.error('Error fetching random album:', error);
+      alert('Unable to find a random album. Please try again.');
+    } finally {
+      setLuckyLoading(false);
+    }
+  };
+
   if (loading) {
     return (
       <Box
@@ -286,7 +320,12 @@ export default function AlbumsPage() {
             </Typography>
 
             {/* Search Bar */}
-            <Box sx={{ maxWidth: 500, mx: "auto" }}>
+            <Stack
+              direction={{ xs: "column", sm: "row" }}
+              spacing={2}
+              sx={{ maxWidth: 700, mx: "auto" }}
+              alignItems="stretch"
+            >
               <TextField
                 fullWidth
                 placeholder="Search albums, artists, or themes..."
@@ -306,7 +345,22 @@ export default function AlbumsPage() {
                   },
                 }}
               />
-            </Box>
+              <Button
+                variant="contained"
+                color="secondary"
+                startIcon={luckyLoading ? <CircularProgress size={20} color="inherit" /> : <Casino />}
+                onClick={handleImFeelingLucky}
+                disabled={luckyLoading}
+                sx={{
+                  whiteSpace: "nowrap",
+                  minWidth: { xs: "100%", sm: "auto" },
+                  borderRadius: 3,
+                  px: 3,
+                }}
+              >
+                I'm Feeling Lucky
+              </Button>
+            </Stack>
 
             {/* Stats */}
             <Stack
@@ -456,7 +510,10 @@ export default function AlbumsPage() {
                           )}
                           {album.youtubeMusicUrl && (
                             <IconButton
-                              onClick={(e) => album.youtubeMusicUrl && handleServiceClick(album.youtubeMusicUrl, e)}
+                              onClick={(e) => {
+                                const url = formatYouTubeMusicUrl(album.youtubeMusicUrl);
+                                if (url) handleServiceClick(url, e);
+                              }}
                               sx={{
                                 bgcolor: "#FF0000",
                                 color: "white",
@@ -662,7 +719,7 @@ export default function AlbumsPage() {
                           {album.youtubeMusicUrl && (
                             <IconButton
                               component="a"
-                              href={album.youtubeMusicUrl}
+                              href={formatYouTubeMusicUrl(album.youtubeMusicUrl)}
                               target="_blank"
                               rel="noopener noreferrer"
                               size="small"

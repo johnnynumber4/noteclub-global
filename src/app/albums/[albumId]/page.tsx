@@ -163,6 +163,16 @@ export default function AlbumDetailPage() {
     });
   };
 
+  const formatYouTubeMusicUrl = (url: string | undefined): string | undefined => {
+    if (!url) return undefined;
+    // If it's already a full URL, return it
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      return url;
+    }
+    // If it's just an ID, construct the full URL
+    return `https://music.youtube.com/playlist?list=${url}`;
+  };
+
   if (loading) {
     return (
       <Container maxWidth="lg" sx={{ py: 4 }}>
@@ -360,7 +370,7 @@ export default function AlbumDetailPage() {
                   {album.youtubeMusicUrl && (
                     <IconButton
                       component="a"
-                      href={album.youtubeMusicUrl}
+                      href={formatYouTubeMusicUrl(album.youtubeMusicUrl)}
                       target="_blank"
                       rel="noopener noreferrer"
                       sx={{

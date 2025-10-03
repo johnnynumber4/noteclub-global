@@ -14,15 +14,78 @@ export async function fetchWikipediaDescription(albumTitle: string, artistName: 
   source: 'wikipedia' | 'music-search' | 'fallback';
 }> {
   try {
-    // Try multiple Wikipedia search strategies
+    // First, try Wikipedia search API to find the best matching article
+    try {
+      const searchResponse = await fetch(
+        `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(`${albumTitle} ${artistName} album`)}&format=json&origin=*&srlimit=5`,
+        {
+          headers: {
+            'User-Agent': 'NoteClubModern/1.0 (https://noteclub.com)',
+            'Accept': 'application/json'
+          }
+        }
+      );
+
+      if (searchResponse.ok) {
+        const searchData = await searchResponse.json();
+        const searchResults = searchData.query?.search || [];
+
+        // Try each search result
+        for (const result of searchResults) {
+          const pageTitle = result.title;
+
+          try {
+            const summaryResponse = await fetch(
+              `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(pageTitle)}`,
+              {
+                headers: {
+                  'User-Agent': 'NoteClubModern/1.0 (https://noteclub.com)',
+                  'Accept': 'application/json'
+                }
+              }
+            );
+
+            if (summaryResponse.ok) {
+              const wikiData = await summaryResponse.json();
+
+              // Check if this is a good result
+              if (wikiData.extract &&
+                  wikiData.extract.length > 100 &&
+                  !wikiData.extract.includes('may refer to') &&
+                  !wikiData.extract.includes('is a disambiguation page') &&
+                  wikiData.type === 'standard') {
+
+                const extract = wikiData.extract.toLowerCase();
+                const albumLower = albumTitle.toLowerCase();
+                const artistLower = artistName.toLowerCase();
+
+                // Check if it's actually about the album
+                if (extract.includes('album') &&
+                    (extract.includes(artistLower) || extract.includes(albumLower))) {
+                  console.log(`✅ Found Wikipedia article: ${pageTitle}`);
+                  return {
+                    description: wikiData.extract,
+                    url: wikiData.content_urls?.desktop?.page || `https://en.wikipedia.org/wiki/${encodeURIComponent(pageTitle)}`,
+                    source: 'wikipedia'
+                  };
+                }
+              }
+            }
+          } catch {
+            continue;
+          }
+        }
+      }
+    } catch (searchError) {
+      console.log('Wikipedia search API failed:', searchError);
+    }
+
+    // Fallback: Try direct URL patterns
     const searchTerms = [
-      `${albumTitle}_album`,
       `${albumTitle}_(album)`,
+      `${albumTitle}_album`,
       `${albumTitle}_(${artistName}_album)`,
-      `${albumTitle}_${artistName}_album`,
       `${albumTitle}`,
-      `${albumTitle}_by_${artistName}`,
-      `${albumTitle}_(${artistName})`
     ];
 
     for (const searchTerm of searchTerms) {
@@ -39,28 +102,15 @@ export async function fetchWikipediaDescription(albumTitle: string, artistName: 
 
         if (wikiResponse.ok) {
           const wikiData = await wikiResponse.json();
-          
-          // Check if this is a good result
-          if (wikiData.extract && 
-              wikiData.extract.length > 50 && 
+
+          if (wikiData.extract &&
+              wikiData.extract.length > 100 &&
               !wikiData.extract.includes('may refer to') &&
-              !wikiData.extract.includes('is a disambiguation page') &&
               wikiData.type === 'standard') {
-            
-            // Score the result based on relevance
+
             const extract = wikiData.extract.toLowerCase();
-            const albumLower = albumTitle.toLowerCase();
-            const artistLower = artistName.toLowerCase();
-            
-            let score = 0;
-            if (extract.includes(albumLower)) score += 3;
-            if (extract.includes(artistLower)) score += 2;
-            if (extract.includes('album')) score += 1;
-            if (extract.includes('studio album')) score += 2;
-            if (extract.includes('debut album')) score += 2;
-            
-            // Accept good matches
-            if (score >= 3 || (extract.includes(albumLower) && extract.includes(artistLower))) {
+            if (extract.includes('album')) {
+              console.log(`✅ Found Wikipedia via direct URL: ${searchTerm}`);
               return {
                 description: wikiData.extract,
                 url: wikiData.content_urls?.desktop?.page || `https://en.wikipedia.org/wiki/${encodeURIComponent(searchTerm)}`,

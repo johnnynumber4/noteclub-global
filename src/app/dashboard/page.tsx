@@ -212,7 +212,7 @@ export default function DashboardPage() {
                           fontWeight={700}
                           color="primary"
                         >
-                          Your Turn to Pick! 🎵
+                          Your Turn 🎵
                         </Typography>
                       </Stack>
                       <Typography variant="body1" color="text.secondary">
@@ -235,7 +235,7 @@ export default function DashboardPage() {
                           width: "fit-content",
                         }}
                       >
-                        Pick Your Album
+                        Post Your Album
                       </Button>
                     </>
                   ) : (
@@ -245,8 +245,7 @@ export default function DashboardPage() {
                           sx={{ fontSize: 40, color: "text.secondary" }}
                         />
                         <Typography variant="h5" fontWeight={700}>
-                          Next Pick By:{" "}
-                          {turnStatus.currentTurnUser?.name || "Unknown User"}
+                          {turnStatus.currentTurnUser?.name || "Unknown User"}&rsquo;s Turn
                         </Typography>
                       </Stack>
                       <Typography variant="body1" color="text.secondary">
@@ -275,7 +274,7 @@ export default function DashboardPage() {
                           },
                         }}
                       >
-                        Pick Anyway (Override)
+                        Did you need to Post out of turn?
                       </Button>
                     </>
                   )}

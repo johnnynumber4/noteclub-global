@@ -79,12 +79,18 @@ export async function GET(
     // Manually populate theme data
     const themeIds = [...new Set(userAlbums.map(album => album.theme).filter(Boolean))];
     const themes = await db.collection('themes').find({ _id: { $in: themeIds } }).toArray();
-    const themeMap = new Map(themes.map(theme => [theme._id, theme]));
+    // Convert ObjectIds to strings for map keys
+    const themeMap = new Map(themes.map(theme => [theme._id.toString(), theme]));
 
     // Add theme titles to albums
     userAlbums.forEach(album => {
-      if (album.theme && themeMap.has(album.theme)) {
-        album.theme = { title: themeMap.get(album.theme).title };
+      if (album.theme) {
+        const themeKey = album.theme.toString();
+        if (themeMap.has(themeKey)) {
+          album.theme = { title: themeMap.get(themeKey).title };
+        } else {
+          album.theme = { title: 'No Theme' };
+        }
       } else {
         album.theme = { title: 'No Theme' };
       }

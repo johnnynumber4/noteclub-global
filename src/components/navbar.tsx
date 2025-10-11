@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -18,6 +18,13 @@ import { Music, LogOut, User, Settings, Disc3, Menu, X, Shield } from "lucide-re
 export function Navbar() {
   const { data: session, status } = useSession();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Debug: log session info
+  useEffect(() => {
+    console.log('Navbar session status:', status);
+    console.log('Navbar session email:', session?.user?.email);
+    console.log('Is admin?:', session?.user?.email === "jyoungiv@gmail.com");
+  }, [session, status]);
 
   return (
     <nav
@@ -57,13 +64,22 @@ export function Navbar() {
         </div>
 
         {/* Desktop Navigation */}
-        <div className="hidden md:flex items-center space-x-8">
+        <div className="hidden md:flex items-center space-x-6">
           <Link
             href="/albums"
             className="text-sm font-semibold text-gray-300 hover:text-red-400 transition-colors duration-200 hover:scale-105"
           >
             Albums
           </Link>
+          {status === "authenticated" && (
+            <Link
+              href="/admin"
+              className="text-sm font-semibold text-orange-400 hover:text-orange-300 transition-colors duration-200 hover:scale-105 flex items-center space-x-1 bg-orange-400/10 px-3 py-1 rounded-md"
+            >
+              <Shield className="h-4 w-4" />
+              <span>Admin ({session?.user?.email})</span>
+            </Link>
+          )}
           <Link
             href="/groups"
             className="text-sm font-semibold text-gray-300 hover:text-blue-400 transition-colors duration-200 hover:scale-105"

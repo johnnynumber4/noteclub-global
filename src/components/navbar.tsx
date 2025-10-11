@@ -13,7 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Music, LogOut, User, Settings, Disc3, Menu, X } from "lucide-react";
+import { Music, LogOut, User, Settings, Disc3, Menu, X, Shield } from "lucide-react";
 
 export function Navbar() {
   const { data: session, status } = useSession();
@@ -155,6 +155,17 @@ export function Navbar() {
                       Settings
                     </Link>
                   </DropdownMenuItem>
+                  {session.user?.email === "jyoungiv@gmail.com" && (
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem asChild>
+                        <Link href="/admin" className="cursor-pointer text-orange-600 focus:text-orange-600">
+                          <Shield className="mr-2 h-4 w-4" />
+                          Admin Panel
+                        </Link>
+                      </DropdownMenuItem>
+                    </>
+                  )}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
                     className="cursor-pointer text-red-600 focus:text-red-600"
@@ -331,6 +342,16 @@ export function Navbar() {
                     <Settings className="h-4 w-4" />
                     <span>Settings</span>
                   </Link>
+                  {session.user?.email === "jyoungiv@gmail.com" && (
+                    <Link
+                      href="/admin"
+                      className="flex items-center space-x-2 text-base text-orange-400 hover:text-orange-300 transition-colors py-2"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      <Shield className="h-4 w-4" />
+                      <span>Admin Panel</span>
+                    </Link>
+                  )}
                   <button
                     onClick={() => {
                       signOut();

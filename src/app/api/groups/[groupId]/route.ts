@@ -31,7 +31,13 @@ export async function GET(
       return NextResponse.json({ error: "Access denied" }, { status: 403 });
     }
 
-    return NextResponse.json({ group });
+    // Add memberCount to the response
+    const groupWithCount = {
+      ...group.toObject(),
+      memberCount: group.members.length,
+    };
+
+    return NextResponse.json({ group: groupWithCount });
   } catch (error) {
     console.error("Get group error:", error);
     return NextResponse.json(

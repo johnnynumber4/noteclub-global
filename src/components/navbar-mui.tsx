@@ -34,6 +34,7 @@ import {
   Logout,
   PersonAdd,
   Home,
+  Shield,
 } from "@mui/icons-material";
 
 export function NavbarMui() {
@@ -82,9 +83,13 @@ export function NavbarMui() {
     fetchUserId();
   }, [session]);
 
+  // Check if user is admin
+  const isAdmin = session?.user?.email === "jyoungiv@gmail.com";
+
   const navigationItems = [
     { label: "Home", href: "/", icon: <Home /> },
     { label: "Albums", href: "/albums", icon: <Album /> },
+    ...(isAdmin ? [{ label: "Admin", href: "/admin", icon: <Shield />, color: "warning" as const }] : []),
   ];
 
   const drawer = (

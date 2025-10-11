@@ -17,11 +17,15 @@ export async function GET(request: NextRequest) {
     const { Group } = await import("@/models/Group");
     const { User } = await import("@/models/User");
 
+    console.log("Fetching groups for user ID:", session.user.id);
+
     const groups = await Group.find({
       members: session.user.id
     })
     .populate("members", "name username image")
     .sort({ updatedAt: -1 });
+
+    console.log("Found groups:", groups.length);
 
     return NextResponse.json({ groups });
   } catch (error) {

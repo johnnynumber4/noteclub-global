@@ -43,6 +43,7 @@ export default function AdminPage() {
   const router = useRouter();
 
   const [users, setUsers] = useState<User[]>([]);
+  const [totalAlbums, setTotalAlbums] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -70,6 +71,7 @@ export default function AdminPage() {
       }
       const data = await response.json();
       setUsers(data.users || []);
+      setTotalAlbums(data.totalAlbums || 0);
     } catch (error) {
       console.error("Error fetching users:", error);
       setError("Failed to load users");
@@ -296,8 +298,8 @@ export default function AdminPage() {
           </Paper>
 
           {/* Summary */}
-          <Stack direction="row" spacing={3}>
-            <Paper sx={{ p: 3, flex: 1 }}>
+          <Stack direction="row" spacing={3} flexWrap="wrap" useFlexGap>
+            <Paper sx={{ p: 3, flex: 1, minWidth: 200 }}>
               <Typography variant="h4" fontWeight={700} color="primary.main">
                 {users.length}
               </Typography>
@@ -305,7 +307,7 @@ export default function AdminPage() {
                 Total Users
               </Typography>
             </Paper>
-            <Paper sx={{ p: 3, flex: 1 }}>
+            <Paper sx={{ p: 3, flex: 1, minWidth: 200 }}>
               <Typography variant="h4" fontWeight={700} color="success.main">
                 {users.filter(u => u.isActive).length}
               </Typography>
@@ -313,12 +315,20 @@ export default function AdminPage() {
                 Active Users
               </Typography>
             </Paper>
-            <Paper sx={{ p: 3, flex: 1 }}>
+            <Paper sx={{ p: 3, flex: 1, minWidth: 200 }}>
               <Typography variant="h4" fontWeight={700} color="error.main">
                 {users.filter(u => !u.isActive).length}
               </Typography>
               <Typography variant="body2" color="text.secondary">
                 Inactive Users
+              </Typography>
+            </Paper>
+            <Paper sx={{ p: 3, flex: 1, minWidth: 200 }}>
+              <Typography variant="h4" fontWeight={700} sx={{ color: "#9c27b0" }}>
+                {totalAlbums}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Total Albums
               </Typography>
             </Paper>
           </Stack>

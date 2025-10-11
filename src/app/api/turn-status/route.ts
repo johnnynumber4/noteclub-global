@@ -71,8 +71,8 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // Get all users first to avoid ObjectId comparison issues
-    const allUsers = await User.find({}).select("name username image _id");
+    // Get all ACTIVE users first to avoid ObjectId comparison issues
+    const allUsers = await User.find({ isActive: true }).select("name username image _id isActive");
 
     // Convert turnOrder IDs to strings for matching
     const turnOrderStrings = defaultGroup.turnOrder.map((id: any) => id.toString());
@@ -110,11 +110,16 @@ export async function GET(request: NextRequest) {
           user != null && user.name != null
       );
 
+    // Find the current turn user's index in the FILTERED active users array
+    const activeCurrentTurnIndex = orderedUsers.findIndex(
+      (user: any) => user._id.toString() === currentTurnUserId?.toString()
+    );
+
     return NextResponse.json({
       isMyTurn,
       currentTurnUser: currentTurnUser || null,
       nextTurnUser: nextTurnUser || null,
-      currentTurnIndex: defaultGroup.currentTurnIndex,
+      currentTurnIndex: activeCurrentTurnIndex >= 0 ? activeCurrentTurnIndex : 0,
       totalMembers: defaultGroup.members.length,
       turnOrder: orderedUsers,
       groupName: defaultGroup.name,

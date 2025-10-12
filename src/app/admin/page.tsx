@@ -86,6 +86,8 @@ export default function AdminPage() {
       setError("");
       setSuccess("");
 
+      console.log("Toggling user active status:", { userId, currentStatus, newStatus: !currentStatus });
+
       const response = await fetch("/api/admin/users/toggle-active", {
         method: "POST",
         headers: {
@@ -97,11 +99,14 @@ export default function AdminPage() {
         }),
       });
 
-      if (!response.ok) {
-        throw new Error("Failed to update user status");
-      }
-
       const data = await response.json();
+      console.log("Toggle response:", data);
+
+      if (!response.ok) {
+        const errorMessage = data.error || "Failed to update user status";
+        const details = data.details ? `: ${data.details}` : "";
+        throw new Error(errorMessage + details);
+      }
 
       // Update local state
       setUsers(users.map(user =>
@@ -113,7 +118,14 @@ export default function AdminPage() {
       setSuccess(`User ${!currentStatus ? "activated" : "deactivated"} successfully`);
     } catch (error) {
       console.error("Error updating user:", error);
-      setError("Failed to update user status");
+      const errorMsg = error instanceof Error ? error.message : "Failed to update user status";
+      setError(errorMsg);
+
+      // If user not found, refresh the user list to get current data
+      if (errorMsg.includes("not found")) {
+        console.log("User not found - refreshing user list");
+        await fetchUsers();
+      }
     } finally {
       setUpdatingUserId(null);
     }

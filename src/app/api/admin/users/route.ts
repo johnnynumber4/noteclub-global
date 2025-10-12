@@ -22,6 +22,9 @@ export async function GET(request: NextRequest) {
       .select("name email username image isActive role turnOrder joinedAt")
       .sort({ name: 1 });
 
+    console.log(`Found ${users.length} users in database`);
+    console.log('User IDs:', users.map(u => ({ id: u._id.toString(), name: u.name })));
+
     // Get actual album counts for each user
     const userIds = users.map(u => u._id);
     const albumCounts = await Album.aggregate([

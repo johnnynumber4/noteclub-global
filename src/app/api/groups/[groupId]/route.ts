@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import dbConnect from "@/lib/mongodb";
 import { Group } from "@/models/Group";
+import mongoose from "mongoose";
 
 // GET /api/groups/[groupId] - Get specific group
 export async function GET(
@@ -18,26 +19,91 @@ export async function GET(
     await dbConnect();
 
     const { groupId } = await params;
-    const group = await Group.findById(groupId)
-      .populate("members", "name username image")
-      .populate("admins", "name username image");
+
+    // Validate ObjectId format
+    if (!mongoose.Types.ObjectId.isValid(groupId)) {
+      return NextResponse.json({ error: "Invalid group ID format" }, { status: 400 });
+    }
+
+    // Handle both ObjectId and string IDs (for migrated groups)
+    const db = mongoose.connection.db;
+    const groupsCollection = db?.collection('groups');
+
+    // Try to find with both string and ObjectId formats
+    let groupDoc = await groupsCollection?.findOne({
+      $or: [
+        { _id: groupId },
+        { _id: new mongoose.Types.ObjectId(groupId) }
+      ]
+    });
+
+    if (!groupDoc) {
+      return NextResponse.json({ error: "Group not found" }, { status: 404 });
+    }
+
+    // Manually populate members and admins
+    const usersCollection = db?.collection('users');
+
+    // Get member IDs (handle both string and ObjectId formats)
+    const memberIds = (groupDoc.members || []).map((id: any) =>
+      typeof id === 'string' ? id : id.toString()
+    );
+
+    const members = await usersCollection?.find({
+      $or: [
+        { _id: { $in: memberIds } },
+        { _id: { $in: memberIds.map((id: string) => {
+          try {
+            return new mongoose.Types.ObjectId(id);
+          } catch {
+            return id;
+          }
+        })}}
+      ]
+    }).project({ name: 1, username: 1, image: 1 }).toArray();
+
+    // Get admin IDs
+    const adminIds = (groupDoc.admins || []).map((id: any) =>
+      typeof id === 'string' ? id : id.toString()
+    );
+
+    const admins = await usersCollection?.find({
+      $or: [
+        { _id: { $in: adminIds } },
+        { _id: { $in: adminIds.map((id: string) => {
+          try {
+            return new mongoose.Types.ObjectId(id);
+          } catch {
+            return id;
+          }
+        })}}
+      ]
+    }).project({ name: 1, username: 1, image: 1 }).toArray();
+
+    // Construct the group object
+    const group = {
+      ...groupDoc,
+      members: members || [],
+      admins: admins || [],
+      memberCount: (members || []).length,
+    };
 
     if (!group) {
       return NextResponse.json({ error: "Group not found" }, { status: 404 });
     }
 
-    // Check if user is a member
-    if (!group.members.some((member: any) => member._id.toString() === session.user.id)) {
+    // Check if user is a member (compare string IDs)
+    const userIdStr = session.user.id.toString();
+    const isMember = group.members.some((member: any) => {
+      const memberId = typeof member._id === 'string' ? member._id : member._id.toString();
+      return memberId === userIdStr;
+    });
+
+    if (!isMember) {
       return NextResponse.json({ error: "Access denied" }, { status: 403 });
     }
 
-    // Add memberCount to the response
-    const groupWithCount = {
-      ...group.toObject(),
-      memberCount: group.members.length,
-    };
-
-    return NextResponse.json({ group: groupWithCount });
+    return NextResponse.json({ group });
   } catch (error) {
     console.error("Get group error:", error);
     return NextResponse.json(
@@ -61,20 +127,43 @@ export async function PATCH(
     await dbConnect();
 
     const { groupId } = await params;
-    const group = await Group.findById(groupId);
-    if (!group) {
+
+    // Validate ObjectId format
+    if (!mongoose.Types.ObjectId.isValid(groupId)) {
+      return NextResponse.json({ error: "Invalid group ID format" }, { status: 400 });
+    }
+
+    // Handle both ObjectId and string IDs (for migrated groups)
+    const db = mongoose.connection.db;
+    const groupsCollection = db?.collection('groups');
+
+    // Try to find with both string and ObjectId formats
+    let groupDoc = await groupsCollection?.findOne({
+      $or: [
+        { _id: groupId },
+        { _id: new mongoose.Types.ObjectId(groupId) }
+      ]
+    });
+
+    if (!groupDoc) {
       return NextResponse.json({ error: "Group not found" }, { status: 404 });
     }
 
-    // Check if user is admin
-    if (!group.admins.includes(session.user.id)) {
+    // Check if user is admin (compare string IDs)
+    const userIdStr = session.user.id.toString();
+    const adminIds = (groupDoc.admins || []).map((id: any) =>
+      typeof id === 'string' ? id : id.toString()
+    );
+    const isAdmin = adminIds.includes(userIdStr);
+
+    if (!isAdmin) {
       return NextResponse.json({ error: "Admin access required" }, { status: 403 });
     }
 
     const updates = await request.json();
     const allowedUpdates = [
-      "name", "description", "isPrivate", "maxMembers", 
-      "turnDurationDays", "allowMemberInvites", 
+      "name", "description", "isPrivate", "maxMembers",
+      "turnDurationDays", "allowMemberInvites",
       "requireApprovalForAlbums", "notifyOnNewAlbums"
     ];
 
@@ -86,10 +175,38 @@ export async function PATCH(
         return obj;
       }, {});
 
-    Object.assign(group, filteredUpdates);
-    await group.save();
+    // Update using native MongoDB driver
+    await groupsCollection?.updateOne(
+      { _id: groupDoc._id },
+      { $set: filteredUpdates }
+    );
 
-    await group.populate("members", "name username image");
+    // Fetch updated group with populated members
+    const updatedGroupDoc = await groupsCollection?.findOne({ _id: groupDoc._id });
+
+    // Manually populate members
+    const usersCollection = db?.collection('users');
+    const memberIds = (updatedGroupDoc.members || []).map((id: any) =>
+      typeof id === 'string' ? id : id.toString()
+    );
+
+    const members = await usersCollection?.find({
+      $or: [
+        { _id: { $in: memberIds } },
+        { _id: { $in: memberIds.map((id: string) => {
+          try {
+            return new mongoose.Types.ObjectId(id);
+          } catch {
+            return id;
+          }
+        })}}
+      ]
+    }).project({ name: 1, username: 1, image: 1 }).toArray();
+
+    const group = {
+      ...updatedGroupDoc,
+      members: members || [],
+    };
 
     return NextResponse.json({ group });
   } catch (error) {

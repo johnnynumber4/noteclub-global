@@ -5,14 +5,14 @@ import dbConnect from "@/lib/mongodb";
 import { User } from "@/models/User";
 import Album from "@/models/Album";
 import mongoose from "mongoose";
+import { isAdmin } from "@/lib/auth-utils";
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-
-    // Check if user is admin
-    if (!session?.user?.email || session.user.email !== "jyoungiv@gmail.com") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    // Check if user is admin using role-based auth
+    const hasAdminAccess = await isAdmin();
+    if (!hasAdminAccess) {
+      return NextResponse.json({ error: "Unauthorized - Admin access required" }, { status: 403 });
     }
 
     await dbConnect();
@@ -21,9 +21,6 @@ export async function GET(request: NextRequest) {
     const users = await User.find({})
       .select("name email username image isActive role turnOrder joinedAt")
       .sort({ name: 1 });
-
-    console.log(`Found ${users.length} users in database`);
-    console.log('User IDs:', users.map(u => ({ id: u._id.toString(), name: u.name })));
 
     // Get actual album counts for each user
     const userIds = users.map(u => u._id);

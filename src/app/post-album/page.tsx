@@ -98,6 +98,8 @@ export default function PostAlbumPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [isManualEntry, setIsManualEntry] = useState(false);
+  const [hasSelectedAlbum, setHasSelectedAlbum] = useState(false);
 
   // Theme data
   const [themes, setThemes] = useState<Theme[]>([]);
@@ -202,7 +204,7 @@ export default function PostAlbumPage() {
     try {
       // Enhanced description fetching based on primary source
       let enhancedDescription = album.description || "";
-      
+
       if (album.primarySource === 'youtube' && album.youtubeMusicUrl) {
         try {
           // Extract YouTube album ID from URL for detailed description
@@ -210,7 +212,7 @@ export default function PostAlbumPage() {
           const albumDetailsResponse = await fetch(
             `/api/youtube-music/album?id=${encodeURIComponent(ytId)}`
           );
-          
+
           if (albumDetailsResponse.ok) {
             const detailsData = await albumDetailsResponse.json();
             enhancedDescription = detailsData.album?.description || enhancedDescription;
@@ -233,15 +235,16 @@ export default function PostAlbumPage() {
         appleMusicUrl: album.appleMusicUrl || "",
         coverImageUrl: album.thumbnail || "",
       }));
-      
+
+      setHasSelectedAlbum(true); // Unlock the form
       setIsSearchOpen(false);
       setSearchQuery("");
       setSearchResults([]);
-      
+
       // Create success message based on available platforms
       const availablePlatforms = album.availableOn.join(', ');
       const platformCount = album.availableOn.length;
-      
+
       let successMessage;
       if (platformCount === 1) {
         successMessage = `Selected "${album.title}" from ${availablePlatforms}!`;
@@ -250,12 +253,12 @@ export default function PostAlbumPage() {
       } else {
         successMessage = `Selected "${album.title}" with links from all platforms (${availablePlatforms})!`;
       }
-      
+
       setSuccess(successMessage);
-      
+
       // Clear success message after 4 seconds
       setTimeout(() => setSuccess(""), 4000);
-      
+
     } catch (error) {
       console.error("Error selecting album:", error);
       // Fallback to basic selection (preserve themeId)
@@ -269,12 +272,20 @@ export default function PostAlbumPage() {
         appleMusicUrl: album.appleMusicUrl || "",
         coverImageUrl: album.thumbnail || "",
       }));
+      setHasSelectedAlbum(true); // Unlock the form
       setIsSearchOpen(false);
       setSearchQuery("");
       setSearchResults([]);
       setSuccess(`Selected "${album.title}" by ${album.artist}!`);
       setTimeout(() => setSuccess(""), 3000);
     }
+  };
+
+  const enableManualEntry = () => {
+    setIsManualEntry(true);
+    setHasSelectedAlbum(true);
+    setSuccess("Manual entry mode enabled - fill in the album details below");
+    setTimeout(() => setSuccess(""), 3000);
   };
 
 
@@ -547,35 +558,67 @@ export default function PostAlbumPage() {
             <CardContent sx={{ p: 4 }}>
               <form onSubmit={handleSubmit}>
                 <Stack spacing={4}>
-                  {/* Unified Music Search */}
-                  <Box>
-                    <Typography variant="h6" gutterBottom>
-                      Search Music Services
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary" gutterBottom>
-                      Search across YouTube Music, Spotify, and Apple Music at once
-                    </Typography>
-                    <Button
-                      variant="outlined"
-                      fullWidth
-                      startIcon={<Search />}
-                      onClick={() => setIsSearchOpen(true)}
-                      sx={{
-                        py: 2,
-                        borderStyle: "dashed",
-                        borderColor: "primary.main",
-                        color: "primary.main",
-                        "&:hover": {
-                          borderColor: "primary.main",
-                          bgcolor: "rgba(33, 150, 243, 0.1)",
-                        },
-                      }}
-                    >
-                      Search All Music Services
-                    </Button>
-                  </Box>
+                  {/* Step 1: Search or Manual Entry - ONLY show if no album selected */}
+                  {!hasSelectedAlbum && (
+                    <Stack spacing={3}>
+                      <Box>
+                        <Typography variant="h6" gutterBottom fontWeight={700}>
+                          1. Find Your Album
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary" gutterBottom>
+                          Search across YouTube Music, Spotify, and Apple Music
+                        </Typography>
+                        <Button
+                          variant="contained"
+                          fullWidth
+                          size="large"
+                          startIcon={<Search />}
+                          onClick={() => setIsSearchOpen(true)}
+                          sx={{
+                            py: 2.5,
+                            background: "linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)",
+                            fontSize: "1.1rem",
+                            "&:hover": {
+                              background: "linear-gradient(45deg, #1976d2 30%, #00ACC1 90%)",
+                            },
+                          }}
+                        >
+                          Search Music Services
+                        </Button>
+                      </Box>
 
-                  <Divider />
+                      <Stack direction="row" spacing={2} alignItems="center">
+                        <Divider sx={{ flex: 1 }} />
+                        <Typography variant="body2" color="text.secondary">
+                          OR
+                        </Typography>
+                        <Divider sx={{ flex: 1 }} />
+                      </Stack>
+
+                      <Box>
+                        <Button
+                          variant="outlined"
+                          fullWidth
+                          size="large"
+                          startIcon={<Add />}
+                          onClick={enableManualEntry}
+                          sx={{
+                            py: 2,
+                            borderStyle: "dashed",
+                            borderWidth: 2,
+                          }}
+                        >
+                          Enter Album Details Manually
+                        </Button>
+                        <Typography variant="caption" color="text.secondary" display="block" textAlign="center" mt={1}>
+                          Can&rsquo;t find it in search? Add it yourself
+                        </Typography>
+                      </Box>
+                    </Stack>
+                  )}
+
+                  {/* Show Divider only when album is selected */}
+                  {hasSelectedAlbum && <Divider />}
 
                   {/* Album Preview */}
                   {(formData.title || formData.coverImageUrl) && (
@@ -647,48 +690,77 @@ export default function PostAlbumPage() {
                     </>
                   )}
 
-                  {/* Manual Entry Fields */}
-                  <Typography variant="h6">Album Details</Typography>
+                  {/* Step 2: Album Details - Show when album selected */}
+                  {hasSelectedAlbum && (
+                    <>
+                      <Stack direction="row" justifyContent="space-between" alignItems="center">
+                        <Typography variant="h6" fontWeight={700}>
+                          2. Album Details
+                        </Typography>
+                        {!isManualEntry && (
+                          <Button
+                            size="small"
+                            onClick={() => {
+                              setFormData({
+                                title: "",
+                                artist: "",
+                                year: "",
+                                genre: "",
+                                description: "",
+                                themeId: formData.themeId, // preserve theme
+                                spotifyUrl: "",
+                                youtubeMusicUrl: "",
+                                appleMusicUrl: "",
+                                coverImageUrl: "",
+                              });
+                              setHasSelectedAlbum(false);
+                              setIsManualEntry(false);
+                            }}
+                          >
+                            Choose Different Album
+                          </Button>
+                        )}
+                      </Stack>
 
-                  <Stack spacing={3}>
-                    <Stack direction={{ xs: "column", sm: "row" }} spacing={3}>
-                      <TextField
-                        fullWidth
-                        label="Album Title *"
-                        value={formData.title}
-                        onChange={(e) =>
-                          setFormData((prev) => ({
-                            ...prev,
-                            title: e.target.value,
-                          }))
-                        }
-                        InputProps={{
-                          startAdornment: (
-                            <InputAdornment position="start">
-                              <AlbumIcon />
-                            </InputAdornment>
-                          ),
-                        }}
-                      />
+                      <Stack spacing={3}>
+                        <Stack direction={{ xs: "column", sm: "row" }} spacing={3}>
+                          <TextField
+                            fullWidth
+                            label="Album Title *"
+                            value={formData.title}
+                            onChange={(e) =>
+                              setFormData((prev) => ({
+                                ...prev,
+                                title: e.target.value,
+                              }))
+                            }
+                            InputProps={{
+                              startAdornment: (
+                                <InputAdornment position="start">
+                                  <AlbumIcon />
+                                </InputAdornment>
+                              ),
+                            }}
+                          />
 
-                      <TextField
-                        fullWidth
-                        label="Artist *"
-                        value={formData.artist}
-                        onChange={(e) =>
-                          setFormData((prev) => ({
-                            ...prev,
-                            artist: e.target.value,
-                          }))
-                        }
-                        InputProps={{
-                          startAdornment: (
-                            <InputAdornment position="start">
-                              <Person />
-                            </InputAdornment>
-                          ),
-                        }}
-                      />
+                          <TextField
+                            fullWidth
+                            label="Artist *"
+                            value={formData.artist}
+                            onChange={(e) =>
+                              setFormData((prev) => ({
+                                ...prev,
+                                artist: e.target.value,
+                              }))
+                            }
+                            InputProps={{
+                              startAdornment: (
+                                <InputAdornment position="start">
+                                  <Person />
+                                </InputAdornment>
+                              ),
+                            }}
+                          />
                     </Stack>
 
                     <Stack direction={{ xs: "column", sm: "row" }} spacing={3}>
@@ -818,40 +890,42 @@ export default function PostAlbumPage() {
                           ),
                         }}
                       />
-                    </Stack>
-                  </Stack>
+                        </Stack>
+                      </Stack>
 
-                  {/* Cover Image */}
-                  <TextField
-                    fullWidth
-                    label="Cover Image URL"
-                    value={formData.coverImageUrl}
-                    onChange={(e) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        coverImageUrl: e.target.value,
-                      }))
-                    }
-                    placeholder="https://..."
-                  />
+                      {/* Cover Image */}
+                      <TextField
+                        fullWidth
+                        label="Cover Image URL"
+                        value={formData.coverImageUrl}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            coverImageUrl: e.target.value,
+                          }))
+                        }
+                        placeholder="https://..."
+                      />
 
-                  {/* Submit Button */}
-                  <Button
-                    type="submit"
-                    variant="contained"
-                    size="large"
-                    disabled={isSubmitting}
-                    startIcon={
-                      isSubmitting ? (
-                        <CircularProgress size={20} />
-                      ) : (
-                        <AlbumIcon />
-                      )
-                    }
-                    sx={{ py: 2 }}
-                  >
-                    {isSubmitting ? "Posting Album..." : "Post Album"}
-                  </Button>
+                      {/* Submit Button */}
+                      <Button
+                        type="submit"
+                        variant="contained"
+                        size="large"
+                        disabled={isSubmitting}
+                        startIcon={
+                          isSubmitting ? (
+                            <CircularProgress size={20} />
+                          ) : (
+                            <AlbumIcon />
+                          )
+                        }
+                        sx={{ py: 2 }}
+                      >
+                        {isSubmitting ? "Posting Album..." : "Post Album"}
+                      </Button>
+                    </>
+                  )}
                 </Stack>
               </form>
             </CardContent>

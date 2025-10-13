@@ -138,33 +138,15 @@ export default function DashboardPage() {
       sx={{ minHeight: "100vh", bgcolor: "background.default", pt: 10, pb: 4 }}
     >
       <Container maxWidth="lg">
-        <Stack spacing={4}>
+        <Stack spacing={6}>
           {/* Header */}
-          <Stack
-            direction={{ xs: "column", sm: "row" }}
-            justifyContent="space-between"
-            alignItems="center"
-            spacing={2}
-          >
-            <Stack spacing={1}>
-              <Typography variant="h3" fontWeight={900}>
-                Hey, {session?.user?.name?.split(" ")[0] || "there"}! 👋
-              </Typography>
-              <Typography variant="h6" color="text.secondary">
-                Ready to share some music?
-              </Typography>
-            </Stack>
-
-            <Stack direction="row" spacing={2}>
-              <Button
-                variant="outlined"
-                component={Link}
-                href="/groups"
-                startIcon={<MusicNote />}
-              >
-                Manage Groups
-              </Button>
-            </Stack>
+          <Stack spacing={1}>
+            <Typography variant="h3" fontWeight={900}>
+              Hey, {session?.user?.name?.split(" ")[0] || "there"}! 👋
+            </Typography>
+            <Typography variant="h6" color="text.secondary">
+              Ready to share some music?
+            </Typography>
           </Stack>
 
           {/* Success/Error Messages */}
@@ -183,225 +165,230 @@ export default function DashboardPage() {
             </Alert>
           )}
 
-          {/* Your Turn Section */}
-          <Stack spacing={3}>
-            <Typography variant="h4" fontWeight={700}>
-              Your Turn Status
-            </Typography>
+          {/* Latest Album Hero - FIRST */}
+          {currentAlbum && (
+            <Paper
+              elevation={0}
+              sx={{
+                p: { xs: 3, md: 5 },
+                background: "linear-gradient(135deg, rgba(33, 150, 243, 0.08), rgba(244, 67, 54, 0.08))",
+                border: "1px solid",
+                borderColor: "divider",
+                borderRadius: 3,
+              }}
+            >
+              <Stack spacing={3}>
+                <Typography variant="overline" fontWeight={700} color="text.secondary">
+                  Latest Pick
+                </Typography>
 
-            {turnStatus ? (
-              <Paper
-                sx={{
-                  p: 4,
-                  background: turnStatus.isMyTurn
-                    ? "linear-gradient(135deg, rgba(244, 67, 54, 0.1), rgba(33, 150, 243, 0.1))"
-                    : "background.paper",
-                  border: turnStatus.isMyTurn ? "2px solid" : "1px solid",
-                  borderColor: turnStatus.isMyTurn ? "primary.main" : "divider",
-                }}
-              >
-                <Stack spacing={3}>
-                  {turnStatus.isMyTurn ? (
-                    <>
-                      <Stack direction="row" alignItems="center" spacing={2}>
-                        <PlayArrow
-                          sx={{ fontSize: 40, color: "primary.main" }}
+                <Grid container spacing={4} alignItems="center">
+                  <Grid size={{ xs: 12, md: 4 }}>
+                    {currentAlbum.coverImageUrl ? (
+                      <Box
+                        sx={{
+                          width: "100%",
+                          paddingTop: "100%",
+                          position: "relative",
+                          borderRadius: 2,
+                          overflow: "hidden",
+                          boxShadow: "0 8px 32px rgba(0,0,0,0.2)",
+                        }}
+                      >
+                        <CardMedia
+                          component="img"
+                          image={currentAlbum.coverImageUrl}
+                          alt={currentAlbum.title}
+                          sx={{
+                            position: "absolute",
+                            top: 0,
+                            left: 0,
+                            width: "100%",
+                            height: "100%",
+                            objectFit: "cover",
+                          }}
                         />
-                        <Typography
-                          variant="h5"
-                          fontWeight={700}
-                          color="primary"
-                        >
-                          Your Turn 🎵
+                      </Box>
+                    ) : (
+                      <Box
+                        sx={{
+                          width: "100%",
+                          paddingTop: "100%",
+                          position: "relative",
+                          borderRadius: 2,
+                          bgcolor: "action.hover",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        <MusicNote sx={{ fontSize: 80, color: "text.secondary" }} />
+                      </Box>
+                    )}
+                  </Grid>
+
+                  <Grid size={{ xs: 12, md: 8 }}>
+                    <Stack spacing={3}>
+                      <Stack spacing={1.5}>
+                        <Typography variant="h3" fontWeight={900}>
+                          {currentAlbum.title}
                         </Typography>
+                        <Typography variant="h5" color="text.secondary" fontWeight={500}>
+                          {currentAlbum.artist}
+                        </Typography>
+                        <Stack direction="row" spacing={1.5} alignItems="center" flexWrap="wrap">
+                          <Chip
+                            avatar={<Avatar>{currentAlbum.postedBy?.name?.[0] || "?"}</Avatar>}
+                            label={currentAlbum.postedBy?.name || "Unknown"}
+                            variant="outlined"
+                          />
+                          <Typography variant="body2" color="text.secondary">
+                            •
+                          </Typography>
+                          <Chip
+                            label={currentAlbum.group?.name || "Unknown Group"}
+                            size="small"
+                            color="primary"
+                            variant="outlined"
+                          />
+                        </Stack>
                       </Stack>
-                      <Typography variant="body1" color="text.secondary">
-                        Choose an amazing album to share with the NoteClub
-                        community!
-                      </Typography>
+
                       <Button
                         variant="contained"
                         size="large"
-                        startIcon={<MusicNote />}
                         component={Link}
-                        href="/post-album"
-                        sx={{
-                          background:
-                            "linear-gradient(45deg, #f44336 30%, #2196f3 90%)",
-                          "&:hover": {
-                            background:
-                              "linear-gradient(45deg, #d32f2f 30%, #1976d2 90%)",
-                          },
-                          width: "fit-content",
-                        }}
+                        href={`/albums/${currentAlbum._id}`}
+                        endIcon={<PlayArrow />}
+                        sx={{ width: "fit-content" }}
                       >
-                        Post Your Album
+                        Listen & Discuss
                       </Button>
-                    </>
-                  ) : (
-                    <>
-                      <Stack direction="row" alignItems="center" spacing={2}>
-                        <Schedule
-                          sx={{ fontSize: 40, color: "text.secondary" }}
-                        />
-                        <Typography variant="h5" fontWeight={700}>
-                          {turnStatus.currentTurnUser?.name || "Unknown User"}&rsquo;s Turn
-                        </Typography>
-                      </Stack>
-                      <Typography variant="body1" color="text.secondary">
-                        {turnStatus.nextTurnUser?.name && (
-                          <>
-                            Up next:{" "}
-                            <strong>{turnStatus.nextTurnUser?.name}</strong>
-                          </>
-                        )}
-                      </Typography>
-
-                      <Button
-                        variant="outlined"
-                        size="medium"
-                        startIcon={<MusicNote />}
-                        component={Link}
-                        href="/post-album?override=true"
-                        sx={{
-                          width: "fit-content",
-                          mt: 2,
-                          borderColor: "primary.main",
-                          color: "primary.main",
-                          "&:hover": {
-                            backgroundColor: "primary.main",
-                            color: "white",
-                          },
-                        }}
-                      >
-                        Did you need to Post out of turn?
-                      </Button>
-                    </>
-                  )}
-
-                  {/* Turn Order Display */}
-                  {turnStatus.turnOrder &&
-                    Array.isArray(turnStatus.turnOrder) &&
-                    turnStatus.turnOrder.length > 0 && (
-                      <Box>
-                        <Typography variant="h6" gutterBottom>
-                          Turn Order (Alphabetical)
-                        </Typography>
-                        <Stack
-                          direction="row"
-                          spacing={1}
-                          flexWrap="wrap"
-                          useFlexGap
-                        >
-                          {turnStatus.turnOrder
-                            .filter((user: any) => user && user._id)
-                            .map((user: any, index: number) => (
-                              <Chip
-                                key={user._id}
-                                avatar={
-                                  <Avatar src={user?.image}>
-                                    {user?.name?.[0] || "?"}
-                                  </Avatar>
-                                }
-                                label={user?.name || "Unknown User"}
-                                variant={
-                                  index === turnStatus.currentTurnIndex
-                                    ? "filled"
-                                    : "outlined"
-                                }
-                                color={
-                                  index === turnStatus.currentTurnIndex
-                                    ? "primary"
-                                    : "default"
-                                }
-                                size="small"
-                              />
-                            ))}
-                        </Stack>
-                      </Box>
-                    )}
-                </Stack>
-              </Paper>
-            ) : (
-              <Paper sx={{ p: 6, textAlign: "center" }}>
-                <CircularProgress />
-                <Typography
-                  variant="body1"
-                  color="text.secondary"
-                  sx={{ mt: 2 }}
-                >
-                  Loading turn status...
-                </Typography>
-              </Paper>
-            )}
-          </Stack>
-
-          {/* Current Album */}
-          {currentAlbum && (
-            <Stack spacing={3}>
-              <Typography variant="h4" fontWeight={700}>
-                Current Album Pick
-              </Typography>
-
-              <Paper
-                sx={{
-                  p: 4,
-                  background:
-                    "linear-gradient(135deg, rgba(33, 150, 243, 0.05), rgba(244, 67, 54, 0.05))",
-                }}
-              >
-                <Stack
-                  direction={{ xs: "column", md: "row" }}
-                  spacing={3}
-                  alignItems="center"
-                >
-                  {currentAlbum.coverImageUrl && (
-                    <Box
-                      sx={{
-                        width: { xs: 200, md: 150 },
-                        height: { xs: 200, md: 150 },
-                        borderRadius: 2,
-                        overflow: "hidden",
-                        flexShrink: 0,
-                      }}
-                    >
-                      <CardMedia
-                        component="img"
-                        sx={{ width: "100%", height: "100%" }}
-                        image={currentAlbum.coverImageUrl}
-                        alt={currentAlbum.title}
-                      />
-                    </Box>
-                  )}
-
-                  <Stack spacing={2} flex={1}>
-                    <Stack spacing={1}>
-                      <Typography variant="h5" fontWeight={700}>
-                        {currentAlbum.title}
-                      </Typography>
-                      <Typography variant="h6" color="text.secondary">
-                        {currentAlbum.artist}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        Latest pick by{" "}
-                        {currentAlbum.postedBy?.name || "Unknown"} •{" "}
-                        {currentAlbum.group?.name || "Unknown Group"}
-                      </Typography>
                     </Stack>
+                  </Grid>
+                </Grid>
+              </Stack>
+            </Paper>
+          )}
 
-                    <Button
-                      variant="outlined"
-                      size="small"
-                      component={Link}
-                      href={`/albums/${currentAlbum._id}`}
-                      sx={{ width: "fit-content" }}
-                    >
-                      View Details
-                    </Button>
+          {/* Your Turn CTA - SECOND (only if it's your turn) */}
+          {turnStatus?.isMyTurn && (
+            <Paper
+              elevation={0}
+              sx={{
+                p: 4,
+                background: "linear-gradient(135deg, rgba(244, 67, 54, 0.1), rgba(33, 150, 243, 0.1))",
+                border: "2px solid",
+                borderColor: "primary.main",
+                borderRadius: 3,
+              }}
+            >
+              <Stack spacing={3} alignItems="center" textAlign="center">
+                <Stack spacing={2} alignItems="center">
+                  <Box
+                    sx={{
+                      width: 64,
+                      height: 64,
+                      borderRadius: "50%",
+                      bgcolor: "primary.main",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <MusicNote sx={{ fontSize: 32, color: "white" }} />
+                  </Box>
+                  <Typography variant="h4" fontWeight={900}>
+                    It's Your Turn! 🎵
+                  </Typography>
+                  <Typography variant="body1" color="text.secondary" maxWidth={600}>
+                    Choose an amazing album to share with the community
+                  </Typography>
+                </Stack>
+
+                <Button
+                  variant="contained"
+                  size="large"
+                  startIcon={<MusicNote />}
+                  component={Link}
+                  href="/post-album"
+                  sx={{
+                    px: 4,
+                    py: 1.5,
+                    fontSize: "1.1rem",
+                    background: "linear-gradient(45deg, #f44336 30%, #2196f3 90%)",
+                    "&:hover": {
+                      background: "linear-gradient(45deg, #d32f2f 30%, #1976d2 90%)",
+                    },
+                  }}
+                >
+                  Share Your Pick
+                </Button>
+              </Stack>
+            </Paper>
+          )}
+
+          {/* Turn Status - THIRD (minimalist when not your turn) */}
+          {turnStatus && !turnStatus.isMyTurn && (
+            <Paper
+              elevation={0}
+              sx={{
+                p: 3,
+                border: "1px solid",
+                borderColor: "divider",
+                borderRadius: 2,
+              }}
+            >
+              <Stack spacing={2.5}>
+                <Stack direction="row" alignItems="center" spacing={2}>
+                  <Schedule sx={{ fontSize: 28, color: "text.secondary" }} />
+                  <Stack spacing={0.5}>
+                    <Typography variant="h6" fontWeight={700}>
+                      {turnStatus.currentTurnUser?.name || "Unknown User"}'s Turn
+                    </Typography>
+                    {turnStatus.nextTurnUser?.name && (
+                      <Typography variant="body2" color="text.secondary">
+                        Up next: <strong>{turnStatus.nextTurnUser.name}</strong>
+                      </Typography>
+                    )}
                   </Stack>
                 </Stack>
-              </Paper>
-            </Stack>
+
+                {/* Turn Order - Collapsed */}
+                {turnStatus.turnOrder && Array.isArray(turnStatus.turnOrder) && turnStatus.turnOrder.length > 0 && (
+                  <Stack spacing={1.5}>
+                    <Typography variant="caption" color="text.secondary" fontWeight={600} textTransform="uppercase">
+                      Turn Order
+                    </Typography>
+                    <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+                      {turnStatus.turnOrder
+                        .filter((user: any) => user && user._id)
+                        .map((user: any, index: number) => (
+                          <Chip
+                            key={user._id}
+                            avatar={<Avatar src={user?.image} sx={{ width: 24, height: 24 }}>{user?.name?.[0] || "?"}</Avatar>}
+                            label={user?.name || "Unknown User"}
+                            variant={index === turnStatus.currentTurnIndex ? "filled" : "outlined"}
+                            color={index === turnStatus.currentTurnIndex ? "primary" : "default"}
+                            size="small"
+                          />
+                        ))}
+                    </Stack>
+                  </Stack>
+                )}
+
+                <Button
+                  variant="text"
+                  size="small"
+                  startIcon={<MusicNote />}
+                  component={Link}
+                  href="/post-album?override=true"
+                  sx={{ width: "fit-content", color: "text.secondary" }}
+                >
+                  Post out of turn
+                </Button>
+              </Stack>
+            </Paper>
           )}
 
           {/* Recent Albums */}

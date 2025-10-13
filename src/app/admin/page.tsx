@@ -21,8 +21,10 @@ import {
   Avatar,
   Stack,
   Button,
+  Tabs,
+  Tab,
 } from "@mui/material";
-import { AdminPanelSettings, ArrowBack } from "@mui/icons-material";
+import { AdminPanelSettings, ArrowBack, Group, People } from "@mui/icons-material";
 import Link from "next/link";
 
 interface User {
@@ -38,29 +40,86 @@ interface User {
   joinedAt: string;
 }
 
+interface GroupMember {
+  _id: string;
+  name: string;
+  email: string;
+  username: string;
+  image?: string;
+  isActive: boolean;
+}
+
+interface GroupData {
+  _id: string;
+  name: string;
+  description?: string;
+  isPrivate: boolean;
+  inviteCode: string;
+  maxMembers: number;
+  members: GroupMember[];
+  admins: Array<{
+    _id: string;
+    name: string;
+    email: string;
+    username: string;
+  }>;
+  createdBy: {
+    _id: string;
+    name: string;
+    email: string;
+  };
+  createdAt: string;
+  updatedAt: string;
+}
+
 export default function AdminPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
 
   const [users, setUsers] = useState<User[]>([]);
+  const [groups, setGroups] = useState<GroupData[]>([]);
   const [totalAlbums, setTotalAlbums] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [updatingUserId, setUpdatingUserId] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState(0);
+  const [isAdminUser, setIsAdminUser] = useState(false);
+  const [checkingAdmin, setCheckingAdmin] = useState(true);
 
-  // Check if user is admin
-  const isAdmin = session?.user?.email === "jyoungiv@gmail.com";
-
+  // Check if user is admin by fetching their role
   useEffect(() => {
+    const checkAdminStatus = async () => {
+      if (session?.user?.id) {
+        try {
+          const response = await fetch(`/api/users/${session.user.id}`);
+          if (response.ok) {
+            const data = await response.json();
+            const hasAdmin = data.user.role === 'admin';
+            setIsAdminUser(hasAdmin);
+
+            if (!hasAdmin) {
+              router.push("/dashboard");
+            } else {
+              fetchUsers();
+              fetchGroups();
+            }
+          }
+        } catch (error) {
+          console.error('Error checking admin status:', error);
+          router.push("/dashboard");
+        } finally {
+          setCheckingAdmin(false);
+        }
+      }
+    };
+
     if (status === "unauthenticated") {
       router.push("/auth/signin");
-    } else if (status === "authenticated" && !isAdmin) {
-      router.push("/dashboard");
-    } else if (status === "authenticated" && isAdmin) {
-      fetchUsers();
+    } else if (status === "authenticated") {
+      checkAdminStatus();
     }
-  }, [status, isAdmin, router]);
+  }, [status, session, router]);
 
   const fetchUsers = async () => {
     try {
@@ -77,6 +136,20 @@ export default function AdminPage() {
       setError("Failed to load users");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchGroups = async () => {
+    try {
+      const response = await fetch("/api/admin/groups");
+      if (!response.ok) {
+        throw new Error("Failed to fetch groups");
+      }
+      const data = await response.json();
+      setGroups(data.groups || []);
+    } catch (error) {
+      console.error("Error fetching groups:", error);
+      setError("Failed to load groups");
     }
   };
 
@@ -131,7 +204,7 @@ export default function AdminPage() {
     }
   };
 
-  if (status === "loading" || loading) {
+  if (status === "loading" || loading || checkingAdmin) {
     return (
       <Box
         sx={{
@@ -147,7 +220,7 @@ export default function AdminPage() {
     );
   }
 
-  if (!isAdmin) {
+  if (!isAdminUser) {
     return null;
   }
 
@@ -197,8 +270,19 @@ export default function AdminPage() {
             </Alert>
           )}
 
-          {/* Users Table */}
-          <Paper sx={{ width: "100%", overflow: "hidden" }}>
+          {/* Tabs */}
+          <Paper sx={{ borderBottom: 1, borderColor: "divider" }}>
+            <Tabs value={activeTab} onChange={(_, newValue) => setActiveTab(newValue)}>
+              <Tab icon={<People />} iconPosition="start" label="Users" />
+              <Tab icon={<Group />} iconPosition="start" label="Groups" />
+            </Tabs>
+          </Paper>
+
+          {/* Tab Content */}
+          {activeTab === 0 && (
+            <>
+              {/* Users Table */}
+              <Paper sx={{ width: "100%", overflow: "hidden" }}>
             <TableContainer sx={{ maxHeight: "70vh" }}>
               <Table stickyHeader>
                 <TableHead>
@@ -240,8 +324,17 @@ export default function AdminPage() {
                           </Typography>
                         </TableCell>
                         <TableCell>
-                          <Typography variant="body2" color="text.secondary">
-                            {user.username}
+                          <Typography
+                            variant="body2"
+                            color="primary"
+                            component={Link}
+                            href={`/profile/${user._id}`}
+                            sx={{
+                              textDecoration: "none",
+                              "&:hover": { textDecoration: "underline" }
+                            }}
+                          >
+                            @{user.username}
                           </Typography>
                         </TableCell>
                         <TableCell align="center">
@@ -344,6 +437,142 @@ export default function AdminPage() {
               </Typography>
             </Paper>
           </Stack>
+            </>
+          )}
+
+          {/* Groups Tab */}
+          {activeTab === 1 && (
+            <>
+              {/* Groups Table */}
+              <Paper sx={{ width: "100%", overflow: "hidden" }}>
+                <TableContainer sx={{ maxHeight: "70vh" }}>
+                  <Table stickyHeader>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>Group Name</TableCell>
+                        <TableCell>Description</TableCell>
+                        <TableCell align="center">Members</TableCell>
+                        <TableCell align="center">Privacy</TableCell>
+                        <TableCell align="center">Invite Code</TableCell>
+                        <TableCell align="center">Created By</TableCell>
+                        <TableCell align="center">Created</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {groups.map((group) => (
+                        <TableRow
+                          key={group._id}
+                          sx={{ "&:hover": { bgcolor: "action.hover" } }}
+                        >
+                          <TableCell>
+                            <Typography
+                              variant="body1"
+                              fontWeight={600}
+                              component={Link}
+                              href={`/groups/${group._id}`}
+                              sx={{
+                                textDecoration: "none",
+                                color: "text.primary",
+                                "&:hover": { color: "primary.main" }
+                              }}
+                            >
+                              {group.name}
+                            </Typography>
+                          </TableCell>
+                          <TableCell>
+                            <Typography variant="body2" color="text.secondary" noWrap>
+                              {group.description || "-"}
+                            </Typography>
+                          </TableCell>
+                          <TableCell align="center">
+                            <Stack direction="row" spacing={-1} justifyContent="center">
+                              {group.members.slice(0, 3).map((member) => (
+                                <Avatar
+                                  key={member._id}
+                                  src={member.image}
+                                  sx={{ width: 28, height: 28, fontSize: 12, border: "2px solid white" }}
+                                  title={member.name}
+                                >
+                                  {member.name[0]}
+                                </Avatar>
+                              ))}
+                              {group.members.length > 3 && (
+                                <Avatar sx={{ width: 28, height: 28, fontSize: 10 }}>
+                                  +{group.members.length - 3}
+                                </Avatar>
+                              )}
+                            </Stack>
+                            <Typography variant="caption" color="text.secondary">
+                              {group.members.length} / {group.maxMembers}
+                            </Typography>
+                          </TableCell>
+                          <TableCell align="center">
+                            <Chip
+                              label={group.isPrivate ? "Private" : "Public"}
+                              size="small"
+                              color={group.isPrivate ? "warning" : "success"}
+                              variant="outlined"
+                            />
+                          </TableCell>
+                          <TableCell align="center">
+                            <Typography variant="body2" fontFamily="monospace">
+                              {group.inviteCode}
+                            </Typography>
+                          </TableCell>
+                          <TableCell align="center">
+                            <Typography variant="body2" color="text.secondary">
+                              {group.createdBy?.name || "Unknown"}
+                            </Typography>
+                          </TableCell>
+                          <TableCell align="center">
+                            <Typography variant="body2" color="text.secondary">
+                              {new Date(group.createdAt).toLocaleDateString()}
+                            </Typography>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              </Paper>
+
+              {/* Group Summary */}
+              <Stack direction="row" spacing={3} flexWrap="wrap" useFlexGap>
+                <Paper sx={{ p: 3, flex: 1, minWidth: 200 }}>
+                  <Typography variant="h4" fontWeight={700} color="primary.main">
+                    {groups.length}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Total Groups
+                  </Typography>
+                </Paper>
+                <Paper sx={{ p: 3, flex: 1, minWidth: 200 }}>
+                  <Typography variant="h4" fontWeight={700} color="success.main">
+                    {groups.filter(g => !g.isPrivate).length}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Public Groups
+                  </Typography>
+                </Paper>
+                <Paper sx={{ p: 3, flex: 1, minWidth: 200 }}>
+                  <Typography variant="h4" fontWeight={700} color="warning.main">
+                    {groups.filter(g => g.isPrivate).length}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Private Groups
+                  </Typography>
+                </Paper>
+                <Paper sx={{ p: 3, flex: 1, minWidth: 200 }}>
+                  <Typography variant="h4" fontWeight={700} sx={{ color: "#9c27b0" }}>
+                    {groups.reduce((sum, g) => sum + g.members.length, 0)}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Total Memberships
+                  </Typography>
+                </Paper>
+              </Stack>
+            </>
+          )}
         </Stack>
       </Container>
     </Box>

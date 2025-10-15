@@ -53,14 +53,14 @@ interface UnifiedAlbumResult {
   description?: string;
   duration?: number;
   trackCount?: number;
-  
+
   // Streaming URLs
   youtubeMusicUrl?: string;
   spotifyUrl?: string;
   appleMusicUrl?: string;
-  
+
   // Source information
-  primarySource: 'youtube' | 'spotify' | 'apple';
+  primarySource: "youtube" | "spotify" | "apple";
   availableOn: string[];
 }
 
@@ -142,7 +142,7 @@ export default function PostAlbumPage() {
       if (response.ok) {
         const data = await response.json();
         setThemes(data.themes || []);
-        
+
         // First try to find a currently active theme
         const active = data.themes?.find(
           (theme: Theme) => theme.isCurrentlyActive
@@ -205,17 +205,18 @@ export default function PostAlbumPage() {
       // Enhanced description fetching based on primary source
       let enhancedDescription = album.description || "";
 
-      if (album.primarySource === 'youtube' && album.youtubeMusicUrl) {
+      if (album.primarySource === "youtube" && album.youtubeMusicUrl) {
         try {
           // Extract YouTube album ID from URL for detailed description
-          const ytId = album.id.replace('unified_', '');
+          const ytId = album.id.replace("unified_", "");
           const albumDetailsResponse = await fetch(
             `/api/youtube-music/album?id=${encodeURIComponent(ytId)}`
           );
 
           if (albumDetailsResponse.ok) {
             const detailsData = await albumDetailsResponse.json();
-            enhancedDescription = detailsData.album?.description || enhancedDescription;
+            enhancedDescription =
+              detailsData.album?.description || enhancedDescription;
           }
         } catch (ytError) {
           console.log("YouTube description fetch failed:", ytError);
@@ -242,7 +243,7 @@ export default function PostAlbumPage() {
       setSearchResults([]);
 
       // Create success message based on available platforms
-      const availablePlatforms = album.availableOn.join(', ');
+      const availablePlatforms = album.availableOn.join(", ");
       const platformCount = album.availableOn.length;
 
       let successMessage;
@@ -258,7 +259,6 @@ export default function PostAlbumPage() {
 
       // Clear success message after 4 seconds
       setTimeout(() => setSuccess(""), 4000);
-
     } catch (error) {
       console.error("Error selecting album:", error);
       // Fallback to basic selection (preserve themeId)
@@ -287,7 +287,6 @@ export default function PostAlbumPage() {
     setSuccess("Manual entry mode enabled - fill in the album details below");
     setTimeout(() => setSuccess(""), 3000);
   };
-
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -374,7 +373,7 @@ export default function PostAlbumPage() {
         await fetchThemes();
         const newTheme = data.theme;
         if (newTheme) {
-          setFormData(prev => ({ ...prev, themeId: newTheme._id }));
+          setFormData((prev) => ({ ...prev, themeId: newTheme._id }));
         }
 
         setTimeout(() => setSuccess(""), 3000);
@@ -429,7 +428,7 @@ export default function PostAlbumPage() {
                 <Typography variant="h6" color="primary.main">
                   Select Theme
                 </Typography>
-                
+
                 <FormControl fullWidth>
                   <InputLabel>Choose Theme</InputLabel>
                   <Select
@@ -443,10 +442,7 @@ export default function PostAlbumPage() {
                     }
                   >
                     {themes.map((theme) => (
-                      <MenuItem
-                        key={theme._id}
-                        value={theme._id}
-                      >
+                      <MenuItem key={theme._id} value={theme._id}>
                         <Stack>
                           <Typography variant="body1">
                             {theme.title}
@@ -458,14 +454,15 @@ export default function PostAlbumPage() {
                                 sx={{ ml: 1 }}
                               />
                             )}
-                            {!theme.isCurrentlyActive && theme._id === activeTheme?._id && (
-                              <Chip
-                                label="Current Theme"
-                                size="small"
-                                color="primary"
-                                sx={{ ml: 1 }}
-                              />
-                            )}
+                            {!theme.isCurrentlyActive &&
+                              theme._id === activeTheme?._id && (
+                                <Chip
+                                  label="Current Theme"
+                                  size="small"
+                                  color="primary"
+                                  sx={{ ml: 1 }}
+                                />
+                              )}
                             {theme.title === "Random" && (
                               <Chip
                                 label="Always Available"
@@ -488,7 +485,9 @@ export default function PostAlbumPage() {
                 {formData.themeId && (
                   <Card sx={{ p: 2, bgcolor: "rgba(244, 67, 54, 0.05)" }}>
                     {(() => {
-                      const selectedTheme = themes.find(t => t._id === formData.themeId);
+                      const selectedTheme = themes.find(
+                        (t) => t._id === formData.themeId
+                      );
                       return selectedTheme ? (
                         <Stack spacing={1}>
                           <Typography variant="subtitle1" fontWeight={600}>
@@ -546,8 +545,8 @@ export default function PostAlbumPage() {
                   🎯 Override Mode Active
                 </Typography>
                 <Typography variant="body2">
-                  - You&rsquo;re posting outside of turn order (turn order will remain
-                  unchanged)
+                  - You&rsquo;re posting outside of turn order (turn order will
+                  remain unchanged)
                 </Typography>
               </Stack>
             </Alert>
@@ -565,7 +564,11 @@ export default function PostAlbumPage() {
                         <Typography variant="h6" gutterBottom fontWeight={700}>
                           1. Find Your Album
                         </Typography>
-                        <Typography variant="body2" color="text.secondary" gutterBottom>
+                        <Typography
+                          variant="body2"
+                          color="text.secondary"
+                          gutterBottom
+                        >
                           Search across YouTube Music, Spotify, and Apple Music
                         </Typography>
                         <Button
@@ -576,25 +579,27 @@ export default function PostAlbumPage() {
                           onClick={() => setIsSearchOpen(true)}
                           sx={{
                             py: 2.5,
-                            background: "linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)",
+                            background:
+                              "linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)",
                             fontSize: "1.1rem",
                             "&:hover": {
-                              background: "linear-gradient(45deg, #1976d2 30%, #00ACC1 90%)",
+                              background:
+                                "linear-gradient(45deg, #1976d2 30%, #00ACC1 90%)",
                             },
                           }}
                         >
                           Search Music Services
                         </Button>
                       </Box>
-
+                      {/* 
                       <Stack direction="row" spacing={2} alignItems="center">
                         <Divider sx={{ flex: 1 }} />
                         <Typography variant="body2" color="text.secondary">
                           OR
                         </Typography>
                         <Divider sx={{ flex: 1 }} />
-                      </Stack>
-
+                      </Stack> */}
+                      {/* 
                       <Box>
                         <Button
                           variant="outlined"
@@ -613,7 +618,7 @@ export default function PostAlbumPage() {
                         <Typography variant="caption" color="text.secondary" display="block" textAlign="center" mt={1}>
                           Can&rsquo;t find it in search? Add it yourself
                         </Typography>
-                      </Box>
+                      </Box> */}
                     </Stack>
                   )}
 
@@ -693,7 +698,11 @@ export default function PostAlbumPage() {
                   {/* Step 2: Album Details - Show when album selected */}
                   {hasSelectedAlbum && (
                     <>
-                      <Stack direction="row" justifyContent="space-between" alignItems="center">
+                      <Stack
+                        direction="row"
+                        justifyContent="space-between"
+                        alignItems="center"
+                      >
                         <Typography variant="h6" fontWeight={700}>
                           2. Album Details
                         </Typography>
@@ -723,7 +732,10 @@ export default function PostAlbumPage() {
                       </Stack>
 
                       <Stack spacing={3}>
-                        <Stack direction={{ xs: "column", sm: "row" }} spacing={3}>
+                        <Stack
+                          direction={{ xs: "column", sm: "row" }}
+                          spacing={3}
+                        >
                           <TextField
                             fullWidth
                             label="Album Title *"
@@ -761,135 +773,141 @@ export default function PostAlbumPage() {
                               ),
                             }}
                           />
-                    </Stack>
+                        </Stack>
 
-                    <Stack direction={{ xs: "column", sm: "row" }} spacing={3}>
+                        <Stack
+                          direction={{ xs: "column", sm: "row" }}
+                          spacing={3}
+                        >
+                          <TextField
+                            fullWidth
+                            label="Year"
+                            type="number"
+                            value={formData.year}
+                            onChange={(e) =>
+                              setFormData((prev) => ({
+                                ...prev,
+                                year: e.target.value,
+                              }))
+                            }
+                            InputProps={{
+                              startAdornment: (
+                                <InputAdornment position="start">
+                                  <Event />
+                                </InputAdornment>
+                              ),
+                            }}
+                          />
+
+                          <TextField
+                            fullWidth
+                            label="Genre"
+                            value={formData.genre}
+                            onChange={(e) =>
+                              setFormData((prev) => ({
+                                ...prev,
+                                genre: e.target.value,
+                              }))
+                            }
+                            InputProps={{
+                              startAdornment: (
+                                <InputAdornment position="start">
+                                  <MusicNote />
+                                </InputAdornment>
+                              ),
+                            }}
+                          />
+                        </Stack>
+                      </Stack>
+
                       <TextField
                         fullWidth
-                        label="Year"
-                        type="number"
-                        value={formData.year}
+                        label="Your Notes / Description"
+                        multiline
+                        rows={3}
+                        value={formData.description}
                         onChange={(e) =>
                           setFormData((prev) => ({
                             ...prev,
-                            year: e.target.value,
+                            description: e.target.value,
                           }))
                         }
                         InputProps={{
                           startAdornment: (
                             <InputAdornment position="start">
-                              <Event />
+                              <Description />
                             </InputAdornment>
                           ),
                         }}
                       />
 
-                      <TextField
-                        fullWidth
-                        label="Genre"
-                        value={formData.genre}
-                        onChange={(e) =>
-                          setFormData((prev) => ({
-                            ...prev,
-                            genre: e.target.value,
-                          }))
-                        }
-                        InputProps={{
-                          startAdornment: (
-                            <InputAdornment position="start">
-                              <MusicNote />
-                            </InputAdornment>
-                          ),
-                        }}
-                      />
-                    </Stack>
-                  </Stack>
+                      {/* Streaming Links */}
+                      <Typography variant="h6">Streaming Links</Typography>
 
-                  <TextField
-                    fullWidth
-                    label="Description"
-                    multiline
-                    rows={3}
-                    value={formData.description}
-                    onChange={(e) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        description: e.target.value,
-                      }))
-                    }
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <Description />
-                        </InputAdornment>
-                      ),
-                    }}
-                  />
+                      <Stack spacing={3}>
+                        <TextField
+                          fullWidth
+                          label="YouTube Music URL"
+                          value={formData.youtubeMusicUrl}
+                          onChange={(e) =>
+                            setFormData((prev) => ({
+                              ...prev,
+                              youtubeMusicUrl: e.target.value,
+                            }))
+                          }
+                          placeholder="https://music.youtube.com/..."
+                          InputProps={{
+                            startAdornment: (
+                              <InputAdornment position="start">
+                                <YouTube sx={{ color: "#FF0000" }} />
+                              </InputAdornment>
+                            ),
+                          }}
+                        />
 
-                  {/* Streaming Links */}
-                  <Typography variant="h6">Streaming Links</Typography>
+                        <Stack
+                          direction={{ xs: "column", sm: "row" }}
+                          spacing={3}
+                        >
+                          <TextField
+                            fullWidth
+                            label="Spotify URL"
+                            value={formData.spotifyUrl}
+                            onChange={(e) =>
+                              setFormData((prev) => ({
+                                ...prev,
+                                spotifyUrl: e.target.value,
+                              }))
+                            }
+                            placeholder="https://open.spotify.com/..."
+                            InputProps={{
+                              startAdornment: (
+                                <InputAdornment position="start">
+                                  <LinkIcon sx={{ color: "#1DB954" }} />
+                                </InputAdornment>
+                              ),
+                            }}
+                          />
 
-                  <Stack spacing={3}>
-                    <TextField
-                      fullWidth
-                      label="YouTube Music URL"
-                      value={formData.youtubeMusicUrl}
-                      onChange={(e) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          youtubeMusicUrl: e.target.value,
-                        }))
-                      }
-                      placeholder="https://music.youtube.com/..."
-                      InputProps={{
-                        startAdornment: (
-                          <InputAdornment position="start">
-                            <YouTube sx={{ color: "#FF0000" }} />
-                          </InputAdornment>
-                        ),
-                      }}
-                    />
-
-                    <Stack direction={{ xs: "column", sm: "row" }} spacing={3}>
-                      <TextField
-                        fullWidth
-                        label="Spotify URL"
-                        value={formData.spotifyUrl}
-                        onChange={(e) =>
-                          setFormData((prev) => ({
-                            ...prev,
-                            spotifyUrl: e.target.value,
-                          }))
-                        }
-                        placeholder="https://open.spotify.com/..."
-                        InputProps={{
-                          startAdornment: (
-                            <InputAdornment position="start">
-                              <LinkIcon sx={{ color: "#1DB954" }} />
-                            </InputAdornment>
-                          ),
-                        }}
-                      />
-
-                      <TextField
-                        fullWidth
-                        label="Apple Music URL"
-                        value={formData.appleMusicUrl}
-                        onChange={(e) =>
-                          setFormData((prev) => ({
-                            ...prev,
-                            appleMusicUrl: e.target.value,
-                          }))
-                        }
-                        placeholder="https://music.apple.com/..."
-                        InputProps={{
-                          startAdornment: (
-                            <InputAdornment position="start">
-                              <LinkIcon sx={{ color: "#FA57C1" }} />
-                            </InputAdornment>
-                          ),
-                        }}
-                      />
+                          <TextField
+                            fullWidth
+                            label="Apple Music URL"
+                            value={formData.appleMusicUrl}
+                            onChange={(e) =>
+                              setFormData((prev) => ({
+                                ...prev,
+                                appleMusicUrl: e.target.value,
+                              }))
+                            }
+                            placeholder="https://music.apple.com/..."
+                            InputProps={{
+                              startAdornment: (
+                                <InputAdornment position="start">
+                                  <LinkIcon sx={{ color: "#FA57C1" }} />
+                                </InputAdornment>
+                              ),
+                            }}
+                          />
                         </Stack>
                       </Stack>
 
@@ -957,7 +975,8 @@ export default function PostAlbumPage() {
           <Stack spacing={3}>
             <Alert severity="info" sx={{ borderRadius: 2 }}>
               <Typography variant="body2">
-                🎵 Searching across YouTube Music, Spotify, and Apple Music simultaneously for the best matches!
+                🎵 Searching across YouTube Music, Spotify, and Apple Music
+                simultaneously for the best matches!
               </Typography>
             </Alert>
 
@@ -1059,32 +1078,57 @@ export default function PostAlbumPage() {
                         >
                           {album.artist}
                         </Typography>
-                        <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap">
-                          {album.year && <Chip label={album.year} size="small" />}
-                          {album.genre && <Chip label={album.genre} size="small" color="secondary" />}
+                        <Stack
+                          direction="row"
+                          spacing={1}
+                          alignItems="center"
+                          flexWrap="wrap"
+                        >
+                          {album.year && (
+                            <Chip label={album.year} size="small" />
+                          )}
+                          {album.genre && (
+                            <Chip
+                              label={album.genre}
+                              size="small"
+                              color="secondary"
+                            />
+                          )}
                         </Stack>
                         <Stack direction="row" spacing={0.5} flexWrap="wrap">
                           {album.youtubeMusicUrl && (
-                            <Chip 
-                              icon={<YouTube />} 
-                              label="YT Music" 
-                              size="small" 
-                              sx={{ bgcolor: "#FF0000", color: "white", fontSize: "0.7rem" }}
+                            <Chip
+                              icon={<YouTube />}
+                              label="YT Music"
+                              size="small"
+                              sx={{
+                                bgcolor: "#FF0000",
+                                color: "white",
+                                fontSize: "0.7rem",
+                              }}
                             />
                           )}
                           {album.spotifyUrl && (
-                            <Chip 
-                              label="Spotify" 
-                              size="small" 
-                              sx={{ bgcolor: "#1DB954", color: "white", fontSize: "0.7rem" }}
+                            <Chip
+                              label="Spotify"
+                              size="small"
+                              sx={{
+                                bgcolor: "#1DB954",
+                                color: "white",
+                                fontSize: "0.7rem",
+                              }}
                             />
                           )}
                           {album.appleMusicUrl && (
-                            <Chip 
-                              icon={<Apple />} 
-                              label="Apple" 
-                              size="small" 
-                              sx={{ bgcolor: "#FA57C1", color: "white", fontSize: "0.7rem" }}
+                            <Chip
+                              icon={<Apple />}
+                              label="Apple"
+                              size="small"
+                              sx={{
+                                bgcolor: "#FA57C1",
+                                color: "white",
+                                fontSize: "0.7rem",
+                              }}
                             />
                           )}
                         </Stack>
@@ -1126,7 +1170,10 @@ export default function PostAlbumPage() {
                 label="Theme Title"
                 value={themeFormData.title}
                 onChange={(e) =>
-                  setThemeFormData((prev) => ({ ...prev, title: e.target.value }))
+                  setThemeFormData((prev) => ({
+                    ...prev,
+                    title: e.target.value,
+                  }))
                 }
                 required
                 fullWidth
@@ -1137,7 +1184,10 @@ export default function PostAlbumPage() {
                 label="Description"
                 value={themeFormData.description}
                 onChange={(e) =>
-                  setThemeFormData((prev) => ({ ...prev, description: e.target.value }))
+                  setThemeFormData((prev) => ({
+                    ...prev,
+                    description: e.target.value,
+                  }))
                 }
                 required
                 fullWidth
@@ -1146,12 +1196,14 @@ export default function PostAlbumPage() {
                 placeholder="Describe what makes albums fit this theme..."
               />
 
-
               <TextField
                 label="Guidelines (Optional)"
                 value={themeFormData.guidelines}
                 onChange={(e) =>
-                  setThemeFormData((prev) => ({ ...prev, guidelines: e.target.value }))
+                  setThemeFormData((prev) => ({
+                    ...prev,
+                    guidelines: e.target.value,
+                  }))
                 }
                 fullWidth
                 multiline
@@ -1171,14 +1223,15 @@ export default function PostAlbumPage() {
               type="submit"
               variant="contained"
               disabled={isCreatingTheme}
-              startIcon={isCreatingTheme ? <CircularProgress size={16} /> : <Add />}
+              startIcon={
+                isCreatingTheme ? <CircularProgress size={16} /> : <Add />
+              }
             >
               {isCreatingTheme ? "Creating..." : "Create Theme"}
             </Button>
           </DialogActions>
         </form>
       </Dialog>
-
     </Box>
   );
 }

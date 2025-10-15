@@ -199,17 +199,18 @@ export default function AlbumDetailPage() {
   }
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Stack spacing={4}>
-        {/* Back Button */}
-        <Button
-          component={Link}
-          href="/albums"
-          startIcon={<ArrowBack />}
-          sx={{ alignSelf: "flex-start" }}
-        >
-          Back to Albums
-        </Button>
+    <Box sx={{ minHeight: "100vh", bgcolor: "background.default", pt: 12, pb: 4 }}>
+      <Container maxWidth="lg">
+        <Stack spacing={4}>
+          {/* Back Button */}
+          <Button
+            component={Link}
+            href="/albums"
+            startIcon={<ArrowBack />}
+            sx={{ alignSelf: "flex-start" }}
+          >
+            Back to Albums
+          </Button>
 
         {/* Album Header */}
         <Card
@@ -565,5 +566,6 @@ export default function AlbumDetailPage() {
         </Card>
       </Stack>
     </Container>
+    </Box>
   );
 }

@@ -37,8 +37,6 @@ export async function GET(request: NextRequest) {
       const allUsers = await User.find({}).sort({ name: 1 }); // Sort by first name
       const userIds = allUsers.map((user) => user._id);
 
-      console.log(`Creating default group with ${allUsers.length} users`);
-
       defaultGroup = new Group({
         name: "NoteClub OGs",
         description: "Default group for all Note Club members",
@@ -74,12 +72,8 @@ export async function GET(request: NextRequest) {
     }
 
     // Use Group model methods to get current and next turn users (handles inactive users)
-    console.log(`Fetching turn users for group: ${defaultGroup.name}, currentTurnIndex: ${defaultGroup.currentTurnIndex}`);
     const currentTurnUser = await defaultGroup.getCurrentTurnUser();
     const nextTurnUser = await defaultGroup.getNextTurnUser();
-
-    console.log('Current turn user:', currentTurnUser ? `${currentTurnUser.name} (${currentTurnUser._id})` : 'null');
-    console.log('Next turn user:', nextTurnUser ? `${nextTurnUser.name} (${nextTurnUser._id})` : 'null');
 
     const isMyTurn =
       currentTurnUser?._id?.toString() === currentUser._id.toString();
@@ -109,8 +103,6 @@ export async function GET(request: NextRequest) {
     const activeCurrentTurnIndex = orderedUsers.findIndex(
       (user: any) => user._id.toString() === currentTurnUser?._id?.toString()
     );
-
-    console.log(`📊 Turn Status Response: DB currentTurnIndex=${defaultGroup.currentTurnIndex}, filtered activeIndex=${activeCurrentTurnIndex}, currentTurnUser=${currentTurnUser?.name}`);
 
     // Create safe response objects with all required fields
     const safeCurrentTurnUser = currentTurnUser ? {

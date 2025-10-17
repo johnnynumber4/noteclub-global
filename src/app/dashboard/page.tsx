@@ -171,14 +171,19 @@ export default function DashboardPage() {
               elevation={0}
               sx={{
                 p: { xs: 3, md: 5 },
-                background: "linear-gradient(135deg, rgba(33, 150, 243, 0.08), rgba(244, 67, 54, 0.08))",
+                background:
+                  "linear-gradient(135deg, rgba(33, 150, 243, 0.08), rgba(244, 67, 54, 0.08))",
                 border: "1px solid",
                 borderColor: "divider",
                 borderRadius: 3,
               }}
             >
               <Stack spacing={3}>
-                <Typography variant="overline" fontWeight={700} color="text.secondary">
+                <Typography
+                  variant="overline"
+                  fontWeight={700}
+                  color="text.secondary"
+                >
                   Latest Pick
                 </Typography>
 
@@ -222,7 +227,9 @@ export default function DashboardPage() {
                           justifyContent: "center",
                         }}
                       >
-                        <MusicNote sx={{ fontSize: 80, color: "text.secondary" }} />
+                        <MusicNote
+                          sx={{ fontSize: 80, color: "text.secondary" }}
+                        />
                       </Box>
                     )}
                   </Grid>
@@ -233,12 +240,25 @@ export default function DashboardPage() {
                         <Typography variant="h3" fontWeight={900}>
                           {currentAlbum.title}
                         </Typography>
-                        <Typography variant="h5" color="text.secondary" fontWeight={500}>
+                        <Typography
+                          variant="h5"
+                          color="text.secondary"
+                          fontWeight={500}
+                        >
                           {currentAlbum.artist}
                         </Typography>
-                        <Stack direction="row" spacing={1.5} alignItems="center" flexWrap="wrap">
+                        <Stack
+                          direction="row"
+                          spacing={1.5}
+                          alignItems="center"
+                          flexWrap="wrap"
+                        >
                           <Chip
-                            avatar={<Avatar>{currentAlbum.postedBy?.name?.[0] || "?"}</Avatar>}
+                            avatar={
+                              <Avatar>
+                                {currentAlbum.postedBy?.name?.[0] || "?"}
+                              </Avatar>
+                            }
                             label={currentAlbum.postedBy?.name || "Unknown"}
                             variant="outlined"
                           />
@@ -277,7 +297,8 @@ export default function DashboardPage() {
               elevation={0}
               sx={{
                 p: 4,
-                background: "linear-gradient(135deg, rgba(244, 67, 54, 0.1), rgba(33, 150, 243, 0.1))",
+                background:
+                  "linear-gradient(135deg, rgba(244, 67, 54, 0.1), rgba(33, 150, 243, 0.1))",
                 border: "2px solid",
                 borderColor: "primary.main",
                 borderRadius: 3,
@@ -299,9 +320,13 @@ export default function DashboardPage() {
                     <MusicNote sx={{ fontSize: 32, color: "white" }} />
                   </Box>
                   <Typography variant="h4" fontWeight={900}>
-                    It's Your Turn! 🎵
+                    It&apos;s Your Turn! 🎵
                   </Typography>
-                  <Typography variant="body1" color="text.secondary" maxWidth={600}>
+                  <Typography
+                    variant="body1"
+                    color="text.secondary"
+                    maxWidth={600}
+                  >
                     Choose an amazing album to share with the community
                   </Typography>
                 </Stack>
@@ -316,9 +341,11 @@ export default function DashboardPage() {
                     px: 4,
                     py: 1.5,
                     fontSize: "1.1rem",
-                    background: "linear-gradient(45deg, #f44336 30%, #2196f3 90%)",
+                    background:
+                      "linear-gradient(45deg, #f44336 30%, #2196f3 90%)",
                     "&:hover": {
-                      background: "linear-gradient(45deg, #d32f2f 30%, #1976d2 90%)",
+                      background:
+                        "linear-gradient(45deg, #d32f2f 30%, #1976d2 90%)",
                     },
                   }}
                 >
@@ -344,7 +371,10 @@ export default function DashboardPage() {
                   <Schedule sx={{ fontSize: 28, color: "text.secondary" }} />
                   <Stack spacing={0.5}>
                     <Typography variant="h6" fontWeight={700}>
-                      {turnStatus.currentTurnUser?.name || "Unknown User"}'s Turn
+                      Current Turn: {turnStatus.currentTurnUser?.name || "Unknown User"}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      Turn index: {turnStatus.currentTurnIndex} of {turnStatus.turnOrder?.length || 0}
                     </Typography>
                     {turnStatus.nextTurnUser?.name && (
                       <Typography variant="body2" color="text.secondary">
@@ -355,27 +385,54 @@ export default function DashboardPage() {
                 </Stack>
 
                 {/* Turn Order - Collapsed */}
-                {turnStatus.turnOrder && Array.isArray(turnStatus.turnOrder) && turnStatus.turnOrder.length > 0 && (
-                  <Stack spacing={1.5}>
-                    <Typography variant="caption" color="text.secondary" fontWeight={600} textTransform="uppercase">
-                      Turn Order
-                    </Typography>
-                    <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
-                      {turnStatus.turnOrder
-                        .filter((user: any) => user && user._id)
-                        .map((user: any, index: number) => (
-                          <Chip
-                            key={user._id}
-                            avatar={<Avatar src={user?.image} sx={{ width: 24, height: 24 }}>{user?.name?.[0] || "?"}</Avatar>}
-                            label={user?.name || "Unknown User"}
-                            variant={index === turnStatus.currentTurnIndex ? "filled" : "outlined"}
-                            color={index === turnStatus.currentTurnIndex ? "primary" : "default"}
-                            size="small"
-                          />
-                        ))}
+                {turnStatus.turnOrder &&
+                  Array.isArray(turnStatus.turnOrder) &&
+                  turnStatus.turnOrder.length > 0 && (
+                    <Stack spacing={1.5}>
+                      <Typography
+                        variant="caption"
+                        color="text.secondary"
+                        fontWeight={600}
+                        textTransform="uppercase"
+                      >
+                        Turn Order
+                      </Typography>
+                      <Stack
+                        direction="row"
+                        spacing={1}
+                        flexWrap="wrap"
+                        useFlexGap
+                      >
+                        {turnStatus.turnOrder
+                          .filter((user: any) => user && user._id)
+                          .map((user: any, index: number) => (
+                            <Chip
+                              key={user._id}
+                              avatar={
+                                <Avatar
+                                  src={user?.image}
+                                  sx={{ width: 24, height: 24 }}
+                                >
+                                  {user?.name?.[0] || "?"}
+                                </Avatar>
+                              }
+                              label={user?.name || "Unknown User"}
+                              variant={
+                                index === turnStatus.currentTurnIndex
+                                  ? "filled"
+                                  : "outlined"
+                              }
+                              color={
+                                index === turnStatus.currentTurnIndex
+                                  ? "primary"
+                                  : "default"
+                              }
+                              size="small"
+                            />
+                          ))}
+                      </Stack>
                     </Stack>
-                  </Stack>
-                )}
+                  )}
 
                 <Button
                   variant="text"

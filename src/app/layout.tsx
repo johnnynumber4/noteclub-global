@@ -8,6 +8,7 @@ import "@fontsource/roboto/900.css";
 import { Providers } from "@/components/providers";
 import { NavbarMui } from "@/components/navbar-mui";
 import { Footer } from "@/components/footer";
+import { TurnFAB } from "@/components/TurnFAB";
 import MuiThemeProvider from "@/components/MuiThemeProvider";
 import NotificationManager from "@/components/NotificationManager";
 import PWAInstallPrompt from "@/components/PWAInstallPrompt";
@@ -50,6 +51,7 @@ export default async function RootLayout({
             <NotificationManager />
             <PWAInstallPrompt />
             <NavbarMui />
+            <TurnFAB />
             <main>{children}</main>
             <Footer />
           </Providers>

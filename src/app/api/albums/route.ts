@@ -295,11 +295,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Theme not found" }, { status: 404 });
     }
 
-    // Allow posting to any theme - removed active theme restriction
+    // Allow posting to any theme (users can choose from available themes)
 
-    // Allow all users to post anytime - removed turn restrictions
-
-    // Allow multiple posts per theme - removed restriction
+    // Note: Turn advancement happens automatically after posting
+    // Users can post even if not their turn (override mode), but turn will still advance
 
     // Auto-fetch Wikipedia description if not provided
     let finalWikipediaUrl = wikipediaUrl;
@@ -360,7 +359,15 @@ export async function POST(request: NextRequest) {
 
     await album.save();
 
-    // Turn management disabled - all users can post anytime
+    // Record that this user just posted (set currentTurnIndex to their position)
+    try {
+      console.log(`📍 Before recording post - Current index: ${defaultGroup.currentTurnIndex}, User posting: ${user.name}`);
+      await defaultGroup.recordUserPosted(user._id);
+      console.log(`✅ Recorded ${user.name} posted - New currentTurnIndex: ${defaultGroup.currentTurnIndex}`);
+    } catch (turnError) {
+      console.error("❌ Error recording user post:", turnError);
+      // Don't fail the album creation if turn recording fails
+    }
 
     // Update user statistics
     try {

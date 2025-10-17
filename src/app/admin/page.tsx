@@ -24,7 +24,7 @@ import {
   Tabs,
   Tab,
 } from "@mui/material";
-import { AdminPanelSettings, ArrowBack, Group, People } from "@mui/icons-material";
+import { AdminPanelSettings, ArrowBack, Group, People, SkipNext, TouchApp } from "@mui/icons-material";
 import Link from "next/link";
 
 interface User {
@@ -87,30 +87,35 @@ export default function AdminPage() {
   const [isAdminUser, setIsAdminUser] = useState(false);
   const [checkingAdmin, setCheckingAdmin] = useState(true);
 
-  // Check if user is admin by fetching their role
+  // Turn management state
+  const [turnStatus, setTurnStatus] = useState<any>(null);
+  const [advancingTurn, setAdvancingTurn] = useState(false);
+  const [settingTurn, setSettingTurn] = useState(false);
+
+  // Check if user is admin by checking email directly
   useEffect(() => {
     const checkAdminStatus = async () => {
-      if (session?.user?.id) {
+      if (session?.user?.email) {
         try {
-          const response = await fetch(`/api/users/${session.user.id}`);
-          if (response.ok) {
-            const data = await response.json();
-            const hasAdmin = data.user.role === 'admin';
-            setIsAdminUser(hasAdmin);
+          // Check if user is admin based on email
+          const isAdmin = session.user.email === "jyoungiv@gmail.com";
+          setIsAdminUser(isAdmin);
 
-            if (!hasAdmin) {
-              router.push("/dashboard");
-            } else {
-              fetchUsers();
-              fetchGroups();
-            }
+          if (!isAdmin) {
+            router.push("/dashboard");
+          } else {
+            fetchUsers();
+            fetchGroups();
+            fetchTurnStatus();
           }
+          setCheckingAdmin(false);
         } catch (error) {
           console.error('Error checking admin status:', error);
           router.push("/dashboard");
-        } finally {
           setCheckingAdmin(false);
         }
+      } else {
+        setCheckingAdmin(false);
       }
     };
 
@@ -150,6 +155,78 @@ export default function AdminPage() {
     } catch (error) {
       console.error("Error fetching groups:", error);
       setError("Failed to load groups");
+    }
+  };
+
+  const fetchTurnStatus = async () => {
+    try {
+      const response = await fetch("/api/turn-status");
+      if (response.ok) {
+        const data = await response.json();
+        setTurnStatus(data);
+      }
+    } catch (error) {
+      console.error("Error fetching turn status:", error);
+    }
+  };
+
+  const advanceTurn = async () => {
+    try {
+      setAdvancingTurn(true);
+      setError("");
+      setSuccess("");
+
+      const response = await fetch("/api/admin/turn/advance", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({}),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to advance turn");
+      }
+
+      setSuccess(`Turn advanced to ${data.currentTurn.user.name}`);
+      await fetchTurnStatus();
+    } catch (error) {
+      console.error("Error advancing turn:", error);
+      setError(error instanceof Error ? error.message : "Failed to advance turn");
+    } finally {
+      setAdvancingTurn(false);
+    }
+  };
+
+  const setUserTurn = async (userId: string) => {
+    try {
+      setSettingTurn(true);
+      setError("");
+      setSuccess("");
+
+      const response = await fetch("/api/admin/turn/set", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ userId }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to set turn");
+      }
+
+      setSuccess(`Turn set to ${data.currentTurn.user.name}`);
+      await fetchTurnStatus();
+    } catch (error) {
+      console.error("Error setting turn:", error);
+      setError(error instanceof Error ? error.message : "Failed to set turn");
+    } finally {
+      setSettingTurn(false);
     }
   };
 
@@ -275,6 +352,7 @@ export default function AdminPage() {
             <Tabs value={activeTab} onChange={(_, newValue) => setActiveTab(newValue)}>
               <Tab icon={<People />} iconPosition="start" label="Users" />
               <Tab icon={<Group />} iconPosition="start" label="Groups" />
+              <Tab icon={<SkipNext />} iconPosition="start" label="Turn Management" />
             </Tabs>
           </Paper>
 
@@ -568,6 +646,182 @@ export default function AdminPage() {
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
                     Total Memberships
+                  </Typography>
+                </Paper>
+              </Stack>
+            </>
+          )}
+
+          {/* Turn Management Tab */}
+          {activeTab === 2 && (
+            <>
+              {/* Current Turn Status */}
+              {turnStatus && (
+                <Paper sx={{ p: 4 }}>
+                  <Stack spacing={3}>
+                    <Typography variant="h5" fontWeight={700}>
+                      Current Turn Status
+                    </Typography>
+
+                    <Stack direction={{ xs: "column", md: "row" }} spacing={3}>
+                      {/* Current Turn User */}
+                      <Paper sx={{ p: 3, flex: 1, bgcolor: "success.light", color: "success.contrastText" }}>
+                        <Stack spacing={2} alignItems="center">
+                          <Typography variant="overline">Current Turn</Typography>
+                          <Avatar
+                            src={turnStatus.currentTurnUser?.image}
+                            sx={{ width: 80, height: 80 }}
+                          >
+                            {turnStatus.currentTurnUser?.name?.[0]}
+                          </Avatar>
+                          <Typography variant="h5" fontWeight={700}>
+                            {turnStatus.currentTurnUser?.name || "Unknown"}
+                          </Typography>
+                          <Typography variant="body2">
+                            @{turnStatus.currentTurnUser?.username}
+                          </Typography>
+                        </Stack>
+                      </Paper>
+
+                      {/* Next Turn User */}
+                      <Paper sx={{ p: 3, flex: 1, bgcolor: "info.light", color: "info.contrastText" }}>
+                        <Stack spacing={2} alignItems="center">
+                          <Typography variant="overline">Up Next</Typography>
+                          <Avatar
+                            src={turnStatus.nextTurnUser?.image}
+                            sx={{ width: 64, height: 64 }}
+                          >
+                            {turnStatus.nextTurnUser?.name?.[0]}
+                          </Avatar>
+                          <Typography variant="h6" fontWeight={600}>
+                            {turnStatus.nextTurnUser?.name || "Unknown"}
+                          </Typography>
+                          <Typography variant="body2">
+                            @{turnStatus.nextTurnUser?.username}
+                          </Typography>
+                        </Stack>
+                      </Paper>
+                    </Stack>
+
+                    {/* Advance Turn Button */}
+                    <Stack direction="row" spacing={2} justifyContent="center">
+                      <Button
+                        variant="contained"
+                        size="large"
+                        startIcon={advancingTurn ? <CircularProgress size={20} /> : <SkipNext />}
+                        onClick={advanceTurn}
+                        disabled={advancingTurn}
+                        sx={{
+                          background: "linear-gradient(45deg, #4CAF50 30%, #66BB6A 90%)",
+                          px: 4,
+                        }}
+                      >
+                        {advancingTurn ? "Advancing..." : "Advance to Next Turn"}
+                      </Button>
+                    </Stack>
+                  </Stack>
+                </Paper>
+              )}
+
+              {/* Turn Order List */}
+              {turnStatus && turnStatus.turnOrder && (
+                <Paper sx={{ p: 4 }}>
+                  <Typography variant="h5" fontWeight={700} gutterBottom>
+                    Turn Order - Set Specific User's Turn
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" gutterBottom sx={{ mb: 3 }}>
+                    Click on any user to set it as their turn
+                  </Typography>
+
+                  <Stack spacing={2}>
+                    {turnStatus.turnOrder.map((user: any, index: number) => {
+                      const isCurrentTurn = user._id === turnStatus.currentTurnUser?._id;
+                      const isNextTurn = user._id === turnStatus.nextTurnUser?._id;
+
+                      return (
+                        <Paper
+                          key={user._id}
+                          sx={{
+                            p: 2,
+                            cursor: "pointer",
+                            transition: "all 0.2s",
+                            border: isCurrentTurn ? "2px solid" : "1px solid",
+                            borderColor: isCurrentTurn ? "success.main" : "divider",
+                            bgcolor: isCurrentTurn
+                              ? "success.light"
+                              : isNextTurn
+                              ? "info.light"
+                              : "background.paper",
+                            "&:hover": {
+                              transform: "translateY(-2px)",
+                              boxShadow: 3,
+                            },
+                          }}
+                          onClick={() => !settingTurn && setUserTurn(user._id)}
+                        >
+                          <Stack direction="row" alignItems="center" spacing={2}>
+                            <Chip
+                              label={index + 1}
+                              size="small"
+                              color={isCurrentTurn ? "success" : "default"}
+                              sx={{ fontWeight: 700 }}
+                            />
+                            <Avatar src={user.image} sx={{ width: 40, height: 40 }}>
+                              {user.name?.[0]}
+                            </Avatar>
+                            <Stack flex={1}>
+                              <Typography variant="body1" fontWeight={600}>
+                                {user.name}
+                              </Typography>
+                              <Typography variant="body2" color="text.secondary">
+                                @{user.username}
+                              </Typography>
+                            </Stack>
+                            {isCurrentTurn && (
+                              <Chip
+                                icon={<TouchApp />}
+                                label="Current Turn"
+                                color="success"
+                                size="small"
+                              />
+                            )}
+                            {isNextTurn && !isCurrentTurn && (
+                              <Chip label="Up Next" color="info" size="small" />
+                            )}
+                          </Stack>
+                        </Paper>
+                      );
+                    })}
+                  </Stack>
+                </Paper>
+              )}
+
+              {/* Stats */}
+              <Stack direction="row" spacing={3} flexWrap="wrap" useFlexGap>
+                <Paper sx={{ p: 3, flex: 1, minWidth: 200 }}>
+                  <Typography variant="h4" fontWeight={700} color="primary.main">
+                    {turnStatus?.totalMembers || 0}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Total Members in Turn Order
+                  </Typography>
+                </Paper>
+                <Paper sx={{ p: 3, flex: 1, minWidth: 200 }}>
+                  <Typography variant="h4" fontWeight={700} color="success.main">
+                    {turnStatus?.currentTurnIndex !== undefined
+                      ? turnStatus.currentTurnIndex + 1
+                      : 0}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Current Turn Position
+                  </Typography>
+                </Paper>
+                <Paper sx={{ p: 3, flex: 1, minWidth: 200 }}>
+                  <Typography variant="h4" fontWeight={700} sx={{ color: "#9c27b0" }}>
+                    {turnStatus?.groupName || "N/A"}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Group Name
                   </Typography>
                 </Paper>
               </Stack>

@@ -6,6 +6,8 @@ import Album from "@/models/Album";
 import { User } from "@/models/User";
 import mongoose from "mongoose";
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ albumId: string }> }

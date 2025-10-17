@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useSession, signOut } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useTurnStatus } from "@/hooks/useTurnStatus";
 import {
   AppBar,
   Toolbar,
@@ -24,6 +25,7 @@ import {
   ListItemText,
   Divider,
   Chip,
+  Badge,
 } from "@mui/material";
 import {
   MusicNote,
@@ -43,6 +45,7 @@ export function NavbarMui() {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const { isMyTurn } = useTurnStatus();
 
   const handleProfileMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -273,6 +276,75 @@ export function NavbarMui() {
                 <Box />
               ) : session ? (
                 <>
+                  {/* Post Album Button - Desktop */}
+                  <Button
+                    component={Link}
+                    href="/post-album"
+                    variant={isMyTurn ? "contained" : "outlined"}
+                    size="small"
+                    sx={{
+                      display: { xs: "none", sm: "flex" },
+                      textTransform: "none",
+                      fontWeight: 600,
+                      ...(isMyTurn
+                        ? {
+                            background: "linear-gradient(45deg, #4CAF50 30%, #66BB6A 90%)",
+                            color: "white",
+                            animation: "pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
+                            "@keyframes pulse": {
+                              "0%, 100%": { opacity: 1 },
+                              "50%": { opacity: 0.8 },
+                            },
+                            "&:hover": {
+                              background: "linear-gradient(45deg, #43A047 30%, #5CB85C 90%)",
+                            },
+                          }
+                        : {
+                            color: "white",
+                            borderColor: "rgba(255, 255, 255, 0.3)",
+                            "&:hover": {
+                              borderColor: "white",
+                              backgroundColor: "rgba(255, 255, 255, 0.1)",
+                            },
+                          }),
+                    }}
+                    startIcon={<Album />}
+                  >
+                    {isMyTurn ? "Your Turn!" : "Post Album"}
+                  </Button>
+
+                  {/* Post Album Icon - Mobile */}
+                  <IconButton
+                    component={Link}
+                    href="/post-album"
+                    sx={{
+                      display: { xs: "flex", sm: "none" },
+                      ...(isMyTurn && {
+                        color: "#4CAF50",
+                        animation: "pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
+                      }),
+                    }}
+                  >
+                    <Badge
+                      variant="dot"
+                      color="success"
+                      invisible={!isMyTurn}
+                      sx={{
+                        "& .MuiBadge-badge": {
+                          animation: isMyTurn ? "ping 1s cubic-bezier(0, 0, 0.2, 1) infinite" : "none",
+                          "@keyframes ping": {
+                            "75%, 100%": {
+                              transform: "scale(2)",
+                              opacity: 0,
+                            },
+                          },
+                        },
+                      }}
+                    >
+                      <Album />
+                    </Badge>
+                  </IconButton>
+
                   <Chip
                     label={`♪ ${session.user?.name || "User"}`}
                     avatar={

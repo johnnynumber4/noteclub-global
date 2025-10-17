@@ -5,6 +5,8 @@ import dbConnect from "@/lib/mongodb";
 import { Group } from "@/models/Group";
 import { User } from "@/models/User";
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
@@ -71,7 +73,18 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // Get all ACTIVE users first to avoid ObjectId comparison issues
+    // Use Group model methods to get current and next turn users (handles inactive users)
+    console.log(`Fetching turn users for group: ${defaultGroup.name}, currentTurnIndex: ${defaultGroup.currentTurnIndex}`);
+    const currentTurnUser = await defaultGroup.getCurrentTurnUser();
+    const nextTurnUser = await defaultGroup.getNextTurnUser();
+
+    console.log('Current turn user:', currentTurnUser ? `${currentTurnUser.name} (${currentTurnUser._id})` : 'null');
+    console.log('Next turn user:', nextTurnUser ? `${nextTurnUser.name} (${nextTurnUser._id})` : 'null');
+
+    const isMyTurn =
+      currentTurnUser?._id?.toString() === currentUser._id.toString();
+
+    // Get all ACTIVE users for turn order display
     const allUsers = await User.find({ isActive: true }).select("name username image _id isActive");
 
     // Convert turnOrder IDs to strings for matching
@@ -80,25 +93,7 @@ export async function GET(request: NextRequest) {
       turnOrderStrings.includes(u._id.toString())
     );
 
-    // Populate current turn user info
-    const currentTurnUserId =
-      defaultGroup.turnOrder[defaultGroup.currentTurnIndex];
-    const currentTurnUser = allTurnUsers.find(
-      (u) => u._id.toString() === currentTurnUserId?.toString()
-    );
-
-    // Get next turn user
-    const nextTurnIndex =
-      (defaultGroup.currentTurnIndex + 1) % defaultGroup.turnOrder.length;
-    const nextTurnUserId = defaultGroup.turnOrder[nextTurnIndex];
-    const nextTurnUser = allTurnUsers.find(
-      (u) => u._id.toString() === nextTurnUserId?.toString()
-    );
-
-    const isMyTurn =
-      currentTurnUserId?.toString() === currentUser._id.toString();
-
-    // Map turn order to users in correct order
+    // Map turn order to ACTIVE users only in correct order
     const orderedUsers = defaultGroup.turnOrder
       .map((userId: any) =>
         allTurnUsers.find(
@@ -112,13 +107,28 @@ export async function GET(request: NextRequest) {
 
     // Find the current turn user's index in the FILTERED active users array
     const activeCurrentTurnIndex = orderedUsers.findIndex(
-      (user: any) => user._id.toString() === currentTurnUserId?.toString()
+      (user: any) => user._id.toString() === currentTurnUser?._id?.toString()
     );
+
+    // Create safe response objects with all required fields
+    const safeCurrentTurnUser = currentTurnUser ? {
+      _id: currentTurnUser._id,
+      name: currentTurnUser.name || 'Unknown',
+      username: currentTurnUser.username || 'unknown',
+      image: currentTurnUser.image || null,
+    } : null;
+
+    const safeNextTurnUser = nextTurnUser ? {
+      _id: nextTurnUser._id,
+      name: nextTurnUser.name || 'Unknown',
+      username: nextTurnUser.username || 'unknown',
+      image: nextTurnUser.image || null,
+    } : null;
 
     return NextResponse.json({
       isMyTurn,
-      currentTurnUser: currentTurnUser || null,
-      nextTurnUser: nextTurnUser || null,
+      currentTurnUser: safeCurrentTurnUser,
+      nextTurnUser: safeNextTurnUser,
       currentTurnIndex: activeCurrentTurnIndex >= 0 ? activeCurrentTurnIndex : 0,
       totalMembers: defaultGroup.members.length,
       turnOrder: orderedUsers,

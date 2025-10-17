@@ -14,10 +14,12 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Music, LogOut, User, Settings, Disc3, Menu, X, Shield } from "lucide-react";
+import { useTurnStatus } from "@/hooks/useTurnStatus";
 
 export function Navbar() {
   const { data: session, status } = useSession();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { isMyTurn, turnStatus } = useTurnStatus();
 
   // Debug: log session info
   useEffect(() => {
@@ -94,9 +96,15 @@ export function Navbar() {
           </Link>
           <Link
             href="/turns"
-            className="text-sm font-semibold text-gray-300 hover:text-green-400 transition-colors duration-200 hover:scale-105"
+            className="text-sm font-semibold text-gray-300 hover:text-green-400 transition-colors duration-200 hover:scale-105 relative"
           >
             Turns
+            {isMyTurn && (
+              <span className="absolute -top-1 -right-2 flex h-3 w-3">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+              </span>
+            )}
           </Link>
         </div>
 
@@ -110,11 +118,21 @@ export function Navbar() {
                 asChild
                 variant="ghost"
                 size="sm"
-                className="text-red-400 hover:text-red-300 hover:bg-red-400/10 transition-all duration-200"
+                className={`${
+                  isMyTurn
+                    ? "text-green-400 hover:text-green-300 hover:bg-green-400/10 animate-pulse"
+                    : "text-red-400 hover:text-red-300 hover:bg-red-400/10"
+                } transition-all duration-200 relative`}
               >
                 <Link href="/post-album">
                   <Disc3 className="h-4 w-4 mr-2" />
-                  Post Album
+                  {isMyTurn ? "Your Turn!" : "Post Album"}
+                  {isMyTurn && (
+                    <span className="absolute -top-0.5 -right-0.5 flex h-2 w-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                    </span>
+                  )}
                 </Link>
               </Button>
 
@@ -230,10 +248,20 @@ export function Navbar() {
               asChild
               variant="ghost"
               size="sm"
-              className="text-red-400 hover:text-red-300 hover:bg-red-400/10"
+              className={`${
+                isMyTurn
+                  ? "text-green-400 hover:text-green-300 hover:bg-green-400/10"
+                  : "text-red-400 hover:text-red-300 hover:bg-red-400/10"
+              } relative`}
             >
               <Link href="/post-album">
                 <Disc3 className="h-4 w-4" />
+                {isMyTurn && (
+                  <span className="absolute -top-0.5 -right-0.5 flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                  </span>
+                )}
               </Link>
             </Button>
           )}
@@ -287,10 +315,16 @@ export function Navbar() {
               </Link>
               <Link
                 href="/turns"
-                className="block text-base font-medium text-gray-600 hover:text-purple-600 transition-colors py-2"
+                className="block text-base font-semibold text-gray-300 hover:text-green-400 transition-colors py-2 relative flex items-center"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Turns
+                {isMyTurn && (
+                  <span className="ml-2 flex h-2.5 w-2.5">
+                    <span className="animate-ping absolute inline-flex h-2.5 w-2.5 rounded-full bg-green-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span>
+                  </span>
+                )}
               </Link>
             </div>
 

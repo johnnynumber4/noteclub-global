@@ -67,7 +67,7 @@ const GroupSchema = new Schema<IGroup>(
       type: Number,
       default: 20,
       min: 2,
-      max: 100,
+      max: 1000,
     },
     
     // Members
@@ -255,33 +255,182 @@ GroupSchema.methods.removeMember = async function(userId: mongoose.Types.ObjectI
   await this.save();
 };
 
-// Method to advance to next turn
-GroupSchema.methods.advanceToNextTurn = async function() {
-  if (this.turnOrder.length === 0) return;
-  
-  this.currentTurnIndex = (this.currentTurnIndex + 1) % this.turnOrder.length;
+// Method to record that a user just posted
+// Sets currentTurnIndex to the index of who just went
+GroupSchema.methods.recordUserPosted = async function(userId: mongoose.Types.ObjectId) {
+  // Find the index of the user who just posted
+  const userIndex = this.turnOrder.findIndex(
+    (id: mongoose.Types.ObjectId) => id.toString() === userId.toString()
+  );
+
+  if (userIndex === -1) {
+    console.log(`⚠️ User ${userId} not found in turn order`);
+    return;
+  }
+
+  this.currentTurnIndex = userIndex;
   await this.save();
-  
-  return this.turnOrder[this.currentTurnIndex];
+  console.log(`✅ Recorded user ${userId} posted at index ${userIndex}`);
 };
 
-// Method to get current turn user with populated data
+// Method to get whose turn it is NOW (next active user after currentTurnIndex)
+// currentTurnIndex = who just went, so we find the next active person
 GroupSchema.methods.getCurrentTurnUser = async function() {
   if (this.turnOrder.length === 0) return null;
-  
-  const User = mongoose.model("User");
-  const currentUserId = this.turnOrder[this.currentTurnIndex];
-  return await User.findById(currentUserId).select("name username image");
-};
 
-// Method to get next turn user with populated data
-GroupSchema.methods.getNextTurnUser = async function() {
-  if (this.turnOrder.length === 0) return null;
-  
-  const User = model("User");
+  const User = mongoose.model("User");
+  const maxAttempts = this.turnOrder.length;
+  let attempts = 0;
+  // Start checking from NEXT index after currentTurnIndex
+  let checkIndex = (this.currentTurnIndex + 1) % this.turnOrder.length;
+
+  // Find next active user after the person who just posted
+  while (attempts < maxAttempts) {
+    const userId = this.turnOrder[checkIndex];
+    let user = await User.findById(userId).select("name username image isActive");
+
+    // Try raw query if Mongoose fails (Atlas compatibility)
+    if (!user && mongoose.connection?.db) {
+      const db = mongoose.connection.db;
+      const rawUser = await db.collection('users').findOne({ _id: userId.toString() });
+      if (rawUser) {
+        user = {
+          _id: rawUser._id,
+          name: rawUser.name,
+          username: rawUser.username,
+          image: rawUser.image,
+          isActive: rawUser.isActive ?? true,
+        } as any;
+      }
+    }
+
+    if (user && user.isActive) {
+      console.log(`🎯 Current turn is ${user.name} at index ${checkIndex} (last posted: ${this.currentTurnIndex})`);
+      return user;
+    }
+
+    checkIndex = (checkIndex + 1) % this.turnOrder.length;
+    attempts++;
+  }
+
+  // Fallback: return user at next index even if inactive
   const nextIndex = (this.currentTurnIndex + 1) % this.turnOrder.length;
   const nextUserId = this.turnOrder[nextIndex];
-  return await User.findById(nextUserId).select("name username image");
+  let user = await User.findById(nextUserId).select("name username image isActive");
+
+  // Try raw query fallback
+  if (!user && mongoose.connection?.db) {
+    const db = mongoose.connection.db;
+    const rawUser = await db.collection('users').findOne({ _id: nextUserId.toString() });
+    if (rawUser) {
+      user = {
+        _id: rawUser._id,
+        name: rawUser.name,
+        username: rawUser.username,
+        image: rawUser.image,
+        isActive: rawUser.isActive ?? true,
+      } as any;
+    }
+  }
+
+  return user;
+};
+
+// Method to get next turn user with populated data (skips inactive users)
+// Returns the user AFTER the current turn user
+// First finds current turn user's position, then looks for next active after that
+GroupSchema.methods.getNextTurnUser = async function() {
+  if (this.turnOrder.length === 0) return null;
+
+  const User = mongoose.model("User");
+
+  // First, find where the current turn user actually is (after skipping inactives)
+  let currentTurnUserIndex = -1;
+  const maxAttempts = this.turnOrder.length;
+  let attempts = 0;
+  let checkIndex = (this.currentTurnIndex + 1) % this.turnOrder.length;
+
+  // Find the current turn user's actual index
+  while (attempts < maxAttempts) {
+    const userId = this.turnOrder[checkIndex];
+    let user = await User.findById(userId).select("isActive");
+
+    // Try raw query if Mongoose fails (Atlas compatibility)
+    if (!user && mongoose.connection?.db) {
+      const db = mongoose.connection.db;
+      const rawUser = await db.collection('users').findOne({ _id: userId.toString() });
+      if (rawUser) {
+        user = { isActive: rawUser.isActive ?? true } as any;
+      }
+    }
+
+    if (user && user.isActive) {
+      currentTurnUserIndex = checkIndex;
+      break;
+    }
+
+    checkIndex = (checkIndex + 1) % this.turnOrder.length;
+    attempts++;
+  }
+
+  // If we couldn't find current turn user, fallback to currentTurnIndex + 2
+  if (currentTurnUserIndex === -1) {
+    currentTurnUserIndex = (this.currentTurnIndex + 1) % this.turnOrder.length;
+  }
+
+  // Now find the next active user AFTER the current turn user
+  attempts = 0;
+  let nextIndex = (currentTurnUserIndex + 1) % this.turnOrder.length;
+
+  while (attempts < maxAttempts) {
+    const nextUserId = this.turnOrder[nextIndex];
+    let user = await User.findById(nextUserId).select("name username image isActive");
+
+    // Try raw query if Mongoose fails (Atlas compatibility)
+    if (!user && mongoose.connection?.db) {
+      const db = mongoose.connection.db;
+      const rawUser = await db.collection('users').findOne({ _id: nextUserId.toString() });
+      if (rawUser) {
+        user = {
+          _id: rawUser._id,
+          name: rawUser.name,
+          username: rawUser.username,
+          image: rawUser.image,
+          isActive: rawUser.isActive ?? true,
+        } as any;
+      }
+    }
+
+    if (user && user.isActive) {
+      console.log(`📅 Next turn is ${user.name} at index ${nextIndex} (current turn at: ${currentTurnUserIndex}, last posted: ${this.currentTurnIndex})`);
+      return user;
+    }
+
+    nextIndex = (nextIndex + 1) % this.turnOrder.length;
+    attempts++;
+  }
+
+  // Fallback: return user at next index even if inactive
+  const fallbackIndex = (currentTurnUserIndex + 1) % this.turnOrder.length;
+  const fallbackUserId = this.turnOrder[fallbackIndex];
+  let user = await User.findById(fallbackUserId).select("name username image isActive");
+
+  // Try raw query fallback
+  if (!user && mongoose.connection?.db) {
+    const db = mongoose.connection.db;
+    const rawUser = await db.collection('users').findOne({ _id: fallbackUserId.toString() });
+    if (rawUser) {
+      user = {
+        _id: rawUser._id,
+        name: rawUser.name,
+        username: rawUser.username,
+        image: rawUser.image,
+        isActive: rawUser.isActive ?? true,
+      } as any;
+    }
+  }
+
+  return user;
 };
 
 // Ensure virtuals are included in JSON

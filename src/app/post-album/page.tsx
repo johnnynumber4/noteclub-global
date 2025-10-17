@@ -592,6 +592,7 @@ export default function PostAlbumPage() {
                         </Button>
                       </Box>
                       {/* 
+                      Later enhancement: re-enable manual entry option
                       <Stack direction="row" spacing={2} alignItems="center">
                         <Divider sx={{ flex: 1 }} />
                         <Typography variant="body2" color="text.secondary">

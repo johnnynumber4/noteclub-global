@@ -264,13 +264,11 @@ GroupSchema.methods.recordUserPosted = async function(userId: mongoose.Types.Obj
   );
 
   if (userIndex === -1) {
-    console.log(`⚠️ User ${userId} not found in turn order`);
     return;
   }
 
   this.currentTurnIndex = userIndex;
   await this.save();
-  console.log(`✅ Recorded user ${userId} posted at index ${userIndex}`);
 };
 
 // Method to get whose turn it is NOW (next active user after currentTurnIndex)
@@ -305,7 +303,6 @@ GroupSchema.methods.getCurrentTurnUser = async function() {
     }
 
     if (user && user.isActive) {
-      console.log(`🎯 Current turn is ${user.name} at index ${checkIndex} (last posted: ${this.currentTurnIndex})`);
       return user;
     }
 
@@ -402,7 +399,6 @@ GroupSchema.methods.getNextTurnUser = async function() {
     }
 
     if (user && user.isActive) {
-      console.log(`📅 Next turn is ${user.name} at index ${nextIndex} (current turn at: ${currentTurnUserIndex}, last posted: ${this.currentTurnIndex})`);
       return user;
     }
 

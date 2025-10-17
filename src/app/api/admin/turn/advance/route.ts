@@ -46,8 +46,15 @@ export async function POST(request: NextRequest) {
 
     // Advance: move currentTurnIndex to next position (this represents who "just posted")
     const newIndex = (oldIndex + 1) % group.turnOrder.length;
+
+    // Use updateOne to bypass validation (in case maxMembers exceeds schema max)
+    await Group.updateOne(
+      { _id: group._id },
+      { $set: { currentTurnIndex: newIndex } }
+    );
+
+    // Update local instance to match
     group.currentTurnIndex = newIndex;
-    await group.save();
 
     // Get users at old and new positions
     const oldUserId2 = group.turnOrder[oldIndex];

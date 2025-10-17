@@ -23,8 +23,20 @@ import {
   Button,
   Tabs,
   Tab,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  FormControlLabel,
+  IconButton,
+  Checkbox,
+  TextField,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
 } from "@mui/material";
-import { AdminPanelSettings, ArrowBack, Group, People, SkipNext, TouchApp } from "@mui/icons-material";
+import { AdminPanelSettings, ArrowBack, Group, People, SkipNext, TouchApp, Edit, Close } from "@mui/icons-material";
 import Link from "next/link";
 
 interface User {
@@ -91,6 +103,14 @@ export default function AdminPage() {
   const [turnStatus, setTurnStatus] = useState<any>(null);
   const [advancingTurn, setAdvancingTurn] = useState(false);
   const [settingTurn, setSettingTurn] = useState(false);
+
+  // Group editing state
+  const [editingGroup, setEditingGroup] = useState<GroupData | null>(null);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editedName, setEditedName] = useState("");
+  const [editedIsPrivate, setEditedIsPrivate] = useState(false);
+  const [editedMemberIds, setEditedMemberIds] = useState<string[]>([]);
+  const [savingGroup, setSavingGroup] = useState(false);
 
   // Check if user is admin by checking email directly
   useEffect(() => {
@@ -190,7 +210,7 @@ export default function AdminPage() {
         throw new Error(data.error || "Failed to advance turn");
       }
 
-      setSuccess(`Turn advanced to ${data.currentTurn.user.name}`);
+      setSuccess(data.message || `Turn advanced to ${data.currentTurnUser?.name}`);
       await fetchTurnStatus();
     } catch (error) {
       console.error("Error advancing turn:", error);
@@ -220,7 +240,7 @@ export default function AdminPage() {
         throw new Error(data.error || "Failed to set turn");
       }
 
-      setSuccess(`Turn set to ${data.currentTurn.user.name}`);
+      setSuccess(data.message || `Turn set to ${data.newLastPosted?.user?.name}`);
       await fetchTurnStatus();
     } catch (error) {
       console.error("Error setting turn:", error);
@@ -236,8 +256,6 @@ export default function AdminPage() {
       setError("");
       setSuccess("");
 
-      console.log("Toggling user active status:", { userId, currentStatus, newStatus: !currentStatus });
-
       const response = await fetch("/api/admin/users/toggle-active", {
         method: "POST",
         headers: {
@@ -250,7 +268,6 @@ export default function AdminPage() {
       });
 
       const data = await response.json();
-      console.log("Toggle response:", data);
 
       if (!response.ok) {
         const errorMessage = data.error || "Failed to update user status";
@@ -273,11 +290,71 @@ export default function AdminPage() {
 
       // If user not found, refresh the user list to get current data
       if (errorMsg.includes("not found")) {
-        console.log("User not found - refreshing user list");
         await fetchUsers();
       }
     } finally {
       setUpdatingUserId(null);
+    }
+  };
+
+  const openEditDialog = (group: GroupData) => {
+    setEditingGroup(group);
+    setEditedName(group.name);
+    setEditedIsPrivate(group.isPrivate);
+    setEditedMemberIds(group.members.map(m => m._id));
+    setEditDialogOpen(true);
+  };
+
+  const closeEditDialog = () => {
+    setEditDialogOpen(false);
+    setEditingGroup(null);
+    setEditedName("");
+    setEditedIsPrivate(false);
+    setEditedMemberIds([]);
+  };
+
+  const toggleMember = (userId: string) => {
+    setEditedMemberIds(prev =>
+      prev.includes(userId)
+        ? prev.filter(id => id !== userId)
+        : [...prev, userId]
+    );
+  };
+
+  const saveGroupChanges = async () => {
+    if (!editingGroup) return;
+
+    try {
+      setSavingGroup(true);
+      setError("");
+      setSuccess("");
+
+      const response = await fetch(`/api/admin/groups/${editingGroup._id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: editedName,
+          isPrivate: editedIsPrivate,
+          memberIds: editedMemberIds,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to update group");
+      }
+
+      setSuccess(`Group "${editingGroup.name}" updated successfully`);
+      await fetchGroups();
+      closeEditDialog();
+    } catch (error) {
+      console.error("Error updating group:", error);
+      setError(error instanceof Error ? error.message : "Failed to update group");
+    } finally {
+      setSavingGroup(false);
     }
   };
 
@@ -534,6 +611,7 @@ export default function AdminPage() {
                         <TableCell align="center">Invite Code</TableCell>
                         <TableCell align="center">Created By</TableCell>
                         <TableCell align="center">Created</TableCell>
+                        <TableCell align="center">Actions</TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
@@ -606,6 +684,15 @@ export default function AdminPage() {
                             <Typography variant="body2" color="text.secondary">
                               {new Date(group.createdAt).toLocaleDateString()}
                             </Typography>
+                          </TableCell>
+                          <TableCell align="center">
+                            <IconButton
+                              size="small"
+                              onClick={() => openEditDialog(group)}
+                              sx={{ color: "primary.main" }}
+                            >
+                              <Edit fontSize="small" />
+                            </IconButton>
                           </TableCell>
                         </TableRow>
                       ))}
@@ -727,7 +814,7 @@ export default function AdminPage() {
               {turnStatus && turnStatus.turnOrder && (
                 <Paper sx={{ p: 4 }}>
                   <Typography variant="h5" fontWeight={700} gutterBottom>
-                    Turn Order - Set Specific User's Turn
+                    Turn Order - Set Specific User&apos;s Turn
                   </Typography>
                   <Typography variant="body2" color="text.secondary" gutterBottom sx={{ mb: 3 }}>
                     Click on any user to set it as their turn
@@ -829,6 +916,119 @@ export default function AdminPage() {
           )}
         </Stack>
       </Container>
+
+      {/* Edit Group Dialog */}
+      <Dialog
+        open={editDialogOpen}
+        onClose={closeEditDialog}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle>
+          <Stack direction="row" justifyContent="space-between" alignItems="center">
+            <Typography variant="h6">Edit Group: {editingGroup?.name}</Typography>
+            <IconButton onClick={closeEditDialog} size="small">
+              <Close />
+            </IconButton>
+          </Stack>
+        </DialogTitle>
+        <DialogContent dividers>
+          <Stack spacing={3}>
+            {/* Group Name */}
+            <TextField
+              label="Group Name"
+              value={editedName}
+              onChange={(e) => setEditedName(e.target.value)}
+              fullWidth
+              required
+              helperText="3-50 characters"
+              error={editedName.trim().length < 3 || editedName.trim().length > 50}
+            />
+
+            {/* Privacy Toggle */}
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={editedIsPrivate}
+                  onChange={(e) => setEditedIsPrivate(e.target.checked)}
+                  color="primary"
+                />
+              }
+              label={
+                <Box>
+                  <Typography variant="body1">
+                    Private Group
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    {editedIsPrivate
+                      ? "Only members can see this group and its content"
+                      : "Anyone can discover and join this group"}
+                  </Typography>
+                </Box>
+              }
+            />
+
+            {/* Members Management */}
+            <Box>
+              <Typography variant="subtitle1" fontWeight={600} gutterBottom>
+                Group Members ({editedMemberIds.length})
+              </Typography>
+              <Typography variant="caption" color="text.secondary" gutterBottom>
+                Select users to include in this group
+              </Typography>
+              <List sx={{ maxHeight: 400, overflow: "auto", mt: 2 }}>
+                {users.map((user) => (
+                  <ListItem
+                    key={user._id}
+                    onClick={() => toggleMember(user._id)}
+                    sx={{
+                      border: "1px solid",
+                      borderColor: "divider",
+                      borderRadius: 1,
+                      mb: 1,
+                      cursor: "pointer",
+                      "&:hover": { bgcolor: "action.hover" },
+                    }}
+                    secondaryAction={
+                      <Checkbox
+                        edge="end"
+                        checked={editedMemberIds.includes(user._id)}
+                        onChange={() => toggleMember(user._id)}
+                      />
+                    }
+                  >
+                    <ListItemAvatar>
+                      <Avatar src={user.image}>
+                        {user.name[0]}
+                      </Avatar>
+                    </ListItemAvatar>
+                    <ListItemText
+                      primary={user.name}
+                      secondary={`@${user.username} • ${user.isActive ? "Active" : "Inactive"}`}
+                    />
+                  </ListItem>
+                ))}
+              </List>
+            </Box>
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={closeEditDialog}>Cancel</Button>
+          <Button
+            onClick={saveGroupChanges}
+            variant="contained"
+            disabled={
+              savingGroup ||
+              editedMemberIds.length === 0 ||
+              editedName.trim().length < 3 ||
+              editedName.trim().length > 50
+            }
+            startIcon={savingGroup ? <CircularProgress size={16} /> : null}
+          >
+            {savingGroup ? "Saving..." : "Save Changes"}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }

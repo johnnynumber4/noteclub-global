@@ -110,6 +110,8 @@ export async function GET(request: NextRequest) {
       (user: any) => user._id.toString() === currentTurnUser?._id?.toString()
     );
 
+    console.log(`📊 Turn Status Response: DB currentTurnIndex=${defaultGroup.currentTurnIndex}, filtered activeIndex=${activeCurrentTurnIndex}, currentTurnUser=${currentTurnUser?.name}`);
+
     // Create safe response objects with all required fields
     const safeCurrentTurnUser = currentTurnUser ? {
       _id: currentTurnUser._id,

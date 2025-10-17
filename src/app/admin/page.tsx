@@ -190,7 +190,7 @@ export default function AdminPage() {
         throw new Error(data.error || "Failed to advance turn");
       }
 
-      setSuccess(`Turn advanced to ${data.currentTurn.user.name}`);
+      setSuccess(data.message || `Turn advanced to ${data.currentTurnUser?.name}`);
       await fetchTurnStatus();
     } catch (error) {
       console.error("Error advancing turn:", error);
@@ -220,7 +220,7 @@ export default function AdminPage() {
         throw new Error(data.error || "Failed to set turn");
       }
 
-      setSuccess(`Turn set to ${data.currentTurn.user.name}`);
+      setSuccess(data.message || `Turn set to ${data.newLastPosted?.user?.name}`);
       await fetchTurnStatus();
     } catch (error) {
       console.error("Error setting turn:", error);

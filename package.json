@@ -8,10 +8,16 @@
     "dev-legacy": "node scripts/clean-pwa-dev.js && next dev",
     "dev-clean": "node scripts/clean-pwa-dev.js",
     "build": "next build",
+    "build:capacitor": "node scripts/build-capacitor.js",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "cap:sync": "npm run build:capacitor && npx cap sync",
+    "cap:open:android": "npx cap open android"
   },
   "dependencies": {
+    "@capacitor/android": "^7.4.3",
+    "@capacitor/cli": "^7.4.3",
+    "@capacitor/core": "^7.4.3",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@fontsource/roboto": "^5.2.6",

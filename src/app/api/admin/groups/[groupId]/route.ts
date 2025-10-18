@@ -10,7 +10,7 @@ export const dynamic = 'force-dynamic';
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { groupId: string } }
+  { params }: { params: Promise<{ groupId: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -22,7 +22,7 @@ export async function PATCH(
 
     await dbConnect();
 
-    const { groupId } = params;
+    const { groupId } = await params;
     const body = await request.json();
     const { name, isPrivate, memberIds } = body;
 
@@ -75,20 +75,39 @@ export async function PATCH(
         );
       }
 
-      // Verify all users exist
-      const users = await User.find({ _id: { $in: validMemberIds } }).select("_id username");
+      // Verify all users exist (with Atlas compatibility)
+      let users = await User.find({ _id: { $in: validMemberIds } }).select("_id username");
+
+      // Try raw MongoDB query for Atlas compatibility
+      if (users.length < validMemberIds.length && mongoose.connection?.db) {
+        const db = mongoose.connection.db;
+        const rawUsers = await db.collection('users').find({
+          _id: { $in: validMemberIds }
+        }).toArray();
+
+        // Combine Mongoose and raw results
+        const userMap = new Map();
+        users.forEach(u => userMap.set(u._id.toString(), u));
+        rawUsers.forEach(u => {
+          const id = typeof u._id === 'string' ? u._id : u._id.toString();
+          if (!userMap.has(id)) {
+            userMap.set(id, { _id: u._id, username: u.username });
+          }
+        });
+        users = Array.from(userMap.values());
+      }
 
       if (users.length !== validMemberIds.length) {
         return NextResponse.json(
-          { error: "Some users not found" },
+          { error: `Some users not found. Found ${users.length} of ${validMemberIds.length} users.` },
           { status: 404 }
         );
       }
 
       // Get all users to rebuild turn order alphabetically
-      const allUsers = await User.find({ _id: { $in: validMemberIds } })
-        .select("_id username")
-        .sort({ username: 1 });
+      const allUsers = users.sort((a, b) =>
+        (a.username || '').localeCompare(b.username || '')
+      );
 
       updateData.members = validMemberIds;
       updateData.turnOrder = allUsers.map(user => user._id);

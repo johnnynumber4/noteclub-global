@@ -105,10 +105,9 @@ export const authOptions: NextAuthOptions = {
       name: `next-auth.session-token`,
       options: {
         httpOnly: true,
-        sameSite: 'lax',
+        sameSite: 'none', // Required for iframe/Capacitor usage
         path: '/',
-        // Capacitor uses https://localhost so we need secure: true
-        secure: true
+        secure: true // Required when sameSite is 'none'
       }
     }
   },

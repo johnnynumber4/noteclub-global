@@ -98,15 +98,16 @@ export const authOptions: NextAuthOptions = {
   ],
   session: {
     strategy: "jwt",
+    maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   cookies: {
     sessionToken: {
       name: `next-auth.session-token`,
       options: {
         httpOnly: true,
-        sameSite: 'lax',
+        sameSite: 'none', // Required for iframe/Capacitor usage
         path: '/',
-        secure: process.env.NODE_ENV === 'production'
+        secure: true // Required when sameSite is 'none'
       }
     }
   },

@@ -826,7 +826,7 @@ export default function PostAlbumPage() {
                         label="Your Notes / Description"
                         multiline
                         rows={3}
-                        value={formData.description}
+                        // value={formData.description}
                         onChange={(e) =>
                           setFormData((prev) => ({
                             ...prev,

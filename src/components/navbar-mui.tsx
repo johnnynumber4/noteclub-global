@@ -38,6 +38,7 @@ import {
   Home,
   Shield,
 } from "@mui/icons-material";
+import { NotificationButton } from "@/components/NotificationButton";
 
 export function NavbarMui() {
   const { data: session, status } = useSession();
@@ -276,6 +277,9 @@ export function NavbarMui() {
                 <Box />
               ) : session ? (
                 <>
+                  {/* Notification Bell */}
+                  <NotificationButton variant="mui" />
+
                   {/* Post Album Button - Desktop */}
                   <Button
                     component={Link}

@@ -410,7 +410,7 @@ export default function PostAlbumPage() {
   }
 
   return (
-    <Box sx={{ minHeight: "100vh", bgcolor: "background.default", pt: 10 }}>
+    <Box sx={{ minHeight: "100vh", bgcolor: "background.default", pt: { xs: 8, md: 10 } }}>
       <Container maxWidth="md">
         <Stack spacing={6}>
           {/* Header */}
@@ -578,10 +578,10 @@ export default function PostAlbumPage() {
                           startIcon={<Search />}
                           onClick={() => setIsSearchOpen(true)}
                           sx={{
-                            py: 2.5,
+                            py: { xs: 1.5, sm: 2.5 },
+                            fontSize: { xs: "1rem", sm: "1.1rem" },
                             background:
                               "linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)",
-                            fontSize: "1.1rem",
                             "&:hover": {
                               background:
                                 "linear-gradient(45deg, #1976d2 30%, #00ACC1 90%)",
@@ -939,7 +939,7 @@ export default function PostAlbumPage() {
                             <AlbumIcon />
                           )
                         }
-                        sx={{ py: 2 }}
+                        sx={{ py: { xs: 1.5, sm: 2 } }}
                       >
                         {isSubmitting ? "Posting Album..." : "Post Album"}
                       </Button>

@@ -8,14 +8,52 @@ const pwaConfig = {
   dest: "public",
   register: true,
   skipWaiting: true,
-  disable: process.env.NODE_ENV === "development" || isTurbopack,
+  disable: false, // Enable SW even in development for testing notifications
+  // disable: process.env.NODE_ENV === "development" || isTurbopack,
   buildExcludes: [/middleware-manifest\.json$/],
+  // Suppress the GenerateSW warning in development
+  ...(process.env.NODE_ENV === "development" && {
+    // Dev mode - reduce warnings
+    maximumFileSizeToCacheInBytes: 5000000,
+  }),
   // Add fallback handling for service worker errors
   fallbacks: {
     image: "/icon-192x192.png",
     document: "/offline",
   },
   runtimeCaching: [
+    // Internal API routes - Network First with fallback to cache
+    {
+      urlPattern: /^\/api\/albums\/[^/]+$/,
+      handler: "NetworkFirst",
+      options: {
+        cacheName: "api-albums",
+        expiration: {
+          maxEntries: 100,
+          maxAgeSeconds: 5 * 60, // 5 minutes
+        },
+        networkTimeoutSeconds: 10,
+        cacheableResponse: {
+          statuses: [0, 200],
+        },
+      },
+    },
+    {
+      urlPattern: /^\/api\/albums$/,
+      handler: "NetworkFirst",
+      options: {
+        cacheName: "api-albums-list",
+        expiration: {
+          maxEntries: 50,
+          maxAgeSeconds: 2 * 60, // 2 minutes
+        },
+        networkTimeoutSeconds: 10,
+        cacheableResponse: {
+          statuses: [0, 200],
+        },
+      },
+    },
+    // Images
     {
       urlPattern: /^https:\/\/.*\.(?:png|jpg|jpeg|svg|gif|webp)$/,
       handler: "CacheFirst",
@@ -27,6 +65,7 @@ const pwaConfig = {
         },
       },
     },
+    // External Music APIs
     {
       urlPattern: /^https:\/\/api\.spotify\.com\/.*/,
       handler: "NetworkFirst",

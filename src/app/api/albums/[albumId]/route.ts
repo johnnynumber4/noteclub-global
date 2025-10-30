@@ -23,7 +23,13 @@ export async function GET(
 
     const { albumId } = await params;
 
+    // Validate albumId format
+    if (!mongoose.Types.ObjectId.isValid(albumId)) {
+      return NextResponse.json({ error: "Invalid album ID" }, { status: 400 });
+    }
+
     const album = await Album.findById(albumId)
+      .populate("postedBy", "_id name username image")
       .populate("theme", "title")
       .lean();
 
@@ -31,29 +37,10 @@ export async function GET(
       return NextResponse.json({ error: "Album not found" }, { status: 404 });
     }
 
-    // Manual user lookup to handle ObjectId type issues
-    let user = { _id: null, name: 'Unknown', username: 'unknown', image: null };
-    if ((album as any).postedBy) {
-      // Use the same approach as the main albums API
-      const users = await User.find({}, "_id name username image").lean();
-      const userMap = new Map();
-      users.forEach((u: any) => {
-        userMap.set(u._id.toString(), u);
-      });
-
-      const foundUser = userMap.get((album as any).postedBy.toString());
-
-      if (foundUser) {
-        user = foundUser;
-      } else {
-        user._id = (album as any).postedBy.toString();
-      }
-    }
-
     // Normalize mixed data structures
     const normalizedAlbum = {
       ...album,
-      postedBy: user,
+      postedBy: (album as any).postedBy || { _id: null, name: 'Unknown', username: 'unknown', image: null },
       theme: (album as any).theme || { title: 'No Theme' },
       isLikedByUser: currentUser ? (album as any).likes?.includes(currentUser._id) : false,
       likeCount: (album as any).likes?.length || 0,

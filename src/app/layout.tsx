@@ -21,6 +21,12 @@ export const metadata: Metadata = {
   description:
     "Share and discover music albums with your friends in organized groups",
   manifest: "/manifest.json",
+  viewport: {
+    width: "device-width",
+    initialScale: 1,
+    maximumScale: 5,
+    viewportFit: "cover",
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",

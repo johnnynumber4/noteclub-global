@@ -17,13 +17,13 @@ export function TurnFAB() {
   return (
     <Link
       href="/post-album"
-      className="fixed bottom-6 right-6 z-40 flex items-center justify-center gap-2 px-6 py-4 rounded-full shadow-2xl transition-all duration-300 hover:scale-110 active:scale-95 md:hidden"
+      className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-40 flex items-center justify-center gap-2 px-4 py-3 sm:px-6 sm:py-4 rounded-full shadow-2xl transition-all duration-300 hover:scale-110 active:scale-95 md:hidden"
       style={{
         background: "linear-gradient(45deg, #4CAF50 30%, #66BB6A 90%)",
       }}
     >
-      <Disc3 className="h-5 w-5 text-white" />
-      <span className="text-white font-bold text-sm">Your Turn!</span>
+      <Disc3 className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
+      <span className="text-white font-bold text-xs sm:text-sm">Your Turn!</span>
 
       {/* Pulsing ring animation */}
       <span className="absolute inset-0 rounded-full animate-ping opacity-30"

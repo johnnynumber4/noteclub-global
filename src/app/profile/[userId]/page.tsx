@@ -194,7 +194,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <Box sx={{ minHeight: "100vh", bgcolor: "background.default", pt: 10, pb: 8 }}>
+    <Box sx={{ minHeight: "100vh", bgcolor: "background.default", pt: { xs: 8, md: 10 }, pb: 8 }}>
       <Container maxWidth="lg">
         <Stack spacing={6}>
           {/* Profile Header */}

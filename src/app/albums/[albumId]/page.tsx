@@ -88,20 +88,47 @@ export default function AlbumDetailPage() {
     }
   }, [albumId]);
 
-  const fetchAlbumDetails = async () => {
+  const fetchAlbumDetails = async (retryCount = 0) => {
+    const maxRetries = 3;
+    const timeout = 10000; // 10 seconds
+
     try {
       setLoading(true);
-      const response = await fetch(`/api/albums/${albumId}`);
+      setError(null);
+
+      // Create AbortController for timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+      const response = await fetch(`/api/albums/${albumId}`, {
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+
       if (!response.ok) {
-        throw new Error("Failed to fetch album details");
+        throw new Error(`Failed to fetch album details: ${response.status}`);
       }
+
       const data = await response.json();
       setAlbum(data.album);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching album:", error);
-      setError("Failed to load album details");
+
+      // Retry on network errors or timeouts
+      if (retryCount < maxRetries && (error.name === 'AbortError' || error.message.includes('fetch'))) {
+        console.log(`Retrying album fetch (${retryCount + 1}/${maxRetries})...`);
+        setTimeout(() => fetchAlbumDetails(retryCount + 1), 1000 * (retryCount + 1)); // Exponential backoff
+        return;
+      }
+
+      setError(error.name === 'AbortError'
+        ? "Request timed out. Please try again."
+        : "Failed to load album details. Please try again.");
     } finally {
-      setLoading(false);
+      if (retryCount === 0 || retryCount >= maxRetries) {
+        setLoading(false);
+      }
     }
   };
 

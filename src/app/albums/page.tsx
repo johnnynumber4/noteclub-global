@@ -299,7 +299,7 @@ export default function AlbumsPage() {
   }
 
   return (
-    <Box sx={{ minHeight: "100vh", bgcolor: "background.default", pt: 10 }}>
+    <Box sx={{ minHeight: "100vh", bgcolor: "background.default", pt: { xs: 8, md: 10 } }}>
       <Container maxWidth="lg">
         <Stack spacing={6}>
           {/* Header */}
@@ -439,15 +439,18 @@ export default function AlbumsPage() {
                     {album.coverImageUrl ? (
                       <CardMedia
                         component="img"
-                        height="200"
                         image={album.coverImageUrl}
                         alt={album.title}
-                        sx={{ objectFit: "cover" }}
+                        sx={{
+                          objectFit: "cover",
+                          height: { xs: 180, sm: 200, md: 220 },
+                          width: "100%"
+                        }}
                       />
                     ) : (
                       <Box
                         sx={{
-                          height: 200,
+                          height: { xs: 180, sm: 200, md: 220 },
                           background: "linear-gradient(135deg, #333, #666)",
                           display: "flex",
                           alignItems: "center",

@@ -10,10 +10,19 @@ const pwaConfig = {
   skipWaiting: true,
   disable: false, // Enable SW even in development for testing notifications
   // disable: process.env.NODE_ENV === "development" || isTurbopack,
-  buildExcludes: [/middleware-manifest\.json$/],
+  buildExcludes: [
+    /middleware-manifest\.json$/,
+    /app-build-manifest\.json$/,
+    /_buildManifest\.js$/,
+    /_ssgManifest\.js$/,
+  ],
   // Suppress the GenerateSW warning in development
   ...(process.env.NODE_ENV === "development" && {
     // Dev mode - reduce warnings
+    maximumFileSizeToCacheInBytes: 5000000,
+  }),
+  // Production optimizations
+  ...(process.env.NODE_ENV === "production" && {
     maximumFileSizeToCacheInBytes: 5000000,
   }),
   // Add fallback handling for service worker errors

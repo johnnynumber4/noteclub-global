@@ -135,7 +135,7 @@ export default function DashboardPage() {
 
   return (
     <Box
-      sx={{ minHeight: "100vh", bgcolor: "background.default", pt: 10, pb: 4 }}
+      sx={{ minHeight: "100vh", bgcolor: "background.default", pt: { xs: 8, md: 10 }, pb: 4 }}
     >
       <Container maxWidth="lg">
         <Stack spacing={6}>
@@ -490,9 +490,13 @@ export default function DashboardPage() {
                       {album.coverImageUrl && (
                         <CardMedia
                           component="img"
-                          height="200"
                           image={album.coverImageUrl}
                           alt={album.title}
+                          sx={{
+                            objectFit: "cover",
+                            height: { xs: 180, sm: 200, md: 220 },
+                            width: "100%"
+                          }}
                         />
                       )}
                       <CardContent>

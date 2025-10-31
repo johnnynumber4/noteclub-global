@@ -38,6 +38,7 @@ import {
   Home,
   Shield,
 } from "@mui/icons-material";
+import { NotificationButton } from "@/components/NotificationButton";
 
 export function NavbarMui() {
   const { data: session, status } = useSession();
@@ -204,9 +205,9 @@ export function NavbarMui() {
         }}
       >
         <Container maxWidth="xl">
-          <Toolbar sx={{ justifyContent: "space-between" }}>
+          <Toolbar sx={{ justifyContent: "space-between", px: { xs: 1, sm: 2 } }}>
             {/* Logo */}
-            <Stack direction="row" spacing={2} alignItems="center">
+            <Stack direction="row" spacing={{ xs: 1, sm: 2 }} alignItems="center">
               <Link href="/" style={{ textDecoration: "none" }}>
                 <Stack direction="row" spacing={1} alignItems="center">
                   <Box
@@ -276,6 +277,9 @@ export function NavbarMui() {
                 <Box />
               ) : session ? (
                 <>
+                  {/* Notification Bell */}
+                  <NotificationButton variant="mui" />
+
                   {/* Post Album Button - Desktop */}
                   <Button
                     component={Link}
@@ -480,7 +484,8 @@ export function NavbarMui() {
           display: { xs: "block", md: "none" },
           "& .MuiDrawer-paper": {
             boxSizing: "border-box",
-            width: 280,
+            width: { xs: "80%", sm: 280 },
+            maxWidth: 320,
             backgroundColor: "rgba(15, 15, 15, 0.95)",
             backdropFilter: "blur(20px)",
             borderRight: "1px solid rgba(255, 255, 255, 0.1)",

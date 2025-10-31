@@ -155,7 +155,7 @@ export default function GroupDetailPage() {
         sx={{
           minHeight: "100vh",
           bgcolor: "background.default",
-          pt: 10,
+          pt: { xs: 8, md: 10 },
           pb: 4,
         }}
       >

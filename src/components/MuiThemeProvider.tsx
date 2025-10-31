@@ -32,23 +32,23 @@ const theme = createTheme({
       "Roboto, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif",
     h1: {
       fontWeight: 900,
-      fontSize: "3.5rem",
+      fontSize: "clamp(2rem, 5vw, 3.5rem)",
     },
     h2: {
       fontWeight: 800,
-      fontSize: "2.5rem",
+      fontSize: "clamp(1.5rem, 4vw, 2.5rem)",
     },
     h3: {
       fontWeight: 700,
-      fontSize: "2rem",
+      fontSize: "clamp(1.25rem, 3vw, 2rem)",
     },
     h4: {
       fontWeight: 600,
-      fontSize: "1.5rem",
+      fontSize: "clamp(1.125rem, 2.5vw, 1.5rem)",
     },
     h5: {
       fontWeight: 600,
-      fontSize: "1.25rem",
+      fontSize: "clamp(1rem, 2vw, 1.25rem)",
     },
     h6: {
       fontWeight: 600,

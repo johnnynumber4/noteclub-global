@@ -8,6 +8,7 @@ import { User } from "@/models/User";
 import { Group } from "@/models/Group";
 import mongoose from "mongoose";
 import { fetchWikipediaDescription } from "@/lib/utils";
+import { NotificationService } from "@/lib/notifications";
 
 // Type definitions for better type safety
 interface UserLookup {
@@ -358,6 +359,15 @@ export async function POST(request: NextRequest) {
     });
 
     await album.save();
+
+    // Send notifications to all group members (except the poster)
+    try {
+      await NotificationService.notifyNewAlbum(album._id, userId);
+      console.log(`🔔 Sent new album notifications for: ${title} by ${artist}`);
+    } catch (notificationError) {
+      console.error("❌ Error sending notifications:", notificationError);
+      // Don't fail the album creation if notification fails
+    }
 
     // Record that this user just posted (set currentTurnIndex to their position)
     try {

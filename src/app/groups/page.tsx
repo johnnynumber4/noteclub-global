@@ -214,7 +214,7 @@ export default function GroupsPage() {
 
   return (
     <Box
-      sx={{ minHeight: "100vh", bgcolor: "background.default", pt: 10, pb: 4 }}
+      sx={{ minHeight: "100vh", bgcolor: "background.default", pt: { xs: 8, md: 10 }, pb: 4 }}
     >
       <Container maxWidth="lg">
         <Stack spacing={4}>

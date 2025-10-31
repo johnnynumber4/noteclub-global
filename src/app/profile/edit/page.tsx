@@ -178,7 +178,7 @@ export default function EditProfilePage() {
   }
 
   return (
-    <Box sx={{ minHeight: "100vh", bgcolor: "background.default", pt: 10, pb: 8 }}>
+    <Box sx={{ minHeight: "100vh", bgcolor: "background.default", pt: { xs: 8, md: 10 }, pb: 8 }}>
       <Container maxWidth="md">
         <Stack spacing={4}>
           {/* Header */}

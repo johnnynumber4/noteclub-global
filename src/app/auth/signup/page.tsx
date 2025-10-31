@@ -135,7 +135,7 @@ export default function SignUp() {
         bgcolor: "background.default",
         background:
           "linear-gradient(135deg, #0f0f0f 0%, #1a0a0a 50%, #0a0a1a 100%)",
-        pt: 10,
+        pt: { xs: 8, md: 10 },
         pb: 4,
       }}
     >

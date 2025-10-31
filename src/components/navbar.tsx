@@ -15,6 +15,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Music, LogOut, User, Settings, Disc3, Menu, X, Shield } from "lucide-react";
 import { useTurnStatus } from "@/hooks/useTurnStatus";
+import { NotificationButton } from "@/components/NotificationButton";
 
 export function Navbar() {
   const { data: session, status } = useSession();
@@ -114,6 +115,7 @@ export function Navbar() {
             <div className="h-9 w-9 animate-pulse rounded-full bg-gray-700" />
           ) : session ? (
             <>
+              <NotificationButton variant="lucide" />
               <Button
                 asChild
                 variant="ghost"
@@ -244,15 +246,17 @@ export function Navbar() {
         {/* Mobile Menu Button */}
         <div className="md:hidden flex items-center space-x-2">
           {session && (
-            <Button
-              asChild
-              variant="ghost"
-              size="sm"
-              className={`${
-                isMyTurn
-                  ? "text-green-400 hover:text-green-300 hover:bg-green-400/10"
-                  : "text-red-400 hover:text-red-300 hover:bg-red-400/10"
-              } relative`}
+            <>
+              <NotificationButton variant="lucide" />
+              <Button
+                asChild
+                variant="ghost"
+                size="sm"
+                className={`${
+                  isMyTurn
+                    ? "text-green-400 hover:text-green-300 hover:bg-green-400/10"
+                    : "text-red-400 hover:text-red-300 hover:bg-red-400/10"
+                } relative`}
             >
               <Link href="/post-album">
                 <Disc3 className="h-4 w-4" />
@@ -264,6 +268,7 @@ export function Navbar() {
                 )}
               </Link>
             </Button>
+            </>
           )}
           <Button
             variant="ghost"

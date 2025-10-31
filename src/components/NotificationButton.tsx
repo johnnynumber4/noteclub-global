@@ -81,13 +81,6 @@ export function NotificationButton({ variant = 'lucide', showLabel = false }: No
     console.log('🔔 Starting subscription process...');
     setIsLoading(true);
 
-    // Add a timeout safety net
-    const timeoutId = setTimeout(() => {
-      console.error('⏱️ Subscribe operation timed out!');
-      setIsLoading(false);
-      alert('Operation timed out. Please try again.');
-    }, 15000); // 15 second timeout
-
     try {
       // Check current permission
       let result = Notification.permission;
@@ -105,7 +98,6 @@ export function NotificationButton({ variant = 'lucide', showLabel = false }: No
       if (result !== 'granted') {
         console.log('❌ Permission denied');
         alert('Please allow notifications to stay updated when new albums are posted!');
-        clearTimeout(timeoutId);
         setIsLoading(false);
         return;
       }
@@ -119,11 +111,20 @@ export function NotificationButton({ variant = 'lucide', showLabel = false }: No
 
       const { publicKey } = await vapidResponse.json();
       console.log('✅ Got VAPID key');
-      const applicationServerKey = urlBase64ToUint8Array(publicKey);
+      const applicationServerKey: Uint8Array = urlBase64ToUint8Array(publicKey);
 
       // Register service worker and subscribe
-      console.log('📱 Checking for existing subscription...');
-      const registration = await navigator.serviceWorker.ready;
+      console.log('📱 Waiting for service worker...');
+
+      // Use a race condition to timeout the service worker ready check
+      const registration = await Promise.race([
+        navigator.serviceWorker.ready,
+        new Promise<ServiceWorkerRegistration>((_, reject) =>
+          setTimeout(() => reject(new Error('Service worker ready timeout')), 10000)
+        )
+      ]);
+
+      console.log('✅ Service worker ready');
 
       // Check if there's already a subscription
       let pushSubscription = await registration.pushManager.getSubscription();
@@ -133,10 +134,16 @@ export function NotificationButton({ variant = 'lucide', showLabel = false }: No
       } else {
         console.log('📱 Creating new browser subscription...');
         try {
-          pushSubscription = await registration.pushManager.subscribe({
-            userVisibleOnly: true,
-            applicationServerKey
-          });
+          // Add timeout to the subscribe operation itself
+          pushSubscription = await Promise.race([
+            registration.pushManager.subscribe({
+              userVisibleOnly: true,
+              applicationServerKey
+            }),
+            new Promise<PushSubscription>((_, reject) =>
+              setTimeout(() => reject(new Error('Push subscription timeout')), 10000)
+            )
+          ]);
           console.log('✅ Browser subscription created');
         } catch (subError) {
           console.error('❌ Failed to create subscription:', subError);
@@ -174,9 +181,13 @@ export function NotificationButton({ variant = 'lucide', showLabel = false }: No
 
     } catch (error) {
       console.error('❌ Failed to subscribe to push notifications:', error);
-      alert('Failed to enable notifications. Check console for details.');
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      if (errorMessage.includes('timeout')) {
+        alert('Service worker took too long to respond. Please refresh the page and try again.');
+      } else {
+        alert('Failed to enable notifications. Check console for details.');
+      }
     } finally {
-      clearTimeout(timeoutId);
       setIsLoading(false);
       // Re-check status to ensure UI is in sync
       await checkSubscriptionStatus();
